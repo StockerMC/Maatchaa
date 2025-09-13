@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@fontsource/figtree": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.7",
+    "@tailwindcss/language-server": "^0.14.26",
     "next": "15.5.3",
     "ogl": "^1.0.11",
     "react": "19.1.0",

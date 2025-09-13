@@ -257,7 +257,10 @@ void main() {
         const mesh = new Mesh(gl, { geometry, program })
         meshRef.current = mesh
 
+        let firstIter = true;
+
         const resize = () => {
+            firstIter = true;
             const rect = container.getBoundingClientRect()
             renderer.setSize(rect.width, rect.height)
             uniforms.iResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight, 1]
@@ -278,7 +281,8 @@ void main() {
 
             lastTimeRef.current = t
 
-            if (!paused && programRef.current && meshRef.current) {
+            if ((!paused || firstIter) && programRef.current && meshRef.current) {
+                firstIter = false;
                 try {
                     renderer.render({ scene: meshRef.current })
                 } catch (e) {

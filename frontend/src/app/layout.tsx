@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Figtree } from "next/font/google"
+import { Figtree, Instrument_Serif } from "next/font/google"
 import Header from "@/components/Header"
 import "./globals.css"
 
@@ -11,8 +11,12 @@ const figtree = Figtree({
     display: "swap",
 })
 
+const instrument = Instrument_Serif({
+    weight: ["400"]
+})
+
 export const metadata: Metadata = {
-    title: "Knotch - Connect creators with brands",
+    title: "Maatchaa",
     description: "",
     generator: "",
 }
