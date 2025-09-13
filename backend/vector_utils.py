@@ -31,17 +31,18 @@ co = cohere.ClientV2(os.getenv("COHERE_KEY"))
 pc = Pinecone(api_key=os.getenv("PINECONE_KEY"), environment="us-east1-gcp")
 index = pc.Index(os.getenv("INDEX_NAME"))
 
+def imageurl_to_b64(image_url: str) -> str:
+    image = requests.get(image_url)
+    stringified_buffer = base64.b64encode(image.content).decode("utf-8")
+    content_type = image.headers["Content-Type"]
+    return f"data:{content_type};base64,{stringified_buffer}"
 
 def imageurl_to_input(image_url: str) -> List[ContentItem]:
-  image = requests.get(image_url)
-  stringified_buffer = base64.b64encode(image.content).decode("utf-8")
-  content_type = image.headers["Content-Type"]
-  image_base64 = f"data:{content_type};base64,{stringified_buffer}"
-
-  return [{
-          "content": [
-              {
-                  "type": "image_url",
+    image_base64 = imageurl_to_b64(image_url)
+    return [{
+        "content": [
+            {
+                "type": "image_url",
                   "image_url": {"url": image_base64}
               }
           ],
@@ -93,3 +94,6 @@ def query_embeddings(vector: List[float], top_k: int = 10) -> Any:
         include_metadata=True
     )
 
+def query_text(text: str, top_k: int = 10) -> Any:
+    text_embedding = text_to_embedding(text).embeddings.float_[0]
+    return query_embeddings(text_embedding, top_k=top_k)

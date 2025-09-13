@@ -1,5 +1,5 @@
-import Gradient from "@/components/Gradient";
-import PhoneComponent from "@/components/Phone";
+import Gradient from "@/components/Gradient"
+import PhoneComponent from "@/components/Phone"
 import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 
 export default function Home() {
