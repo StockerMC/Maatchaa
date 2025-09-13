@@ -30,46 +30,40 @@ export default function PhoneComponent({ image, alt = "Phone content", className
     return (
         <div className={`relative ${className}`}>
             {/* iPhone Mockup using provided image */}
-            <div className="relative w-[375px] h-[812px]">
+            <div className="relative w-[300px] h-[650px]">
                 {/* iPhone Frame Image */}
                 <img
-                    src="/images/iphone-mockup.png"
+                    src="/images/iphone.png"
                     alt="iPhone Frame"
                     className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
                 />
 
-                <div className="absolute top-[28px] left-[18px] right-[18px] bottom-[28px] bg-white rounded-[36px] overflow-hidden z-0">
+                {/* Content Area */}
+                <div className="absolute top-[28px] left-[14px] right-[14px] bottom-[28px] rounded-[40px] overflow-hidden z-0 flex flex-col bg-black">
                     {/* Status Bar */}
-                    <div className="flex justify-between items-center px-6 pb-2 text-black text-sm font-medium pt-7">
+                    <div className="flex justify-between items-center px-6 text-white text-sm font-medium pt-4 z-10 shrink-0">
                         <span className="font-semibold">{currentTime}</span>
                         <div className="flex items-center gap-1">
                             <div className="flex gap-1">
-                                <div className="w-1 h-1 bg-black rounded-full"></div>
-                                <div className="w-1 h-1 bg-black rounded-full"></div>
-                                <div className="w-1 h-1 bg-black rounded-full"></div>
-                                <div className="w-1 h-1 bg-black/50 rounded-full"></div>
+                                <div className="w-1 h-1 bg-white rounded-full"></div>
+                                <div className="w-1 h-1 bg-white rounded-full"></div>
+                                <div className="w-1 h-1 bg-white rounded-full"></div>
+                                <div className="w-1 h-1 bg-white/50 rounded-full"></div>
                             </div>
                             <svg className="w-5 h-3 ml-1" viewBox="0 0 24 16" fill="none">
-                                <rect x="1" y="4" width="18" height="8" rx="2" stroke="black" strokeWidth="1" fill="black" />
-                                <rect x="20" y="6" width="2" height="4" rx="1" fill="black" />
+                                <rect x="1" y="4" width="18" height="8" rx="2" stroke="white" strokeWidth="1" fill="white" />
+                                <rect x="20" y="6" width="2" height="4" rx="1" fill="white" />
                             </svg>
                         </div>
                     </div>
 
-                    {/* Content Area - Display the provided image */}
-                    <div className="flex-1 p-4 flex items-center justify-center">
+                    {/* Content */}
+                    <div className="relative flex-1 flex items-center justify-center overflow-hidden">
                         <img
                             src={image || "/placeholder.svg"}
                             alt={alt}
-                            className="max-w-full max-h-full object-contain rounded-lg"
+                            className="w-full h-full object-contain"
                         />
-                    </div>
-
-                    {/* Home Indicator */}
-                    <div className="absolute bottom-0 left-0 right-0">
-                        <div className="flex justify-center flex-row pb-3">
-                            <div className="w-24 bg-black rounded-full py-0 h-1 my-1.5"></div>
-                        </div>
                     </div>
                 </div>
             </div>

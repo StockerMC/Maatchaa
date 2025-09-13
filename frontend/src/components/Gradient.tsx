@@ -4,22 +4,18 @@ import type React from "react"
 import { useEffect, useRef } from "react"
 import { Renderer, Program, Mesh, Triangle } from "ogl"
 
-export interface GradientBlindsProps {
+export interface GradientProps {
     className?: string
     dpr?: number
     paused?: boolean
     gradientColors?: string[]
     angle?: number
     noise?: number
-    blindCount?: number
-    blindMinWidth?: number
-    mouseDampening?: number
     mirrorGradient?: boolean
     spotlightRadius?: number
     spotlightSoftness?: number
     spotlightOpacity?: number
     distortAmount?: number
-    shineDirection?: "left" | "right"
     mixBlendMode?: string
 }
 
@@ -41,24 +37,20 @@ const prepStops = (stops?: string[]) => {
     return { arr, count }
 }
 
-const GradientBlinds: React.FC<GradientBlindsProps> = ({
-                                                           className,
-                                                           dpr,
-                                                           paused = false,
-                                                           gradientColors = ["#0f1629", "#1e3a8a", "#2563eb", "#1d4ed8"],
-                                                           angle = 0,
-                                                           noise = 0.3,
-                                                           blindCount = 16,
-                                                           blindMinWidth = 60,
-                                                           mouseDampening = 0.15,
-                                                           mirrorGradient = false,
-                                                           spotlightRadius = 0.5,
-                                                           spotlightSoftness = 1,
-                                                           spotlightOpacity = 1,
-                                                           distortAmount = 0,
-                                                           shineDirection = "left",
-                                                           mixBlendMode = "lighten",
-                                                       }) => {
+const Gradient: React.FC<GradientProps> = ({
+                                               className,
+                                               dpr,
+                                               paused = false,
+                                               gradientColors = ["#0f1629", "#1e3a8a", "#2563eb", "#1d4ed8"],
+                                               angle = 0,
+                                               noise = 0.1,
+                                               mirrorGradient = false,
+                                               spotlightRadius = 0.5,
+                                               spotlightSoftness = 1,
+                                               spotlightOpacity = 0.5,
+                                               distortAmount = 0,
+                                               mixBlendMode = "normal",
+                                           }) => {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const rafRef = useRef<number | null>(null)
     const programRef = useRef<Program | null>(null)
@@ -110,13 +102,11 @@ uniform float uRevealProgress;
 
 uniform float uAngle;
 uniform float uNoise;
-uniform float uBlindCount;
 uniform float uSpotlightRadius;
 uniform float uSpotlightSoftness;
 uniform float uSpotlightOpacity;
 uniform float uMirror;
 uniform float uDistort;
-uniform float uShineFlip;
 uniform vec3  uColor0;
 uniform vec3  uColor1;
 uniform vec3  uColor2;
@@ -188,23 +178,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     }
     vec3 base = getGradientColor(t);
 
-    float glowWave = sin(iTime * 0.8 + uv0.y * 3.14159) * 0.5 + 0.5;
-    float glowPosition = sin(iTime * 0.3) * 0.5 + 0.5;
-    float glowDistance = abs(uv0.y - glowPosition);
-    float glowIntensity = 1.0 - smoothstep(0.0, 0.25, glowDistance);
-    vec3 glowColor = base * (1.0 + glowIntensity * 0.01 * glowWave);
-
     vec2 offset = vec2(iMouse.x/iResolution.x, iMouse.y/iResolution.y);
     float d = length(uv0 - offset);
     float r = max(uSpotlightRadius, 1e-4);
     float dn = d / r;
-    float spot = (1.0 - 2.0 * pow(dn, uSpotlightSoftness)) * uSpotlightOpacity;
-    vec3 cir = vec3(spot);
-    float stripe = fract(uvMod.x * max(uBlindCount, 1.0));
-    if (uShineFlip > 0.5) stripe = 1.0 - stripe;
-    vec3 ran = vec3(stripe);
-
-    vec3 col = cir + glowColor - ran;
+    float spot = (1.0 - smoothstep(0.0, uSpotlightSoftness, dn)) * uSpotlightOpacity;
+    vec3 spotColor = vec3(spot);
+    
+    vec3 col = base + spotColor;
     col += (rand(gl_FragCoord.xy + iTime) - 0.5) * uNoise;
 
     fragColor = vec4(col, 1.0);
@@ -225,13 +206,11 @@ void main() {
             uRevealProgress: { value: number }
             uAngle: { value: number }
             uNoise: { value: number }
-            uBlindCount: { value: number }
             uSpotlightRadius: { value: number }
             uSpotlightSoftness: { value: number }
             uSpotlightOpacity: { value: number }
             uMirror: { value: number }
             uDistort: { value: number }
-            uShineFlip: { value: number }
             uColor0: { value: [number, number, number] }
             uColor1: { value: [number, number, number] }
             uColor2: { value: [number, number, number] }
@@ -250,13 +229,11 @@ void main() {
             uRevealProgress: { value: 1.0 },
             uAngle: { value: (angle * Math.PI) / 180 },
             uNoise: { value: noise },
-            uBlindCount: { value: Math.max(1, blindCount) },
             uSpotlightRadius: { value: spotlightRadius },
             uSpotlightSoftness: { value: spotlightSoftness },
             uSpotlightOpacity: { value: spotlightOpacity },
             uMirror: { value: mirrorGradient ? 1 : 0 },
             uDistort: { value: distortAmount },
-            uShineFlip: { value: shineDirection === "right" ? 1 : 0 },
             uColor0: { value: colorArr[0] },
             uColor1: { value: colorArr[1] },
             uColor2: { value: colorArr[2] },
@@ -284,15 +261,6 @@ void main() {
             const rect = container.getBoundingClientRect()
             renderer.setSize(rect.width, rect.height)
             uniforms.iResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight, 1]
-
-            if (blindMinWidth && blindMinWidth > 0) {
-                const maxByMinWidth = Math.max(1, Math.floor(rect.width / blindMinWidth))
-
-                const effective = blindCount ? Math.min(blindCount, maxByMinWidth) : maxByMinWidth
-                uniforms.uBlindCount.value = Math.max(1, effective)
-            } else {
-                uniforms.uBlindCount.value = Math.max(1, blindCount)
-            }
 
             const cx = gl.drawingBufferWidth / 2
             const cy = gl.drawingBufferHeight / 2
@@ -344,15 +312,11 @@ void main() {
         gradientColors,
         angle,
         noise,
-        blindCount,
-        blindMinWidth,
-        mouseDampening,
         mirrorGradient,
         spotlightRadius,
         spotlightSoftness,
         spotlightOpacity,
         distortAmount,
-        shineDirection,
     ])
 
     return (
@@ -368,4 +332,4 @@ void main() {
     )
 }
 
-export default GradientBlinds
+export default Gradient

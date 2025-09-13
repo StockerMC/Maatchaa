@@ -12,19 +12,19 @@ export default function Header() {
                     href="#"
                     className="text-white/80 hover:text-white text-sm font-light px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
-                    Features
-                </a>
-                <a
-                    href="#"
-                    className="text-white/80 hover:text-white text-sm font-light px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
-                >
                     Pricing
                 </a>
                 <a
                     href="#"
                     className="text-white/80 hover:text-white text-sm font-light px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
-                    Docs
+                    Businesses
+                </a>
+                <a
+                    href="#"
+                    className="text-white/80 hover:text-white text-sm font-light px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
+                >
+                    Creators
                 </a>
             </nav>
 
