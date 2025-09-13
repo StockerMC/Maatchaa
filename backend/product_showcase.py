@@ -3,7 +3,8 @@ from openai import OpenAI
 
 from dotenv import load_dotenv
 load_dotenv()
-from vector_utils import imageurl_to_b64, query_text
+
+from backend.utils.vector import imageurl_to_b64, query_text
 import os
 
 client = OpenAI(api_key=os.getenv("OPENAI_KEY"))

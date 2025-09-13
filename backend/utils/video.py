@@ -2,8 +2,6 @@ from google import genai
 from dotenv import load_dotenv
 import traceback
 
-load_dotenv()
-
 client = genai.Client()
 
 video_url = "https://www.youtube.com/shorts/-yuNUX3GSl8"

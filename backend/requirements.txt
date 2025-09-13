@@ -3,3 +3,5 @@ uvicorn
 cohere
 pinecone
 python-dotenv
+openai
+supabase
