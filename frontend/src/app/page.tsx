@@ -1,5 +1,7 @@
 import Gradient from "@/components/Gradient"
-import PhoneComponent from "@/components/Phone"
+import PhoneComponent from "@/components/Phone";
+import PhoneImageScroller from "@/components/PhoneImageScroller";
+import { ShortScroller } from "@/components/ShortScroller";
 import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 
 export default function Home() {
@@ -44,10 +46,7 @@ export default function Home() {
                 </div>
 
                 <div className="lg:flex-1 flex justify-center items-center w-full">
-                    <PhoneComponent
-                        image="/images/img.png"
-                        alt="YouTube Shorts creator content"
-                    />
+                    <PhoneComponent/>
                 </div>
             </div>
         </div>
