@@ -6,7 +6,7 @@ import os
 import time
 from typing import List, Dict, Any, TypedDict, Optional
 
-from shopify_utils import Product
+from utils.shopify import Product
 
 class ImageUrlContent(TypedDict):
     type: str

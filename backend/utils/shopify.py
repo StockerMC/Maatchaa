@@ -2,13 +2,13 @@ import requests
 from typing import List, Dict, Any, Optional, TypedDict
 
 class Product(TypedDict):
-    name: str
-    price: str
-    image: str
-    body_html: str
-    vendor: str
+    name: str | None
+    price: float
+    image: str | None
+    body_html: str | None
+    vendor: str | None
 
-def get_products(shop_url: str) -> Dict[str, Any]:
+def get_products(shop_url: str) -> List[Product]:
     res = requests.get(shop_url+"/products.json")
     data = res.json()
     simplified_products: List[Product] = []
