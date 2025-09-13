@@ -106,7 +106,9 @@ def choose_best_products(query: str, top_k=5):
 def create_showcase(query: str):
     chosen_products = choose_best_products(query, 5)
     print(len(chosen_products))
-    prompt = "Put the attached products in a minimalistic, aesthetic product showcase"
+    prompt = """Put the attached products in a minimalistic, aesthetic, 3d product showcase. 
+    Match the environment to the theme of the products. Make sure the lighting and colors complement the products.
+    Pay attention to the arrangement of the products, spacing, and overall composition to create a visually appealing scene."""
     res = gen_showcase_image_from_products(prompt, chosen_products)
 
     with open("showcase_image.png", "wb") as f:
@@ -114,4 +116,4 @@ def create_showcase(query: str):
 
     print("done")
 
-#create_showcase("young and classy")
+create_showcase("performative matcha feminine male aesthetic")
