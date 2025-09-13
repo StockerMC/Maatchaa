@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from supabase import acreate_client, AsyncClient
 import os
 from typing import List, Dict, Optional
@@ -7,6 +9,8 @@ import base64
 from io import BytesIO
 
 class SupabaseClient:
+    client: AsyncClient
+
     def __init__(self):
         load_dotenv()
         self.url = os.getenv("SUPABASE_URL")
@@ -15,8 +19,11 @@ class SupabaseClient:
         if not self.url or not self.key:
             raise ValueError("Missing Supabase URL or Key in environment variables")
 
-        # TODO
-        # self.client: AsyncClient = await acreate_client(self.url, self.key)
+    @classmethod
+    async def from_client(cls, client: AsyncClient) -> SupabaseClient:
+        instance = cls()
+        instance.client = client
+        return instance
 
     async def post_row(self, title: str, showcase_images: List[str], products: Dict,
                  main_image_url: str, row_id: str | None = None) -> Dict:
