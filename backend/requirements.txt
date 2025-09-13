@@ -1,0 +1,5 @@
+blacksheep
+uvicorn
+cohere
+pinecone
+python-dotenv
