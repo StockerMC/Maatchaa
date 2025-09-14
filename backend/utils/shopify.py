@@ -2,11 +2,11 @@ import requests
 from typing import List, Dict, Any, Optional, TypedDict
 
 class Product(TypedDict):
-    name: str | None
+    name: str
     price: float
-    image: str | None
-    body_html: str | None
-    vendor: str | None
+    image: str
+    body_html: str
+    vendor: str
 
 def get_products(shop_url: str) -> List[Product]:
     res = requests.get(shop_url+"/products.json")

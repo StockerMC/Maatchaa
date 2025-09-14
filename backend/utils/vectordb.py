@@ -20,6 +20,7 @@ class Metadata(TypedDict):
     title: str
     vendor: str
     imageURL: str
+    price: float
 
 class EmbeddingItem(TypedDict):
     id: str
@@ -77,7 +78,8 @@ def embed_products(products: List[Product]) -> List[EmbeddingItem]:
                 "body_html": product["body_html"],
                 "title": product["name"],
                 "vendor": product["vendor"],
-                "imageURL": product["image"]
+                "imageURL": product["image"],
+                "price": product["price"]
             }
         })
         time.sleep(0.2)

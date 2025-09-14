@@ -3,6 +3,7 @@ from supabase import acreate_client, AsyncClient
 import os
 from dotenv import load_dotenv
 from utils.supabase import SupabaseClient
+import product_showcase as ps
 
 async def main():
     load_dotenv()
@@ -17,6 +18,8 @@ async def main():
         SUPABASE_URL,
         SUPABASE_SERVICE_ROLE_KEY
     ))
+
+    await ps.create_showcase("performative soft male aesthetic", client)
 
     # TODO: create the automatic background searches
 
