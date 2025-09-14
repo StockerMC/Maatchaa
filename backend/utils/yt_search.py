@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 import traceback
 
 load_dotenv()
-API_KEY = "AQ.Ab8RN6KHcwQc_n4zGCkYw2FydTUNGHZ9MyhOIyI-w4lHTQ35ww"
+
 async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_language: str = None, region_code: str = None, order: str = "viewCount", published_after_days: int = 7):
-    youtube = build("youtube", "v3", developerKey=API_KEY)
-    published_after = (datetime.now(timezone.utc) - timedelta(days=published_after_days)).isoformat("T") + "Z"
+    youtube = build("youtube", "v3")
+    published_after = (datetime.now(timezone.utc) - timedelta(days=published_after_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     request_params = {
         "part": "snippet",
