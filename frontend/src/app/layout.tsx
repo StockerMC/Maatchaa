@@ -4,6 +4,7 @@ import { Figtree, Instrument_Serif } from "next/font/google"
 import Header from "@/components/Header"
 import "./globals.css"
 import Gradient from "@/components/Gradient"
+import { Providers } from "@/components/Providers"
 
 const figtree = Figtree({
     subsets: ["latin"],
@@ -30,32 +31,34 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={`${figtree.variable}`}>
-        <div className="flex flex-col min-h-screen overflow-x-hidden">
-            <Header/>
-            <main className="flex flex-grow items-center justify-center w-full px-6">
-                {children}
-                {/* Absolute positioned background */}
-                <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
-                    <Gradient
-                        className="w-full h-full"
-                        gradientColors={[
-                            "#8FAF6F", // Light matcha green
-                            "#9AAF85", // Matcha green
-                            "#A8B894", // Green-beige transition
-                            "#C4C0A8", // Warm beige-green
-                            "#C4C0A8", // Soft beige
-                        ]}
-                        noise={0.1}
-                        spotlightRadius={0.6}
-                        spotlightOpacity={0}
-                        distortAmount={0.1}
-                        mirrorGradient={false}
-                        angle={0}
-                        paused={true}
-                    />
+            <Providers>
+                <div className="flex flex-col min-h-screen overflow-x-hidden">
+                    <Header/>
+                    <main className="flex flex-grow items-center justify-center w-full px-6">
+                        {children}
+                        {/* Absolute positioned background */}
+                        <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
+                            <Gradient
+                                className="w-full h-full"
+                                gradientColors={[
+                                    "#8FAF6F", // Light matcha green
+                                    "#9AAF85", // Matcha green
+                                    "#A8B894", // Green-beige transition
+                                    "#C4C0A8", // Warm beige-green
+                                    "#C4C0A8", // Soft beige
+                                ]}
+                                noise={0.1}
+                                spotlightRadius={0.6}
+                                spotlightOpacity={0}
+                                distortAmount={0.1}
+                                mirrorGradient={false}
+                                angle={0}
+                                paused={true}
+                            />
+                        </div>
+                    </main>
                 </div>
-            </main>
-        </div>
+            </Providers>
         </body>
         </html>
     )
