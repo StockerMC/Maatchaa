@@ -26,7 +26,7 @@ class SupabaseClient:
         instance.client = client
         return instance
     
-    async def post_yt_row(self, company: str, yt_short_url: str, cached_query: dict) -> Dict:
+    async def post_yt_row(self, company: str, yt_short_url: str, product_imgs: list[str], product_text: list[str]) -> Dict:
         """
         Post a YouTube short video row to the database
 
@@ -42,7 +42,8 @@ class SupabaseClient:
             "id": str(uuid4()),
             "company": company,
             "yt_short_url": yt_short_url,
-            "cached_query": cached_query
+            "product_text": product_text,
+            "product_imgs": product_imgs
         }
 
         try:
@@ -52,6 +53,27 @@ class SupabaseClient:
             print(f"Error posting to database: {e}")
             raise e
         
+    async def video_exists(self, url: str) -> bool:
+        try:
+            result = await self.client.table("yt_shorts_all").select("id").eq("url", url).execute()
+            return len(result.data) > 0 if result.data else False
+        except Exception as e:
+            print(f"Error checking video existence: {e}")
+            raise e
+        
+    async def add_video_to_all(self, url: str) -> Dict:
+        data = {
+            "id": str(uuid4()),
+            "url": url
+        }
+
+        try:
+            result = await self.client.table("yt_shorts_all").insert(data).execute()
+            return result.data[0] if result.data else None
+        except Exception as e:
+            print(f"Error posting to database: {e}")
+            raise e
+
     async def post_product_row(self, title: str, showcase_images: List[str], products: Dict,
                  main_image_url: str, row_id: Optional[str] = None) -> Dict:
         """
