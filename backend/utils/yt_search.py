@@ -1,12 +1,14 @@
+from __future__ import annotations
 import os
 from googleapiclient.discovery import build
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import traceback
+from typing import Optional
 
 load_dotenv()
 
-async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_language: str | None = None, region_code: str | None = None, order: str = "viewCount", published_after_days: int = 7):
+async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_language: Optional[list[str]] = None, region_code: str | None = None, order: str = "viewCount", published_after_days: int = 7):
     youtube = build("youtube", "v3")
     published_after = (datetime.now(timezone.utc) - timedelta(days=published_after_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -19,6 +21,8 @@ async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_languag
         "publishedAfter": published_after,
         "videoDuration": "short",
         "relevanceLanguage": "en",
+        "location": "43.6532,-79.3832", # Toronto coordinates
+        "locationRadius": "100km",
     }
 
     if relevance_language:

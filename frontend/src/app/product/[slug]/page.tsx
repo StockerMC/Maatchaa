@@ -23,7 +23,6 @@ export default async function ProductPage({
         return <div className="text-8xl font-semibold">404 not found :3</div>;
     }
 
-
     return (
         <div className="min-h-screen w-full pt-12">
             <div className="max-w-7xl mx-auto px-4 py-8">

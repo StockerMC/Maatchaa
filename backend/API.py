@@ -4,6 +4,7 @@ load_dotenv()
 from utils import shopify, vectordb
 from blacksheep import Request, Application, delete, get, post, json
 from utils.supabase import SupabaseClient
+import product_showcase as ps
 
 app = Application()
 
@@ -263,10 +264,12 @@ async def update_comment(request: Request):
 async def create_showcase(request: Request):
     try:
         data = await request.json()
-        
+
+        res = await ps.create_showcase(data["query"])
+
         return json({
             "message": "Showcase created successfully",
-            "showcase_url": showcase_url
+            "showcase": res
         })
         
     except Exception as e:
