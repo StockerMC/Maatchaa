@@ -31,7 +31,7 @@ async def parse_video(video_url: str):
                         "potential_categories": ["fitness", "beauty", "gaming", "food", "tech", ...],
                         }
 
-                        Keep responses concise and focused on the actual video content, not speculation.
+                        Keep responses concise and focused on the actual video content, not speculation. Do not hallucinate.
                         ''')
                 ]
             )
