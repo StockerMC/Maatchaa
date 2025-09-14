@@ -32,7 +32,7 @@ export default function Home() {
                 className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 max-w-7xl w-full mx-auto z-10">
                 {/* Hero Text */}
                 <div className="text-center lg:text-left w-[60%]">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-20">
                         Tie your content to the right sponsors with{" "}
                         <SquigglyUnderlineText>Maatchaa</SquigglyUnderlineText>
                     </h1>
