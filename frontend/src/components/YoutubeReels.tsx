@@ -1,6 +1,7 @@
 "use client";
 
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
+import { useState } from "react";
 
 interface YouTubeReelsProps {
     videos: string[];
@@ -9,15 +10,17 @@ interface YouTubeReelsProps {
 }
 
 export default function YouTubeReels({ videos, productImages, className }: YouTubeReelsProps) {
+    const [videoList, setVideoList] = useState(videos);
+    const [imageList, setImageList] = useState(productImages);
     return (
         <div className="overflow-hidden h-[1000px] w-[700px]">
             <Carousel className="w-full h-full max-w-xs" opts={{ loop: true }} orientation="vertical">
                 <CarouselContent className="h-[800px] w-[700px]">
-                    {videos.map((videoId, index) => (
+                    {videoList.map((videoId, index) => (
                         <CarouselItem key={index}>
                             <div className="flex items-center gap-2">
                                 <div className="flex flex-col gap-2">
-                                    {productImages[index] && productImages[index].map((imgSrc, imgIndex) => (
+                                    {imageList[index] && imageList[index].map((imgSrc, imgIndex) => (
                                         <img
                                             key={imgIndex}
                                             src={imgSrc}
@@ -41,6 +44,13 @@ export default function YouTubeReels({ videos, productImages, className }: YouTu
                                         ✓
                                     </button>
                                     <button
+                                        onClick={() => {
+                                            // Remove video from array and delete the product images
+                                            const newVideoList = videoList.filter((_, i) => i !== index);
+                                            const newImageList = imageList.filter((_, i) => i !== index);
+                                            setVideoList(newVideoList);
+                                            setImageList(newImageList);
+                                        }}
                                         className="cursor-pointer bg-[#e6e1c5] hover:bg-[#d9d4ba] text-gray-900 font-semibold w-12 h-12 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                         X
                                     </button>
