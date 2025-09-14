@@ -36,17 +36,6 @@ export default function YouTubeReels({ videos, productImages, className }: YouTu
                                     allowFullScreen
                                 />
                                 <div className="cursor-pointer flex flex-col gap-4">
-                                    <a className="w-12 h-12" href={"https://www.youtube.com/shorts/" + videoId}
-                                       target="_blank"
-                                       rel="noopener noreferrer">
-                                        <button
-                                            className="cursor-pointer bg-[#e6e1c5] hover:bg-[#d9d4ba] text-gray-900 font-semibold
-                                                w-12
-                                                h-12 rounded-full text-xl transition-all duration-300 transform
-                                                hover:scale-105 shadow-lg hover:shadow-xl">
-                                            ℹ
-                                        </button>
-                                    </a>
                                     <button
                                         className="cursor-pointer bg-[#e6e1c5] hover:bg-[#d9d4ba] text-gray-900 font-semibold w-12 h-12 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                         ✓
