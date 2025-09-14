@@ -6,7 +6,7 @@ import traceback
 
 load_dotenv()
 
-async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_language: str = None, region_code: str = None, order: str = "viewCount", published_after_days: int = 7):
+async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_language: str | None = None, region_code: str | None = None, order: str = "viewCount", published_after_days: int = 7):
     youtube = build("youtube", "v3")
     published_after = (datetime.now(timezone.utc) - timedelta(days=published_after_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -17,8 +17,8 @@ async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_languag
         "maxResults": max_results,
         "order": order,
         "publishedAfter": published_after,
-        "videoDuration": "short"
-        
+        "videoDuration": "short",
+        "relevanceLanguage": "en",
     }
 
     if relevance_language:

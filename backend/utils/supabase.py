@@ -33,7 +33,6 @@ class SupabaseClient:
         Args:
             company: The company name
             yt_short_url: The YouTube short URL
-            cached_query: JSONB object containing cached query data
 
         Returns:
             Response from Supabase insert operation
