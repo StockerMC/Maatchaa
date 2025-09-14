@@ -12,6 +12,7 @@
     "@fontsource/figtree": "^5.2.8",
     "@fontsource/instrument-serif": "^5.2.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/supabase-js": "^2.57.4",
     "@tailwindcss/language-server": "^0.14.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -22,6 +23,7 @@
     "ogl": "^1.0.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "supabase": "^2.40.7",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

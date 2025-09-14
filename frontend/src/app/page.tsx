@@ -7,26 +7,6 @@ import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 export default function Home() {
     return (
         <div className="flex items-center justify-center w-full h-full overflow-hidden">
-            {/* Absolute positioned background */}
-            <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
-                <Gradient
-                    className="w-full h-full"
-                    gradientColors={[
-                        "#8FAF6F", // Light matcha green
-                        "#9AAF85", // Matcha green
-                        "#A8B894", // Green-beige transition
-                        "#C4C0A8", // Warm beige-green
-                        "#C4C0A8", // Soft beige
-                    ]}
-                    noise={0.1}
-                    spotlightRadius={0.6}
-                    spotlightOpacity={0}
-                    distortAmount={0.1}
-                    mirrorGradient={false}
-                    angle={0}
-                    paused={true}
-                />
-            </div>
 
             <div
                 className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 max-w-7xl w-full mx-auto z-10">
