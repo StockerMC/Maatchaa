@@ -185,7 +185,7 @@ const authOptions: NextAuthOptions = {
         },
     },
     pages: {
-        signIn: "/connect",
+        signIn: "/creator",
     },
     cookies: {
         sessionToken: {

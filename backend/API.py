@@ -258,4 +258,3 @@ async def update_comment(request: Request):
         # Handle unexpected errors
         print(f"Error updating comment: {str(e)}")
         return json({"error": "Failed to update comment"}, status=500)
-    

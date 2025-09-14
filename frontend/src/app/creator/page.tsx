@@ -83,7 +83,7 @@ export default function ConnectPage() {
 
 //     // If successful and we have a url, redirect
 //     if (result?.url) {
-//         window.location.href = `/connect?channelId=${channelId}`;
+//         window.location.href = `/creator?channelId=${channelId}`;
 //     }
 // } catch (error) {
 //     console.error("Error during sign in:", error);
