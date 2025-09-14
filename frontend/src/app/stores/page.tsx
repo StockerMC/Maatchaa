@@ -45,12 +45,12 @@ export default function ConnectStorePage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center">Connect Your Shopify Store</h1>
+    <div className="absolute flex items-center justify-center h-screen align-middle">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+        <h1 className="text-2xl font-bold text-center text-white">Connect Your Shopify Store</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="shopName" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="shopName" className="block text-sm font-medium text-white/90">
               Shop Name
             </label>
             <input
@@ -59,14 +59,14 @@ export default function ConnectStorePage() {
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
               placeholder="your-store.myshopify.com"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 mt-1 border border-white/30 rounded-md shadow-sm bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
               required
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Connecting..." : "Connect Store"}
           </Button>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-300">{error}</p>}
         </form>
       </div>
     </div>

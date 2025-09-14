@@ -15,7 +15,7 @@ export default async function ProductPage({
     const { data, error } = await supabase
         .from("youtube_shorts")
         .select("*")
-        .eq("id", slug)
+        .eq("slug", slug)
         .single();
 
     if (error) {

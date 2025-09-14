@@ -258,3 +258,17 @@ async def update_comment(request: Request):
         # Handle unexpected errors
         print(f"Error updating comment: {str(e)}")
         return json({"error": "Failed to update comment"}, status=500)
+
+@post("create-showcase")
+async def create_showcase(request: Request):
+    try:
+        data = await request.json()
+        
+        return json({
+            "message": "Showcase created successfully",
+            "showcase_url": showcase_url
+        })
+        
+    except Exception as e:
+        print(f"Error creating showcase: {str(e)}")
+        return json({"error": "Failed to create showcase"}, status=500)

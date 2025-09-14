@@ -22,10 +22,9 @@ export default function CreatorsPage() {
     };
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-white">
-            <Gradient />
-            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-                <div className="max-w-4xl w-full mx-auto text-center">
+        <div className="relative min-h-screen w-full overflow-hidden bg-white rounded-2xl ml-20 mr-20">
+            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
+                <div className="max-w-4xl w-full mx-auto text-center bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-200/50">
                     <div className="flex items-center justify-center mb-6">
                         <Youtube className="w-16 h-16 text-red-600" />
                     </div>
@@ -53,21 +52,21 @@ export default function CreatorsPage() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-5xl mx-auto mt-16">
+                <div className="w-full max-w-5xl mx-auto mt-16 px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                        <div className="p-6 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
+                        <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/70 shadow-lg">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Seamless Integration</h3>
                             <p className="text-gray-600">
                                 Connect your YouTube channel in seconds. We automatically sync your videos and analytics.
                             </p>
                         </div>
-                        <div className="p-6 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
+                        <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/70 shadow-lg">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Powerful Monetization</h3>
                             <p className="text-gray-600">
                                 Tag products in your videos and earn commissions on every sale. No upfront costs.
                             </p>
                         </div>
-                        <div className="p-6 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
+                        <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/70 shadow-lg">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Audience Insights</h3>
                             <p className="text-gray-600">
                                 Understand your viewers&apos; shopping habits and optimize your content for higher earnings.
