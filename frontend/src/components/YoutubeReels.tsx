@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
+import { supabase } from "@/lib/supabase";
 
 interface YouTubeReelsProps {
     reelsData: ReelData[];
