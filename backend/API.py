@@ -3,8 +3,33 @@ load_dotenv()
 
 from utils import shopify, vectordb
 from blacksheep import Request, Application, delete, get, post, json
+from utils.supabase import SupabaseClient
 
 app = Application()
+
+# Global SupabaseClient instance
+supabase_client = None
+
+@app.on_start
+async def on_start(application: Application):
+    """Initialize global resources when the application starts"""
+    global supabase_client
+    supabase_client = SupabaseClient()
+    await supabase_client.initialize()
+    print("✅ SupabaseClient initialized")
+
+@app.after_start
+async def after_start(application: Application):
+    """Called after the application has started"""
+    print("🚀 BlackSheep application started successfully")
+
+@app.on_stop
+async def on_stop(application: Application):
+    """Clean up global resources when the application shuts down"""
+    global supabase_client
+    if supabase_client:
+        await supabase_client.close()
+        print("✅ SupabaseClient closed")
 
 # Health check endpoint
 @get("/")
@@ -189,3 +214,13 @@ async def get_stats():
         
     except Exception as e:
         return json({"error": str(e)}, status=500)
+
+@delete("/pending-shorts")
+async def delete_pending_short(id: str):
+    try:
+        global supabase_client
+        await supabase_client.delete_pending_short(id)
+        return json({"message": "short deleted successfully"})
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+    

@@ -3,6 +3,5 @@ uvicorn
 cohere
 pinecone
 python-dotenv
-openai
 supabase
 google-api-python-client
