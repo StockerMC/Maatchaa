@@ -223,6 +223,52 @@ async def delete_pending_short(id: str):
         return json({"message": "short deleted successfully"})
     except Exception as e:
         return json({"error": str(e)}, status=500)
-    
 
+@post("/comments/update")
+async def update_comment(request: Request):
+    try:
+        data = await request.json()
+        
+        # Validate required fields
+        required_fields = ["channel_id", "comment_id", "text"]
+        for field in required_fields:
+            if field not in data:
+                return json({"error": f"Missing required field: {field}"}, status=400)
+        
+        # Extract fields
+        channel_id = data["channel_id"]
+        comment_id = data["comment_id"]
+        new_text = data["text"]
+        video_id = data.get("video_id")  # Optional, but required if comment doesn't exist
+        
+        from utils.comments import update_comment as yt_update_comment
+        
+        # Update or create the comment using the YouTube API
+        updated_comment = await yt_update_comment(channel_id, comment_id, new_text, video_id)
+        
+        return json({
+            "message": "Comment updated/created successfully",
+            "comment": updated_comment
+        })
+        
+    except ValueError as e:
+        # Handle specific errors (like missing tokens)
+        return json({"error": str(e)}, status=400)
+    except Exception as e:
+        # Handle unexpected errors
+        print(f"Error updating comment: {str(e)}")
+        return json({"error": "Failed to update comment"}, status=500)
 
+@post("create-showcase")
+async def create_showcase(request: Request):
+    try:
+        data = await request.json()
+        
+        return json({
+            "message": "Showcase created successfully",
+            "showcase_url": showcase_url
+        })
+        
+    except Exception as e:
+        print(f"Error creating showcase: {str(e)}")
+        return json({"error": "Failed to create showcase"}, status=500)

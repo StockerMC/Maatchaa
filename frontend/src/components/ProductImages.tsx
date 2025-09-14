@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function ProductImages({ data }: { data: any }) {
+export function ProductImages({ data }: { data: { main_image_url: string, showcase_images: string[] } }) {
     const [currentImage, setCurrentImage] = useState(data.main_image_url);
 
     return <>

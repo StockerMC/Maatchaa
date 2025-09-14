@@ -5,7 +5,7 @@ import * as React from "react";
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext } from "@/components/ui/carousel";
 import { useState } from "react";
 
-let images = ["images/img1.png", "images/img2.png", "images/img3.png", "images/img4.png"];
+const images = ["images/img1.png", "images/img2.png", "images/img3.png", "images/img4.png"];
 
 export function ShortScroller() {
     const [api, setApi] = useState<CarouselApi>();
