@@ -19,13 +19,13 @@ export function ShortScroller() {
 
     return (
         <Carousel setApi={setApi} className="w-full h-full max-w-xs" opts={{ loop: true }} orientation="vertical">
-            <CarouselContent className="h-[450px]">
+            <CarouselContent className="h-[450px] mt-12">
                 {Array.from({ length: 4 }).map((_, index) => (
                     <CarouselItem key={index}>
                         <img
                             src={images[index % images.length]}
                             alt={`Image ${index + 1}`}
-                            className="pt-32 w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover rounded-lg"
                         />
                     </CarouselItem>
                 ))}
