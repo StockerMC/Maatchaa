@@ -1,4 +1,4 @@
-"use client"
+import Link from "next/link"
 
 export default function Header() {
     return (
@@ -8,24 +8,24 @@ export default function Header() {
 
             {/* Navigation */}
             <nav className="flex items-center space-x-8">
-                <a
+                <Link
                     href="/"
                     className="text-white/80 hover:text-white text-xl font-medium px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
                     Home
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/stores"
                     className="text-white/80 hover:text-white text-xl font-medium px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
                     Stores
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/creators"
                     className="text-white/80 hover:text-white text-xl font-medium px-4 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
                     Creators
-                </a>
+                </Link>
             </nav>
 
             {/* Login Button Group with Arrow

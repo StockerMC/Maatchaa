@@ -80,7 +80,7 @@ const authOptions: NextAuthOptions = {
     ],
     debug: true,
     callbacks: {
-        async jwt({ token, user, account, trigger, request }) {
+        async jwt({ token, user, account, trigger }) {
             console.log("[JWT Callback] account:", account ? "present" : "missing");
             console.log(user)
             console.log(account)
@@ -88,7 +88,7 @@ const authOptions: NextAuthOptions = {
             // Initial sign in
             if (account && user) {
                 // Access cookies from the request
-                const cookies = request?.cookies as { get: (name: string) => { value: string } | undefined };
+                // const cookies = request?.cookies as { get: (name: string) => { value: string } | undefined };
                 console.log("[JWT Callback] Initial sign in:", {
                     hasAccess: !!account.access_token,
                     hasRefresh: !!account.refresh_token,
@@ -271,7 +271,7 @@ async function logRequest(req: Request) {
     }
 }
 
-const handler = async (req: Request, context: any) => {
+const handler = async (req: Request, context: unknown ) => {
     await logRequest(req);
     
     // Get channelId from cookie

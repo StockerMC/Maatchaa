@@ -12,7 +12,7 @@ export default async function ProductPage({
 }) {
     const { slug } = await params;
 
-    let { data, error } = await supabase
+    const { data, error } = await supabase
         .from("youtube_shorts")
         .select("*")
         .eq("id", slug)

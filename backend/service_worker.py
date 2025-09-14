@@ -131,7 +131,7 @@ async def main():
     # Check for required environment variables
     required_vars = [
         "SUPABASE_URL",
-        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET"
     ]
@@ -142,7 +142,7 @@ async def main():
     # Check for required environment variables
     required_vars = [
         "SUPABASE_URL",
-        "SUPABASE_SERVICE_ROLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET"
     ]
@@ -153,10 +153,10 @@ async def main():
 
     # Initialize Supabase client
     supabase_url = str(os.getenv("SUPABASE_URL"))
-    supabase_key = str(os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+    supabase_key = str(os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY"))
     # Initialize Supabase client
     supabase_url = str(os.getenv("SUPABASE_URL"))
-    supabase_key = str(os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+    supabase_key = str(os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY"))
     client = await SupabaseClient.from_client(await acreate_client(
         supabase_url,
         supabase_key

@@ -70,7 +70,7 @@ export default function CreatorsPage() {
                         <div className="p-6 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Audience Insights</h3>
                             <p className="text-gray-600">
-                                Understand your viewers' shopping habits and optimize your content for higher earnings.
+                                Understand your viewers&apos; shopping habits and optimize your content for higher earnings.
                             </p>
                         </div>
                     </div>

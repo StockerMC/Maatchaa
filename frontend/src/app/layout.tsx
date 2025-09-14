@@ -14,7 +14,8 @@ const figtree = Figtree({
 })
 
 const instrument = Instrument_Serif({
-    weight: ["400"]
+    weight: ["400"],
+    subsets: ["latin"],
 })
 
 export const metadata: Metadata = {

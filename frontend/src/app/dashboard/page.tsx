@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -92,7 +92,6 @@ function StoreDashboard() {
   );
 }
 
-
 function CreatorDashboard() {
   const { data: session, status } = useSession();
 
@@ -133,7 +132,7 @@ function CreatorDashboard() {
   );
 }
 
-export default function DashboardPage() {
+function Dashboard() {
   const searchParams = useSearchParams();
   const isStoreConnected = searchParams.get("store_connected") === "true";
 
@@ -142,4 +141,12 @@ export default function DashboardPage() {
   }
 
   return <CreatorDashboard />;
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Dashboard />
+    </Suspense>
+  );
 }

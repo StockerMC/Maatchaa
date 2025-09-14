@@ -37,8 +37,8 @@ export default function ConnectStorePage() {
       localStorage.setItem("shop_name", shopName);
 
       router.push("/dashboard?store_connected=true");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     } finally {
       setIsLoading(false);
     }

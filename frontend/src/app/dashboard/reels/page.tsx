@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 export default async function ReelsPage() {
 
-    let { data: yt_shorts_pending, error } = await supabase
+    const { data: yt_shorts_pending, error } = await supabase
         .from("yt_shorts_pending")
         .select("*")
         .eq("company", "https://matchamatcha.ca");
