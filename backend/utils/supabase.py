@@ -25,8 +25,34 @@ class SupabaseClient:
         instance = cls()
         instance.client = client
         return instance
+    
+    async def post_yt_row(self, company: str, yt_short_url: str, cached_query: dict) -> Dict:
+        """
+        Post a YouTube short video row to the database
 
-    async def post_row(self, title: str, showcase_images: List[str], products: Dict,
+        Args:
+            company: The company name
+            yt_short_url: The YouTube short URL
+            cached_query: JSONB object containing cached query data
+
+        Returns:
+            Response from Supabase insert operation
+        """
+        data = {
+            "id": str(uuid4()),
+            "company": company,
+            "yt_short_url": yt_short_url,
+            "cached_query": cached_query
+        }
+
+        try:
+            result = await self.client.table("yt_shorts_pending").insert(data).execute()
+            return result.data[0] if result.data else None
+        except Exception as e:
+            print(f"Error posting to database: {e}")
+            raise e
+        
+    async def post_product_row(self, title: str, showcase_images: List[str], products: Dict,
                  main_image_url: str, row_id: Optional[str] = None) -> Dict:
         """
         Post a complete row to the database
@@ -79,3 +105,20 @@ class SupabaseClient:
             return None
 
         return public_url
+
+    async def initialize(self):
+        """Initialize the async Supabase client"""
+        self.client = await acreate_client(self.url, self.key)
+        
+    async def close(self):
+        """Close the async Supabase client"""
+        if hasattr(self, 'client') and self.client:
+            await self.client.aclose()
+
+    async def delete_pending_short(self, id: str):
+        try:
+            return await self.client.table("yt_shorts_pending").delete().eq("id", id).execute()
+        except Exception as e:
+            print(f"Error deleting pending short: {e}")
+            raise e
+

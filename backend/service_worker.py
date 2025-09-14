@@ -21,14 +21,11 @@ async def main():
         SUPABASE_SERVICE_ROLE_KEY
     ))
 
-    query = await parse_video("https://www.youtube.com/shorts/MzIen6fSQwA")
+    short_url = "https://www.youtube.com/shorts/MzIen6fSQwA"
+    query = await parse_video(short_url)
     print("Query:", query)
-    res = await ps.create_showcase(json.dumps(query[0]["output"]), client)
-    if res:
-        print("Showcase created successfully")
-    else:
-        print("Failed to create showcase")
-
+    if query[1] == 200:
+        await client.post_yt_row("labubu", short_url, query[0])
     # TODO: create the automatic background searches
 
 asyncio.run(main())

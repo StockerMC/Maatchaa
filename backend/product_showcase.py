@@ -160,7 +160,7 @@ async def create_showcase(query: str, supabase_client: SupabaseClient):
     res = gen_showcase_image_from_products(prompt, chosen_products)
     public_url = await supabase_client.upload_image_to_supabase(res, "product")
 
-    await supabase_client.post_row(
+    await supabase_client.post_product_row(
         title=query,
         showcase_images=[p["image"] for p in chosen_products if p["image"]],
         products={ "products": chosen_products },
