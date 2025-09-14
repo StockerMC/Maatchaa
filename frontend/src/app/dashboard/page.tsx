@@ -107,7 +107,7 @@ function CreatorDashboard() {
   }
 
   if (status === "unauthenticated") {
-    redirect("/creator");
+    redirect("/creators");
   }
 
   if (session?.error) {
