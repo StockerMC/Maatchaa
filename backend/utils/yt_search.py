@@ -80,8 +80,3 @@ async def get_channel_email(channel_id: str):
         print(f"An error occurred: {e}")
         traceback.print_exc()
         return None
-
-# Example usage
-import asyncio
-analyzed_videos = asyncio.run((fetch_top_shorts(keyword="matcha")))
-print(analyzed_videos)
