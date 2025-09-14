@@ -125,7 +125,6 @@ async def test_youtube_comments(channel_id: str, video_id: str) -> None:
 
 async def main():
     """Main function to run the service worker."""
-    """Main function to run the service worker."""
     load_dotenv()
 
     # Check for required environment variables
@@ -154,17 +153,12 @@ async def main():
     # Initialize Supabase client
     supabase_url = str(os.getenv("SUPABASE_URL"))
     supabase_key = str(os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY"))
-    # Initialize Supabase client
-    supabase_url = str(os.getenv("SUPABASE_URL"))
-    supabase_key = str(os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY"))
     client = await SupabaseClient.from_client(await acreate_client(
-        supabase_url,
-        supabase_key
         supabase_url,
         supabase_key
     ))
 
-    shorts = await fetch_top_shorts("matcha")
+    shorts = await fetch_top_shorts("skincare")
     print(shorts)
     for short in shorts:
         await evaluate_video(short["url"], client)
