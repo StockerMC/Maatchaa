@@ -42,6 +42,39 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
         }
     };
 
+    const handleCreateShowcase = async (reel: ReelData) => {
+        try {
+            const response = await fetch("/api/create-showcase", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    url: reel.yt_short_url,
+                }),
+            });
+
+
+            // Check if successful response has JSON content type
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const result = await response.json();
+                console.log("Showcase created successfully:", result);
+            } else {
+                // Handle successful non-JSON responses
+                const resultText = await response.text();
+                console.log("Showcase created successfully:", resultText);
+            }
+            
+            // Optional: Show success feedback to user
+            // You could add a toast notification here
+            
+        } catch (error) {
+            console.error("Error creating showcase:", error);
+            // Optional: Show error feedback to user
+        }
+    };
+
     return (
         <div className="overflow-hidden h-[1000px] w-[700px]">
             {reelsList.length === 0 ? (
@@ -114,6 +147,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                                     />
                                     <div className="cursor-pointer flex flex-col gap-4">
                                         <button
+                                            onClick={() => handleCreateShowcase(reel)}
                                             className="cursor-pointer bg-[#e6e1c5] hover:bg-[#d9d4ba] text-gray-900 font-semibold w-12 h-12 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                             ✓
                                         </button>

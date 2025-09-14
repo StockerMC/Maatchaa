@@ -158,7 +158,7 @@ async def main():
         supabase_key
     ))
 
-    shorts = await fetch_top_shorts("skincare")
+    shorts = await fetch_top_shorts("matcha")
     print(shorts)
     for short in shorts:
         await evaluate_video(short["url"], client)

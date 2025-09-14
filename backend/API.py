@@ -5,6 +5,8 @@ from utils import shopify, vectordb
 from blacksheep import Request, Application, delete, get, post, json
 from utils.supabase import SupabaseClient
 import product_showcase as ps
+from utils.video import parse_video
+import json as json_lib
 
 app = Application()
 
@@ -260,18 +262,26 @@ async def update_comment(request: Request):
         print(f"Error updating comment: {str(e)}")
         return json({"error": "Failed to update comment"}, status=500)
 
-@post("create-showcase")
+@post("/create-showcase")
 async def create_showcase(request: Request):
     try:
         data = await request.json()
 
-        res = await ps.create_showcase(data["query"])
+        query = await parse_video(data["url"])
+        res = await ps.create_showcase(
+            query=json_lib.dumps(query[0]),
+            supabase_client=supabase_client
+        )
+
+        if not res:
+            return json({"error": "Failed to create showcase"}, status=500)
 
         return json({
             "message": "Showcase created successfully",
-            "showcase": res
+            "slug": res
         })
         
     except Exception as e:
         print(f"Error creating showcase: {str(e)}")
         return json({"error": "Failed to create showcase"}, status=500)
+

@@ -1,10 +1,7 @@
-from openai import OpenAI
 from google import genai
-from google.genai import types
-from PIL import Image, ImageDraw
+from PIL import Image
 from io import BytesIO
 import requests
-import math
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -152,7 +149,7 @@ def choose_best_products(query: str, threshold: float = 0.3, top_k=10):
     return [candidate_products[i] for i in selected_indices[:top_k]]
 
 async def create_showcase(query: str, supabase_client: SupabaseClient):
-    chosen_products = choose_best_products(query, 10)
+    chosen_products = choose_best_products(query, top_k=10)
     if chosen_products is None or len(chosen_products) < 3:
         print("Not enough suitable products found, bad video")
         return False
@@ -164,11 +161,10 @@ async def create_showcase(query: str, supabase_client: SupabaseClient):
     res = gen_showcase_image_from_products(prompt, chosen_products)
     public_url = await supabase_client.upload_image_to_supabase(res, "product")
 
-    await supabase_client.post_product_row(
+    row = await supabase_client.post_product_row(
         title=query,
         showcase_images=[p["image"] for p in chosen_products if p["image"]],
         products={ "products": chosen_products },
         main_image_url=public_url
     )
-
-    return True
+    return row.get("slug", None)
