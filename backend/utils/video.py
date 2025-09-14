@@ -1,10 +1,10 @@
 from google import genai
-from dotenv import load_dotenv
 import traceback
+import os
 
-client = genai.Client()
+client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
 
-video_url = "https://www.youtube.com/shorts/-yuNUX3GSl8"
+#video_url = "https://www.youtube.com/shorts/-yuNUX3GSl8"
 # TODO INCLUDE INFO ABOUT THE COMPANY / SHOPIFY VENDOR
 
 async def parse_video(video_url: str):
@@ -36,7 +36,7 @@ async def parse_video(video_url: str):
                 ]
             )
         )
-
+        print(response)
         if (
             response.candidates
             and response.candidates[0].content

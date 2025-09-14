@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from utils.supabase import SupabaseClient
 import product_showcase as ps
+from utils.video import parse_video
+import json
 
 async def main():
     load_dotenv()
@@ -19,7 +21,13 @@ async def main():
         SUPABASE_SERVICE_ROLE_KEY
     ))
 
-    await ps.create_showcase("performative soft male aesthetic", client)
+    query = await parse_video("https://www.youtube.com/shorts/MzIen6fSQwA")
+    print("Query:", query)
+    res = await ps.create_showcase(json.dumps(query[0]["output"]), client)
+    if res:
+        print("Showcase created successfully")
+    else:
+        print("Failed to create showcase")
 
     # TODO: create the automatic background searches
 

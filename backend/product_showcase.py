@@ -11,7 +11,7 @@ load_dotenv()
 
 from utils.supabase import SupabaseClient
 
-from utils.vectordb import imageurl_to_b64, query_text
+from utils.vectordb import query_text
 import os
 
 client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
@@ -116,7 +116,7 @@ def choose_best_products(query: str, top_k=5):
     Please select 3-6 products that best match the user's query. 
     Consider synergy, aesthetics, and how well they fit the query.
     
-    End your response with Ans; the product numbers (1, 2, 3, etc.) separated by commas and nothing else. 
+    End your response with Ans; the product numbers (1, 2, 3, etc.) separated by commas and nothing else. If you believe fewer than 3 products are suitable, leave it empty.
     The response is parsed with response_text.split("Ans;")[-1].split(",") and will break if the format is not followed.
     Example response: 
     *Thinking work...*
@@ -136,25 +136,28 @@ def choose_best_products(query: str, top_k=5):
     selected_indices = []
     try:
         indices = [int(x.strip()) - 1 for x in response_text.split("Ans;")[-1].split(",")]
+        if len(indices) < 3:
+            print("Gemini selected fewer than 3 products")
+            return None
         selected_indices = [i for i in indices if 0 <= i < len(candidate_products)]
     except (ValueError, IndexError):
-        # Fallback to top products by score if parsing fails
-        print("Failed to parse Gemini response, falling back to top products.")
-        selected_indices = list(range(3))
+        return None
 
     
     # Return the selected products
     return [candidate_products[i] for i in selected_indices[:top_k]]
 
 async def create_showcase(query: str, supabase_client: SupabaseClient):
-    chosen_products = choose_best_products(query, 5)
+    chosen_products = choose_best_products(query, 10)
+    if chosen_products is None or len(chosen_products) < 3:
+        print("Not enough suitable products found, bad video")
+        return False
     print(len(chosen_products))
-    prompt = """You are a master photographer and product stylist. You are tasked with creating a minimalistic, aesthetic, 3D product showcase. 
-    Match the environment to the theme of the products. The scene is a realistic photoshoot which means no floating products without support.
+    prompt = """You are a master photographer and product stylist. You are tasked with creating an appealing, aesthetic, 3D product showcase. 
+    Match the environment to the theme of the products. Frame 1 or 2 products as the main focus with the others supporting. The scene is a realistic photoshoot which means no floating products without support.
     Make sure the lighting and colors complement the products. The angle of the camera can be anything visually interesting.
     Pay attention to the arrangement of the products, spacing, and overall composition to create a visually appealing scene."""
     res = gen_showcase_image_from_products(prompt, chosen_products)
-    #res = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
     public_url = await supabase_client.upload_image_to_supabase(res, "product")
 
     await supabase_client.post_row(
@@ -164,4 +167,4 @@ async def create_showcase(query: str, supabase_client: SupabaseClient):
         main_image_url=public_url
     )
 
-    print("done")
+    return True
