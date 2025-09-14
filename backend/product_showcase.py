@@ -87,8 +87,12 @@ def gen_showcase_image_from_products(prompt, products: list[dict]) -> BytesIO:
     # No limit needed since we're creating a composite image
     return gen_showcase_image(prompt, image_urls)
 
-def choose_best_products(query: str, top_k=5): 
-    res = query_text(query, 8)
+def choose_best_products(query: str, threshold: float = 0.3, top_k=10): 
+    res = query_text(query, top_k)
+    # Check if top scoring result is below threshold
+    if not res.matches or res.matches[0].score < threshold:
+        print(f"Top scoring result ({res.matches[0].score if res.matches else 'N/A'}) is below {threshold} threshold")
+        return None
     
     # Extract product metadata from vector search results
     candidate_products = []

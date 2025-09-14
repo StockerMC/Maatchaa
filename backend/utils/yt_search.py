@@ -18,6 +18,7 @@ async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_languag
         "order": order,
         "publishedAfter": published_after,
         "videoDuration": "short"
+        
     }
 
     if relevance_language:
@@ -46,5 +47,5 @@ async def fetch_top_shorts(keyword: str, max_results: int = 5, relevance_languag
 
 # Example usage
 import asyncio
-analyzed_videos = asyncio.run((fetch_top_shorts(keyword="fitness")))
+analyzed_videos = asyncio.run((fetch_top_shorts(keyword="matcha")))
 print(analyzed_videos)
