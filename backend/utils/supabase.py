@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 
 from supabase import acreate_client, AsyncClient
 import os
@@ -26,7 +27,7 @@ class SupabaseClient:
         return instance
 
     async def post_row(self, title: str, showcase_images: List[str], products: Dict,
-                 main_image_url: str, row_id: str | None = None) -> Dict:
+                 main_image_url: str, row_id: Optional[str] = None) -> Dict:
         """
         Post a complete row to the database
 
@@ -42,6 +43,7 @@ class SupabaseClient:
         """
         data = {
             "id": row_id or str(uuid4()),
+            "youtube_id": str(uuid4()), # Placeholder, replace with actual YouTube ID if available
             "title": title,
             "showcase_images": showcase_images,
             "products": products,
@@ -55,7 +57,7 @@ class SupabaseClient:
             print(f"Error posting to database: {e}")
             raise e
 
-    async def upload_image_to_supabase(self, image_b64: str, youtube_short_id: str) -> str | None:
+    async def upload_image_to_supabase(self, image: BytesIO, youtube_short_id: str) -> str | None:
         """
         Uploads an in-memory image file to Supabase Storage.
 
@@ -67,26 +69,13 @@ class SupabaseClient:
         Returns:
             The public URL of the uploaded image, or None if failed.
         """
-        # Remove base64 prefix if present
-        if "," in image_b64:
-            image_b64 = image_b64.split(",", 1)[1]
-        image_bytes = base64.b64decode(image_b64)
-        file_obj = BytesIO(image_bytes)
-        file_obj.seek(0)
+        image.seek(0)
         file_name = f"{youtube_short_id}_showcase_{str(uuid4())}.png"
         try:
-            response = await self.client.storage.from_('images').upload(file_name, file_obj.read())
+            response = await self.client.storage.from_('images').upload(file_name, image.read(), file_options={"content-type": "image/png"})
             public_url = await self.client.storage.from_('images').get_public_url(file_name)
         except Exception as e:
             print(f"Error uploading image to Supabase: {e}")
             return None
 
-        await (self.client
-            .table('youtube_shorts')
-            .update({"showcase_images": [public_url]})
-            .eq("id", youtube_short_id)
-            .execute())
-
         return public_url
-
-client = SupabaseClient()

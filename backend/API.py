@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from utils import shopify, vector
+from utils import shopify, vectordb
 from blacksheep import Request, Application, delete, get, post, json
 
 app = Application()
@@ -30,8 +30,8 @@ async def ingest_products(request: Request):
             return json({"error": "No products with images found"}, status=400)
         
         # Create embeddings and upsert to vector DB
-        embeddings = vector.embed_products(products_with_images)
-        vector.upsert_embeddings(embeddings)
+        embeddings = vectordb.embed_products(products_with_images)
+        vectordb.upsert_embeddings(embeddings)
         
         return json({
             "message": f"Successfully ingested {len(embeddings)} products",
@@ -54,11 +54,11 @@ async def search_by_image(request: Request):
             return json({"error": "image_url is required"}, status=400)
         
         # Get embedding for the query image
-        embedding_response = vector.imageurl_to_embedding(image_url)
+        embedding_response = vectordb.imageurl_to_embedding(image_url)
         query_vector = embedding_response.embeddings.float_[0]
         
         # Search in vector database
-        results = vector.index.query(
+        results = vectordb.index.query(
             vector=query_vector,
             top_k=top_k,
             include_metadata=True
@@ -91,8 +91,8 @@ async def search_by_text(request: Request):
             return json({"error": "query is required"}, status=400)
         
         # Search using metadata filter (simple text search in body_html)
-        results = vector.index.query(
-            vector=vector.text_to_embedding(query_text).embeddings.float_[0],
+        results = vectordb.index.query(
+            vector=vectordb.text_to_embedding(query_text).embeddings.float_[0],
             top_k=top_k,
             include_values=False,
             include_metadata=True
@@ -122,7 +122,7 @@ async def get_products(request: Request):
         offset = int(request.query.get("offset", "0"))
         
         # Query vector database to get products
-        results = vector.index.query(
+        results = vectordb.index.query(
             vector=[0] * 1024,  # Dummy vector to get all results
             top_k=min(limit, 100),  # Pinecone has limits
             include_metadata=True
@@ -149,7 +149,7 @@ async def get_products(request: Request):
 async def get_product(product_id: str):
     try:
         # Fetch specific product by ID
-        results = vector.index.fetch(ids=[product_id])
+        results = vectordb.index.fetch(ids=[product_id])
         
         if product_id not in results.vectors:
             return json({"error": "Product not found"}, status=404)
@@ -169,7 +169,7 @@ async def get_product(product_id: str):
 @delete("/products/{product_id}")
 async def delete_product(product_id: str):
     try:
-        vector.index.delete(ids=[product_id])
+        vectordb.index.delete(ids=[product_id])
         return json({"message": f"Product {product_id} deleted successfully"})
         
     except Exception as e:
@@ -179,7 +179,7 @@ async def delete_product(product_id: str):
 @get("/stats")
 async def get_stats():
     try:
-        stats = vector.index.describe_index_stats()
+        stats = vectordb.index.describe_index_stats()
         return json({
             "total_vectors": stats.total_vector_count,
             "dimension": stats.dimension,

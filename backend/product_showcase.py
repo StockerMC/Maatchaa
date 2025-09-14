@@ -1,49 +1,91 @@
-import base64
 from openai import OpenAI
+from google import genai
+from google.genai import types
+from PIL import Image, ImageDraw
+from io import BytesIO
+import requests
+import math
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from backend.utils.vector import imageurl_to_b64, query_text
+from utils.supabase import SupabaseClient
+
+from utils.vectordb import imageurl_to_b64, query_text
 import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
-gemini = OpenAI(
-    api_key=os.getenv("GEMINI_KEY"),
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-)
+client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
 
-def gen_showcase_image(prompt, ref_images: list[str]): # list of shopify image URLs
-    ref_images_b64 = [{"type": "input_image", "image_url": imageurl_to_b64(url)} for url in ref_images]
-    response = client.responses.create(
-        model="gpt-4o",
-        input=[
-            {"role": "user", 
-             "content": [
-                 {"type": "input_text", "text": prompt}
-                ] + ref_images_b64
-            }
-        ],
-        tools=[{"type": "image_generation"}],
+
+def create_product_grid(image_urls: list[str]) -> list[Image.Image]:
+    """Create multiple grid layouts of product images, each containing up to max_images_per_grid products"""
+    if not image_urls:
+        return []
+    
+    # Download and process images
+    images = []
+    for url in image_urls:
+        try:
+            response = requests.get(url)
+            image_data = BytesIO(response.content)
+            img = Image.open(image_data)
+            # Convert to RGB if necessary
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            images.append(img)
+        except Exception as e:
+            print(f"Error loading image from URL {url}: {e}")
+    
+    if not images:
+        return []
+
+    if len(images) <= 4:
+        return images
+    
+    # horizontally combine image 5 and 1, image 6 and 2, etc
+    for i in range(4, len(images)):
+        base_img = images[i - 4]
+        new_img = images[i]
+        
+        # Resize new_img to match base_img height
+        new_img = new_img.resize((int(new_img.width * (base_img.height / new_img.height)), base_img.height))
+        
+        # Create a new image with combined width
+        combined_width = base_img.width + new_img.width
+        combined_image = Image.new('RGB', (combined_width, base_img.height))
+        
+        # Paste both images into the combined image
+        combined_image.paste(base_img, (0, 0))
+        combined_image.paste(new_img, (base_img.width, 0))
+        
+        images[i - 4] = combined_image
+
+    return images
+
+def gen_showcase_image(prompt, ref_images: list[str]) -> BytesIO: # list of shopify image URLs
+    # Create composite grid images from all reference images
+    composite_images = create_product_grid(ref_images)
+    
+    if not composite_images:
+        print("Failed to create composite images")
+        return None
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-image-preview",
+        contents=[prompt, *composite_images] 
     )
 
+    for part in response.candidates[0].content.parts:
+        if part.text is not None:
+            print(part.text)
+        elif part.inline_data is not None:
+            image_data = BytesIO(part.inline_data.data)
+            return image_data
 
-    image_generation_calls = [
-        output
-        for output in response.output
-        if output.type == "image_generation_call"
-    ]
-
-    image_data = [output.result for output in image_generation_calls]
-
-    if image_data:
-        return image_data[0] #b64 string of generated image
-    else:
-        raise ValueError("No image generated. " + str(response))
-
-def gen_showcase_image_from_products(prompt, products: list[dict], max_images=5):
+def gen_showcase_image_from_products(prompt, products: list[dict]) -> BytesIO:
     image_urls = [p["image"] for p in products if p.get("image")]
-    return gen_showcase_image(prompt, image_urls[:max_images])
+    # No limit needed since we're creating a composite image
+    return gen_showcase_image(prompt, image_urls)
 
 def choose_best_products(query: str, top_k=5): 
     res = query_text(query, 8)
@@ -82,17 +124,17 @@ def choose_best_products(query: str, top_k=5):
     Ans; 1, 3, 5
     """
     
-    gemini_response = gemini.chat.completions.create(
-        model="gemini-2.0-flash-exp",
-        messages=[{"role": "user", "content": prompt}]
+    genai_response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[prompt]
     )
 
-    print("Gemini response:", gemini_response.choices[0].message.content.strip())
+    response_text = genai_response.candidates[0].content.parts[0].text
+    print("Gemini response:", response_text.strip())
     
     # Parse the response to get selected product indices
     selected_indices = []
     try:
-        response_text = gemini_response.choices[0].message.content.strip()
         indices = [int(x.strip()) - 1 for x in response_text.split("Ans;")[-1].split(",")]
         selected_indices = [i for i in indices if 0 <= i < len(candidate_products)]
     except (ValueError, IndexError):
@@ -104,17 +146,22 @@ def choose_best_products(query: str, top_k=5):
     # Return the selected products
     return [candidate_products[i] for i in selected_indices[:top_k]]
 
-def create_showcase(query: str):
+async def create_showcase(query: str, supabase_client: SupabaseClient):
     chosen_products = choose_best_products(query, 5)
     print(len(chosen_products))
-    prompt = """Put the attached products in a minimalistic, aesthetic, 3d product showcase. 
-    Match the environment to the theme of the products. Make sure the lighting and colors complement the products.
+    prompt = """You are a master photographer and product stylist. You are tasked with creating a minimalistic, aesthetic, 3D product showcase. 
+    Match the environment to the theme of the products. The scene is a realistic photoshoot which means no floating products without support.
+    Make sure the lighting and colors complement the products. The angle of the camera can be anything visually interesting.
     Pay attention to the arrangement of the products, spacing, and overall composition to create a visually appealing scene."""
     res = gen_showcase_image_from_products(prompt, chosen_products)
+    #res = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    public_url = await supabase_client.upload_image_to_supabase(res, "product")
 
-    with open("showcase_image.png", "wb") as f:
-        f.write(base64.b64decode(res))
+    await supabase_client.post_row(
+        title=query,
+        showcase_images=[p["image"] for p in chosen_products if p["image"]],
+        products={ "products": chosen_products },
+        main_image_url=public_url
+    )
 
     print("done")
-
-create_showcase("performative matcha feminine male aesthetic")
