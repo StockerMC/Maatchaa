@@ -277,7 +277,13 @@ void main() {
 
         const loop = (t: number) => {
             rafRef.current = requestAnimationFrame(loop)
-            uniforms.iTime.value = t * 0.001
+            const timeInSeconds = t * 0.001
+            uniforms.iTime.value = timeInSeconds
+
+            // Slowly rotate the gradient over time
+            if (!paused) {
+                uniforms.uAngle.value = (angle * Math.PI) / 180 + timeInSeconds * 0.05
+            }
 
             lastTimeRef.current = t
 

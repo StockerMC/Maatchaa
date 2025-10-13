@@ -1,30 +1,36 @@
 "use client";
 
 import * as React from "react";
+import Autoplay from "embla-carousel-autoplay";
 
-import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext } from "@/components/ui/carousel";
-import { useState } from "react";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
-const images = ["images/img1.png", "images/img2.png", "images/img3.png", "images/img4.png"];
+const baseImages = ["images/img1.png", "images/img2.png", "images/img3.png", "images/img4.png"];
+// Duplicate the images multiple times to create enough slides for seamless looping
+const images = [...baseImages, ...baseImages, ...baseImages];
 
 export function ShortScroller() {
-    const [api, setApi] = useState<CarouselApi>();
-    React.useEffect(() => {
-        if (!api) return;
-        const interval = setInterval(() => {
-            api.scrollNext();
-        }, 2000);
-        return () => clearInterval(interval);
-    }, [api]);
+    const plugin = React.useRef(
+        Autoplay({ delay: 2000, stopOnInteraction: false })
+    );
 
     return (
-        <Carousel setApi={setApi} className="w-full h-full max-w-xs" opts={{ loop: true }} orientation="vertical">
+        <Carousel
+            className="w-full h-full max-w-xs"
+            opts={{
+                loop: true,
+                align: 'start',
+                skipSnaps: false,
+            }}
+            orientation="vertical"
+            plugins={[plugin.current]}
+        >
             <CarouselContent className="h-[450px] mt-12">
-                {Array.from({ length: 4 }).map((_, index) => (
+                {images.map((image, index) => (
                     <CarouselItem key={index}>
                         <img
-                            src={images[index % images.length]}
-                            alt={`Image ${index + 1}`}
+                            src={image}
+                            alt={`Image ${(index % baseImages.length) + 1}`}
                             className="w-full h-full object-cover rounded-lg"
                         />
                     </CarouselItem>

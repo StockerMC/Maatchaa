@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@radix-ui/themes/styles.css";
 
 :root {
     --background: #ffffff;
@@ -26,3 +27,4 @@ body {
     color: var(--foreground);
     font-family: var(--font-figtree), sans-serif;
 }
+
