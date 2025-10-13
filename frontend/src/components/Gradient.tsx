@@ -253,8 +253,7 @@ void main() {
 
         const geometry = new Triangle(gl)
         geometryRef.current = geometry
-        const mesh = new Mesh(gl, { geometry, program })
-        meshRef.current = mesh
+        meshRef.current = new Mesh(gl, { geometry, program })
 
         let firstIter = true;
 

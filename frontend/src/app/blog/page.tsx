@@ -71,7 +71,7 @@ export default function BlogPage() {
           <p>
             YouTube creators with engaged audiences struggle to find brands that
             align with their content. Meanwhile, Shopify merchants looking to
-            expand their reach through influencer marketing don't have an easy
+            expand their reach through influencer marketing don&apos;t have an easy
             way to discover authentic creators in their niche.
           </p>
 
@@ -139,9 +139,9 @@ export default function BlogPage() {
             <li>Mobile-responsive design</li>
           </ul>
 
-          <h2>What's Next</h2>
+          <h2>What&apos;s Next</h2>
           <p>
-            Hack the North was just the beginning. We're now refining the product
+            Hack the North was just the beginning. We&apos;re now refining the product
             based on feedback from creators and brands. Our roadmap includes:
           </p>
           <ul>
@@ -151,14 +151,14 @@ export default function BlogPage() {
             <li>Expanding to TikTok and Instagram creators</li>
           </ul>
           <p>
-            If you're a creator or brand interested in trying Maatchaa, join our
-            waitlist. We're rolling out early access soon.
+            If you&apos;re a creator or brand interested in trying Maatchaa, join our
+            waitlist. We&apos;re rolling out early access soon.
           </p>
 
           <blockquote>
-            "Building Maatchaa taught us that the best products solve real
-            problems for real people. We can't wait to see where this journey
-            takes us." — The Maatchaa Team
+            &ldquo;Building Maatchaa taught us that the best products solve real
+            problems for real people. We can&apos;t wait to see where this journey
+            takes us.&rdquo; — The Maatchaa Team
           </blockquote>
 
           <p>
