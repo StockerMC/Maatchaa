@@ -59,7 +59,6 @@ const Gradient: React.FC<GradientProps> = ({
     const rendererRef = useRef<Renderer | null>(null)
     const mouseTargetRef = useRef<[number, number]>([0, 0])
     const lastTimeRef = useRef<number>(0)
-    const firstResizeRef = useRef<boolean>(true)
 
     useEffect(() => {
         const container = containerRef.current

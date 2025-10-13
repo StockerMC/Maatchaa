@@ -162,7 +162,7 @@ export default function BlogPage() {
           </blockquote>
 
           <p>
-            <Link href="/waitlist" className="text-primary font-semibold">
+            <Link href="/#waitlist" className="text-primary font-semibold">
               Join the waitlist →
             </Link>
           </p>

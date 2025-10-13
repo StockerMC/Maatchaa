@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Figtree, Instrument_Serif } from "next/font/google"
+import { Figtree } from "next/font/google"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Theme } from '@radix-ui/themes'
 import Header from "@/components/Header"
@@ -14,11 +14,6 @@ const figtree = Figtree({
     weight: ["400", "500", "600", "700"],
     variable: "--font-figtree",
     display: "swap",
-})
-
-const instrument = Instrument_Serif({
-    weight: ["400"],
-    subsets: ["latin"],
 })
 
 export const metadata: Metadata = {
