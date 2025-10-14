@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
 
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
-const baseImages = ["images/img1.png", "images/img2.png", "images/img3.png", "images/img4.png"];
+const baseImages = ["/images/img1.png", "/images/img2.png", "/images/img3.png", "/images/img4.png"];
 // Duplicate the images multiple times to create enough slides for seamless looping
 const images = [...baseImages, ...baseImages, ...baseImages];
 
@@ -28,12 +27,12 @@ export function ShortScroller() {
         >
             <CarouselContent className="h-[450px] mt-12">
                 {images.map((image, index) => (
-                    <CarouselItem key={index} className="relative">
-                        <Image
+                    <CarouselItem key={index}>
+                        {/*eslint-disable-next-line*/}
+                        <img
                             src={image}
                             alt={`Image ${(index % baseImages.length) + 1}`}
-                            fill
-                            className="object-cover rounded-lg"
+                            className="w-full h-full object-cover rounded-lg"
                         />
                     </CarouselItem>
                 ))}
