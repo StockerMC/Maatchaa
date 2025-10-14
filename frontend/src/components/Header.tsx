@@ -63,6 +63,12 @@ export default function Header() {
                         <NavigationMenu.Link asChild>
                             <Link
                                 href="/"
+                                onClick={(e) => {
+                                    if (isHomePage) {
+                                        e.preventDefault();
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }
+                                }}
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
                                     isScrolled ? "text-gray-600 hover:text-gray-900" : "text-white hover:text-white/80"

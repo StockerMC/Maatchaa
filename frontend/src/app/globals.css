@@ -31,6 +31,7 @@
 
 html {
     background: #1c1917;
+    scroll-behavior: smooth;
 }
 
 body {
