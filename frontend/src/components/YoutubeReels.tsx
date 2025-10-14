@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
 import { supabase } from "@/lib/supabase";
 import toast from 'react-hot-toast';
@@ -101,11 +102,14 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
         <div className="overflow-hidden h-[1000px] w-[700px]">
             {reelsList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[800px] w-full text-center">
-                    <img
-                        src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyMmc0Y2U3cHJ5dW5kdjc0cmtvNzR4cnZ1dXNrM2FlY2lhOXBjeHg2ZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/SS40oFiyppsHhvClo2/200.gif"
-                        alt="Labubu"
-                        className="w-64 h-64 object-contain mb-8"
-                    />
+                    <div className="relative w-64 h-64 mb-8">
+                        <Image
+                            src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyMmc0Y2U3cHJ5dW5kdjc0cmtvNzR4cnZ1dXNrM2FlY2lhOXBjeHg2ZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/SS40oFiyppsHhvClo2/200.gif"
+                            alt="Labubu"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">
                         That&apos;s all for now, working hard to find more content...
                     </h1>
@@ -141,10 +145,11 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                                                     >
                                                         {imgSrc ? (
                                                             <>
-                                                                <img
+                                                                <Image
                                                                     src={imgSrc}
                                                                     alt={productTitle}
-                                                                    className="w-full h-full object-cover"
+                                                                    fill
+                                                                    className="object-cover"
                                                                 />
                                                                 {/* Hover overlay with product title */}
                                                                 <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-1">

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { ShortScroller } from "./ShortScroller";
 
 interface PhoneComponentProps {
@@ -31,10 +32,11 @@ export default function PhoneComponent({ className = "" }: PhoneComponentProps) 
             {/* iPhone Mockup using provided image */}
             <div className="relative w-[300px] h-[650px]">
                 {/* iPhone Frame Image */}
-                <img
+                <Image
                     src="/images/iphone.png"
                     alt="iPhone Frame"
-                    className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
+                    fill
+                    className="object-contain z-10 pointer-events-none"
                 />
 
                 {/* Content Area */}

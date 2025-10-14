@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import Image from "next/image";
 
 interface PhoneImageScrollerProps {
     images: string[];
@@ -45,13 +46,15 @@ export default function PhoneImageScroller({ images, duration = 4000 }: PhoneIma
         <div className="relative overflow-hidden">
             <div ref={scrollerRef} className="flex flex-col transition-none">
                 {allImages.map((src, i) => (
-                    <img
-                        key={i}
-                        src={src}
-                        alt={`phone-img-${i}`}
-                        className="w-full h-full object-contain"
-                        draggable={false}
-                    />
+                    <div key={i} className="relative w-full h-full min-h-[200px]">
+                        <Image
+                            src={src}
+                            alt={`phone-img-${i}`}
+                            fill
+                            className="object-contain"
+                            draggable={false}
+                        />
+                    </div>
                 ))}
             </div>
         </div>

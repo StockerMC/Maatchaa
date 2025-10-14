@@ -64,7 +64,7 @@ export default async function ProductPage({
                         </div>
 
                         <Button
-                            size="lg"
+                            size="4"
                             className="cursor-pointer w-full bg-[#e6e1c5] hover:bg-[#d9d4ba] text-gray-700 font-semibold py-4 text-lg"
                         >
                             Buy Now

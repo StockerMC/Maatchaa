@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
 
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -27,11 +28,12 @@ export function ShortScroller() {
         >
             <CarouselContent className="h-[450px] mt-12">
                 {images.map((image, index) => (
-                    <CarouselItem key={index}>
-                        <img
+                    <CarouselItem key={index} className="relative">
+                        <Image
                             src={image}
                             alt={`Image ${(index % baseImages.length) + 1}`}
-                            className="w-full h-full object-cover rounded-lg"
+                            fill
+                            className="object-cover rounded-lg"
                         />
                     </CarouselItem>
                 ))}
