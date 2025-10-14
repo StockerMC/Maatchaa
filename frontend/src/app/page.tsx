@@ -21,7 +21,7 @@ export default function Home() {
     const whiskPositions = [
         { left: 15, top: 58, size: 8.5, rotate: -12 },
         { left: 30, top: 62, size: 9.2, rotate: 6 },
-        { left: 45, top: 70, size: 7.8, rotate: -6 },
+        { left: 45, top: 63, size: 7.8, rotate: -6 },
         { left: 60, top: 74, size: 8.7, rotate: 12 },
         { left: 75, top: 59, size: 9.5, rotate: -20 },
         { left: 90, top: 68, size: 8.0, rotate: 3 }
