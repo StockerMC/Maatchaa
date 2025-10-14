@@ -4,7 +4,7 @@ import { ArrowTopRightIcon} from "@radix-ui/react-icons";
 
 export default function Footer() {
   return (
-    <footer className="py-12 px-6 bg-stone-800">
+    <footer className="py-12 px-6 bg-stone-900">
       <div className="max-w-6xl mx-auto">
         <Flex direction="column" gap="8">
           {/* Main content */}

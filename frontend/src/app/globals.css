@@ -29,9 +29,13 @@
     }
 }
 
+html {
+    background: #1c1917;
+}
+
 body {
     /*cursor: url('/cursor.png'), auto;*/
-    background: var(--background);
+    background: #ffffff;
     color: var(--foreground);
     font-family: var(--font-figtree), sans-serif;
 }
