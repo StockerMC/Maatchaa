@@ -67,8 +67,8 @@ export default function Home() {
                         </p>
                         <Button variant="classic" color="lime" size="4" asChild
                                 style={{ backgroundColor: 'var(--lime-10)' }}>
-                            <Link href="/#waitlist" className="flex items-center gap-2">
-                                Join our Waitlist
+                            <Link href="/stores" className="flex items-center gap-2">
+                                Try Our Demo
                                 <ArrowTopRightIcon width="18" height="18" />
                             </Link>
                         </Button>

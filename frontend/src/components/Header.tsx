@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import * as NavigationMenu from "@radix-ui/react-navigation-menu"
-import { sage, gold } from "@radix-ui/colors"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -12,17 +11,15 @@ export default function Header() {
     const pathname = usePathname()
     const router = useRouter()
     const isHomePage = pathname === "/"
-    const [isScrolled, setIsScrolled] = useState(false)
+    const [isScrolled, setIsScrolled] = useState(() => {
+        // Initialize based on current scroll position to avoid transition on page load
+        if (typeof window !== 'undefined') {
+            return window.scrollY > 100
+        }
+        return false
+    })
 
     useEffect(() => {
-        // Check initial scroll position on mount
-        const checkScrollPosition = () => {
-            setIsScrolled(window.scrollY > 100)
-        }
-
-        // Check immediately on mount
-        checkScrollPosition()
-
         // Then add scroll listener
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 100)
@@ -47,18 +44,18 @@ export default function Header() {
             <NavigationMenu.Root
                 className={cn(
                     "mx-auto mt-2 flex items-center",
-                    "px-4 py-2",
-                    "transition-all duration-500 ease-in-out"
+                     "px-8 py-2"
                 )}
                 style={{
                     borderRadius: isScrolled ? '9999px' : '0px',
-                    border: isScrolled ? `2px solid ${sage.sage7}` : '2px solid transparent',
-                    backgroundColor: isScrolled ? `${gold.gold2}99` : 'transparent',
+                    border: isScrolled ? '1.5px solid rgba(0, 0, 0, 0.15)' : '1.5px solid transparent',
+                    backgroundColor: isScrolled ? 'rgb(255, 255, 255)' : 'transparent',
                     backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    boxShadow: isScrolled ? '0 1px 3px 0 rgb(0 0 0 / 0.1)' : 'none',
+                    boxSizing: 'border-box',
+                    transition: 'all 500ms ease-in-out',
                 }}
             >
-                <NavigationMenu.List className="flex items-center gap-8" style={{ margin: 0, padding: 0 }}>
+                <NavigationMenu.List className="flex items-center" style={{ margin: 0, padding: 0, gap: '2.5rem' }}>
                     <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0 }}>
                         <NavigationMenu.Link asChild>
                             <Link
@@ -71,9 +68,9 @@ export default function Header() {
                                 }}
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
-                                    isScrolled ? "text-gray-600 hover:text-gray-900" : "text-white hover:text-white/80"
+                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
                                 )}
-                                style={{ display: 'flex', alignItems: 'center' }}
+                                style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
                             >
                                 Home
                             </Link>
@@ -86,9 +83,9 @@ export default function Header() {
                                 href="/blog"
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
-                                    isScrolled ? "text-gray-600 hover:text-gray-900" : "text-white hover:text-white/80"
+                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
                                 )}
-                                style={{ display: 'flex', alignItems: 'center' }}
+                                style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
                             >
                                 Blog
                             </Link>
@@ -96,27 +93,37 @@ export default function Header() {
                     </NavigationMenu.Item>
 
                     <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0 }}>
+                        <NavigationMenu.Link asChild>
+                            <Link
+                                href="/stores"
+                                className={cn(
+                                    "text-sm font-medium transition-colors duration-500",
+                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
+                                )}
+                                style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
+                            >
+                                Demo
+                            </Link>
+                        </NavigationMenu.Link>
+                    </NavigationMenu.Item>
+
+                    <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0 }}>
                         <Button
-                            variant="surface"
+                            variant="solid"
                             color="lime"
                             size="2"
                             onClick={handleWaitlistClick}
                             style={{
-                                fontSize: '0.875rem',
-                                fontWeight: 500,
+                                height: '28px',
+                                padding: '4px 12px',
+                                fontSize: '14px',
+                                lineHeight: '20px',
+                                border: '1px solid transparent',
+                                boxSizing: 'border-box',
                                 transition: 'all 500ms ease-in-out',
-                                height: 'auto',
-                                padding: '0.25rem 0.75rem',
-                                lineHeight: '1.25rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                ...(!isScrolled && {
-                                    color: 'white',
-                                    backgroundColor: 'transparent',
-                                    border: 'none',
-                                    boxShadow: 'none',
-                                    outline: 'none',
-                                })
+                                color: isScrolled ? undefined : 'white',
+                                backgroundColor: isScrolled ? undefined : 'transparent',
+                                boxShadow: isScrolled ? undefined : 'none',
                             }}
                         >
                             Waitlist
