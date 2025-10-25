@@ -11,19 +11,15 @@ export default function Header() {
     const pathname = usePathname()
     const router = useRouter()
     const isHomePage = pathname === "/"
-    const [isScrolled, setIsScrolled] = useState(() => {
-        // Initialize based on current scroll position to avoid transition on page load
-        if (typeof window !== 'undefined') {
-            return window.scrollY > 100
-        }
-        return false
-    })
+    const [isScrolled, setIsScrolled] = useState(false)
 
     useEffect(() => {
-        // Then add scroll listener
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 100)
         }
+
+        // Set initial state
+        handleScroll()
 
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
