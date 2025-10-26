@@ -1,0 +1,297 @@
+@import "@radix-ui/colors/lime.css";
+@import "@radix-ui/colors/lime-dark.css";
+@import "@radix-ui/colors/gray.css";
+@import "@radix-ui/colors/gray-dark.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Updated to Matcha × Stone design system from home page */
+    /* Matcha Green Palette - Expanded */
+    --matcha-1: #a8bf9c;
+    --matcha-2: #98b88c;
+    --matcha-3: #9cb894;
+    --matcha-4: #a5c39a;
+    --matcha-5: #8fb080;
+    --matcha-6: #9dbe91;
+    --matcha-7: #a2bb96;
+    --matcha-8: #96b58a;
+
+    /* Added new color palette with teals and greens */
+    --matcha-glow-1: #90f3c0;
+    --matcha-glow-2: #b4d88b;
+    --matcha-teal-1: #9ae6f5;
+    --matcha-teal-2: #7dd3c0;
+    --matcha-lime: #c2e59c;
+
+    /* Matcha Glow Accents */
+    --matcha-glow-1: #90f3c0;
+    --matcha-glow-2: #97ffc6;
+    --matcha-glow-3: #a8e64a;
+
+    /* Stone Neutrals */
+    --stone-dark: #1a1a1a;
+    --stone-medium: #2a2a2a;
+    --stone-light: #f5f5f5;
+
+    /* Beige Accent */
+    --beige-primary: #e6e1c5;
+    --beige-hover: #d9d4ba;
+
+    /* Semantic tokens */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 81 88% 50%; /* Lime green */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 45 20% 88%; /* Beige */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 81 88% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 91%;
+    --input: 0 0% 96%;
+    --ring: 81 88% 50%;
+    --radius: 0.75rem;
+
+    /* Sidebar - Dark stone theme */
+    --sidebar: 0 0% 10%; /* #1A1A1A */
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-muted: 0 0% 16%; /* #2A2A2A */
+    --sidebar-muted-foreground: 0 0% 65%;
+    --sidebar-accent: 81 88% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 20%;
+  }
+
+  .dark {
+    --background: 0 0% 10%; /* #1A1A1A */
+    --foreground: 0 0% 98%;
+    --card: 0 0% 16%; /* #2A2A2A */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 81 88% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 81 88% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 16%;
+    --ring: 81 88% 50%;
+
+    /* Sidebar in dark mode */
+    --sidebar: 0 0% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-muted: 0 0% 16%;
+    --sidebar-muted-foreground: 0 0% 65%;
+    --sidebar-accent: 81 88% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Added matcha color utility classes */
+@layer utilities {
+  /* Added new color utilities for expanded palette */
+  .bg-matcha-1 {
+    background-color: var(--matcha-1);
+  }
+  .bg-matcha-2 {
+    background-color: var(--matcha-2);
+  }
+  .bg-matcha-3 {
+    background-color: var(--matcha-3);
+  }
+  .bg-matcha-4 {
+    background-color: var(--matcha-4);
+  }
+  .bg-matcha-5 {
+    background-color: var(--matcha-5);
+  }
+  .bg-matcha-6 {
+    background-color: var(--matcha-6);
+  }
+  .bg-matcha-7 {
+    background-color: var(--matcha-7);
+  }
+  .bg-matcha-8 {
+    background-color: var(--matcha-8);
+  }
+
+  .bg-matcha-glow-1 {
+    background-color: var(--matcha-glow-1);
+  }
+  .bg-matcha-glow-2 {
+    background-color: var(--matcha-glow-2);
+  }
+  .bg-matcha-teal-1 {
+    background-color: var(--matcha-teal-1);
+  }
+  .bg-matcha-teal-2 {
+    background-color: var(--matcha-teal-2);
+  }
+  .bg-matcha-lime {
+    background-color: var(--matcha-lime);
+  }
+
+  .bg-stone-dark {
+    background-color: var(--stone-dark);
+  }
+  .bg-stone-medium {
+    background-color: var(--stone-medium);
+  }
+  .bg-stone-light {
+    background-color: var(--stone-light);
+  }
+
+  .bg-beige {
+    background-color: var(--beige-primary);
+  }
+  .bg-beige-hover {
+    background-color: var(--beige-hover);
+  }
+
+  .text-matcha-glow-1 {
+    color: var(--matcha-glow-1);
+  }
+  .text-matcha-glow-2 {
+    color: var(--matcha-glow-2);
+  }
+  .text-matcha-teal-1 {
+    color: var(--matcha-teal-1);
+  }
+  .text-matcha-teal-2 {
+    color: var(--matcha-teal-2);
+  }
+  .text-matcha-lime {
+    color: var(--matcha-lime);
+  }
+
+  .text-stone-dark {
+    color: var(--stone-dark);
+  }
+  .text-stone-light {
+    color: var(--stone-light);
+  }
+
+  .border-matcha-glow-1 {
+    border-color: var(--matcha-glow-1);
+  }
+  .border-matcha-glow-2 {
+    border-color: var(--matcha-glow-2);
+  }
+  .border-matcha-teal-1 {
+    border-color: var(--matcha-teal-1);
+  }
+  .border-matcha-teal-2 {
+    border-color: var(--matcha-teal-2);
+  }
+
+  /* Removed all shadow utilities, replaced with border-based styles */
+  .btn-matcha {
+    @apply bg-[var(--lime-10)] hover:bg-[var(--lime-11)] text-gray-900 font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 border-2 border-[var(--lime-11)];
+  }
+
+  .btn-beige {
+    @apply bg-beige hover:bg-beige-hover text-gray-900 font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 border-2 border-gray-300;
+  }
+
+  .btn-outline-dark {
+    @apply border-2 border-gray-900 text-gray-900 bg-transparent hover:bg-gray-900 hover:text-white px-8 py-4 rounded-full transition-all duration-300;
+  }
+
+  /* Card styles without shadows, using borders instead */
+  .card-light {
+    @apply bg-white rounded-3xl p-8 md:p-12 border-2 border-gray-200 backdrop-blur-sm;
+  }
+
+  .card-dark {
+    @apply bg-stone-dark rounded-2xl p-6 text-white border-2 border-gray-700;
+  }
+
+  .card-glass {
+    @apply bg-black/5 backdrop-blur-sm rounded-2xl p-6 border-2 border-white/20;
+  }
+
+  /* Responsive utilities */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .shorts-card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shorts-card-hover {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  .shorts-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Matcha glow effect for dark sections */
+  .matcha-glow {
+    box-shadow: 0 0 40px rgba(144, 243, 192, 0.2);
+  }
+
+  .matcha-glow-strong {
+    box-shadow: 0 0 60px rgba(144, 243, 192, 0.4);
+  }
+}
+
+/* Sidebar styles */
+.bg-sidebar {
+  background-color: hsl(var(--sidebar));
+}
+
+.text-sidebar-foreground {
+  color: hsl(var(--sidebar-foreground));
+}
+
+.bg-sidebar-accent {
+  background-color: hsl(var(--sidebar-accent));
+}
+
+.text-sidebar-accent-foreground {
+  color: hsl(var(--sidebar-accent-foreground));
+}
