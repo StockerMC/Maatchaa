@@ -1,4 +1,3 @@
-import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 import { Flex, Text, Box } from "@radix-ui/themes";
 import { ArrowTopRightIcon} from "@radix-ui/react-icons";
 

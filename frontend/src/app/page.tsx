@@ -4,15 +4,16 @@ import PhoneComponent from "@/components/Phone";
 import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 import { Button } from "@/components/ui/button";
 import { Box, Text } from "@radix-ui/themes";
-import { gray, lime, teal, jade } from "@radix-ui/colors";
+import { gray, lime } from "@radix-ui/colors";
 import { ArrowTopRightIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import Footer from "@/components/Footer";
 import WaitlistScrollHandler from "@/components/WaitlistScrollHandler";
 import Link from "next/link";
+import Image from "next/image";
 import Gradient from "@/components/Gradient";
 import VideoStepSync from "@/components/VideoStepSync";
-import { StaticRadialGradient, ColorPanels } from '@paper-design/shaders-react';
+import { StaticRadialGradient } from '@paper-design/shaders-react';
 import { MeshGradient } from '@mesh-gradient/react';
 
 export default function HomePage() {
@@ -111,9 +112,11 @@ export default function HomePage() {
                             {/* Right: Image */}
                             <div className="flex items-center justify-center">
                                 <div className="w-full h-80 rounded-2xl overflow-hidden border border-gray-200">
-                                    <img
+                                    <Image
                                         src="/images/homepage.jpeg"
                                         alt="Creator and brand collaboration"
+                                        width={800}
+                                        height={600}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -127,9 +130,11 @@ export default function HomePage() {
                         <div>
                             {/* Image */}
                             <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
-                                <img
+                                <Image
                                     src="/images/img3.png"
                                     alt="The problem with current sponsorships"
+                                    width={800}
+                                    height={450}
                                     className="w-[90%] h-full object-cover"
                                 />
                             </div>
@@ -144,14 +149,15 @@ export default function HomePage() {
                                 Brands struggle to find authentic creators who truly align with their products.
                             </Text>
                         </div>
-
                         {/* Right: Our Solution */}
                         <div>
                             {/* Image */}
                             <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
-                                <img
+                                <Image
                                     src="/images/img2.png"
                                     alt="Maatchaa's automated solution"
+                                    width={800}
+                                    height={450}
                                     className="w-[90%] h-full object-cover"
                                 />
                             </div>
