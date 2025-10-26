@@ -136,6 +136,9 @@ vec3 getGradientColor(float t){
   float seg = floor(scaled);
   float f = fract(scaled);
 
+  // Smoothstep for smoother transitions between colors
+  f = smoothstep(0.0, 1.0, f);
+
   if (seg < 1.0) return mix(uColor0, uColor1, f);
   if (seg < 2.0 && count > 2) return mix(uColor1, uColor2, f);
   if (seg < 3.0 && count > 3) return mix(uColor2, uColor3, f);
@@ -165,11 +168,28 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     vec2 uvMod = uv;
     if (uDistort > 0.0) {
-      float a = uvMod.y * 6.0;
-      float b = uvMod.x * 6.0;
+      // Multiple wave frequencies for natural ocean-like movement
+      float time = iTime * 0.5;
+
+      // Large waves
+      float wave1 = sin(uvMod.y * 3.0 + time) * 0.5;
+      float wave2 = cos(uvMod.x * 2.5 + time * 0.7) * 0.6;
+
+      // Medium waves
+      float wave3 = sin(uvMod.y * 5.0 - time * 1.2) * 0.3;
+      float wave4 = cos(uvMod.x * 4.5 + time * 0.9) * 0.35;
+
+      // Small ripples
+      float wave5 = sin(uvMod.y * 8.0 + time * 1.5) * 0.15;
+      float wave6 = cos(uvMod.x * 7.0 - time * 1.1) * 0.2;
+
+      // Organic noise-like variation
+      float noise1 = sin(uvMod.x * 10.0 + uvMod.y * 8.0 + time) * 0.1;
+      float noise2 = cos(uvMod.x * 12.0 - uvMod.y * 9.0 + time * 0.8) * 0.12;
+
       float w = 0.01 * uDistort;
-      uvMod.x += sin(a) * w;
-      uvMod.y += cos(b) * w;
+      uvMod.x += (wave1 + wave3 + wave5 + noise1) * w;
+      uvMod.y += (wave2 + wave4 + wave6 + noise2) * w;
     }
     float t = uvMod.x;
     if (uMirror > 0.5) {
