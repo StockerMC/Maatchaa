@@ -34,7 +34,8 @@ export function WaitlistForm() {
         if (error.code === "23505") {
           toast.error("This email is already on the waitlist!");
         } else {
-          throw error;
+          console.error("Error submitting to waitlist:", error);
+          toast.error("Something went wrong. Please try again.");
         }
       } else {
         setEmail("");

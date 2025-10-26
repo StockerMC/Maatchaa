@@ -112,7 +112,7 @@ export default function VideoStepSync() {
                                 <div className="w-full h-0.5 bg-white/20 rounded-full"></div>
                                 {/* Green fill that animates smoothly */}
                                 <div
-                                    className="absolute top-0 left-0 h-0.5 bg-[#A8E64A] rounded-full"
+                                    className="absolute top-0 left-0 h-0.5 bg-[#90f485] rounded-full"
                                     style={{
                                         width: `${progress}%`
                                     }}

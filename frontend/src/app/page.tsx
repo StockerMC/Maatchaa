@@ -1,391 +1,259 @@
-    // lets just say the margin/padding conflicts are cooked
-    // someone should fix them (or dont touch it because it works rn)
-    "use client"
-    import React from "react";
-    import PhoneComponent from "@/components/Phone";
-    import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
-    import { Button } from "@/components/ui/button";
-    import { Box, Text, Card, Flex } from "@radix-ui/themes";
-    import { sage, gray, lime } from "@radix-ui/colors";
-    import { ArrowTopRightIcon, ArrowDownIcon, ArrowRightIcon, TargetIcon, EyeOpenIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
-    import { WaitlistForm } from "@/components/waitlist/waitlist-form";
-    import Footer from "@/components/Footer";
-    import WaitlistScrollHandler from "@/components/WaitlistScrollHandler";
-    import Link from "next/link";
-    import Image from "next/image";
-    import Gradient from "@/components/Gradient";
+"use client"
+import React from "react";
+import PhoneComponent from "@/components/Phone";
+import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
+import { Button } from "@/components/ui/button";
+import { Box, Text } from "@radix-ui/themes";
+import { gray, lime, teal, jade } from "@radix-ui/colors";
+import { ArrowTopRightIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import { WaitlistForm } from "@/components/waitlist/waitlist-form";
+import Footer from "@/components/Footer";
+import WaitlistScrollHandler from "@/components/WaitlistScrollHandler";
+import Link from "next/link";
+import Gradient from "@/components/Gradient";
+import VideoStepSync from "@/components/VideoStepSync";
+import { StaticRadialGradient, ColorPanels } from '@paper-design/shaders-react';
+import { MeshGradient } from '@mesh-gradient/react';
 
-    export default function Home() {
-        // fixed, deterministic decorative matcha positions (non-overlapping)
-        // chosen to sit lower in the waitlist section and spaced to avoid clipping
-        const whiskPositions = [
-            { left: 15, top: 58, size: 8.5, rotate: -12 },
-            { left: 30, top: 62, size: 9.2, rotate: 6 },
-            { left: 45, top: 63, size: 7.8, rotate: -6 },
-            { left: 60, top: 74, size: 8.7, rotate: 12 },
-            { left: 75, top: 59, size: 9.5, rotate: -20 },
-            { left: 90, top: 68, size: 8.0, rotate: 3 }
-        ];
-
-        return (
-            <div className="flex flex-col w-full">
-                <WaitlistScrollHandler />
-                {/* Hero Section */}
-                <section className="flex items-center justify-center w-full min-h-screen relative overflow-hidden">
-                    {/* Gradient background - contained within hero section */}
-                    <div className="absolute inset-0 w-full h-full -z-10">
-                        <Gradient
-                            className="w-full h-full"
-                            gradientColors={[
-                                "#A8BF9C", // Mid-tone matcha
-                                "#98B88C", // Soft matcha
-                                "#9CB894", // Warm matcha
-                                "#A5C39A", // Light matcha
-                                "#8FB080", // Muted green
-                                "#9DBE91", // Balanced matcha
-                                "#A2BB96", // Subtle green
-                                "#96B58A", // Natural matcha
-                            ]}
-                            noise={0.08}
-                            spotlightRadius={0.6}
-                            spotlightOpacity={0}
-                            distortAmount={2.5}
-                            mirrorGradient={true}
-                            angle={45}
-                            paused={false}
-                        />
+export default function HomePage() {
+    return (
+        <div className="flex flex-col w-full">
+            <WaitlistScrollHandler />
+            {/* Hero Section */}
+            <section className="flex items-center justify-center w-full min-h-screen relative overflow-hidden">
+                {/* Gradient background - contained within hero section */}
+                <div className="absolute inset-0 w-full h-full -z-10">
+                    <Gradient
+                        className="w-full h-full"
+                        gradientColors={[
+                            "#A8BF9C", // Mid-tone matcha
+                            "#98B88C", // Soft matcha
+                            "#9CB894", // Warm matcha
+                            "#A5C39A", // Light matcha
+                            "#8FB080", // Muted green
+                            "#9DBE91", // Balanced matcha
+                            "#A2BB96", // Subtle green
+                            "#96B58A", // Natural matcha
+                        ]}
+                        noise={0.08}
+                        spotlightRadius={0.6}
+                        spotlightOpacity={0}
+                        distortAmount={2.5}
+                        mirrorGradient={true}
+                        angle={45}
+                        paused={false}
+                    />
+                </div>
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-12">
+                    {/* Hero Text */}
+                    <div className="text-center lg:text-left w-full lg:w-[60%]">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
+                            Sponsorships that match, made easy with{" "}
+                            <SquigglyUnderlineText>Maatchaa</SquigglyUnderlineText>
+                        </h1>
+                        <p className="text-lg md:text-xl text-white drop-shadow-lg max-w-2xl mx-auto lg:mx-0 font-semibold mb-8">
+                            Connect your brand with relevant creators in minutes, struggle free.
+                        </p>
+                        <Button variant="classic" color="lime" size="4" asChild
+                                style={{ backgroundColor: 'var(--lime-10)' }}>
+                            <Link href="/stores" className="flex items-center gap-2">
+                                Try Our Demo
+                                <ArrowTopRightIcon width="18" height="18" />
+                            </Link>
+                        </Button>
                     </div>
-                    <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-12">
-                        {/* Hero Text */}
-                        <div className="text-center lg:text-left w-full lg:w-[60%]">
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
-                                Sponsorships that match, made easy with{" "}
-                                <SquigglyUnderlineText>Maatchaa</SquigglyUnderlineText>
-                            </h1>
-                            <p className="text-lg md:text-xl text-white drop-shadow-lg max-w-2xl mx-auto lg:mx-0 font-semibold mb-8">
-                                Connect your brand with relevant creators in minutes, struggle free.
-                            </p>
-                            <Button variant="classic" color="lime" size="4" asChild
-                                    style={{ backgroundColor: 'var(--lime-10)' }}>
-                                <Link href="/stores" className="flex items-center gap-2">
-                                    Try Our Demo
-                                    <ArrowTopRightIcon width="18" height="18" />
-                                </Link>
-                            </Button>
+
+                    <div className="flex justify-center items-center w-full lg:w-[40%]">
+                        <PhoneComponent/>
+                    </div>
+                </div>
+            </section>
+
+            {/* Manifesto / Quote Section + Problem/Solution */}
+            <section className="px-6 py-20 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto relative">
+                    {/* Card with mesh gradient background */}
+                    <div className="relative rounded-3xl overflow-hidden bg-white" style={{ minHeight: '400px' }}>
+                        {/* Mesh Gradient Background - cyan to grass gradient */}
+                        <div className="absolute inset-0 opacity-30">
+                            <MeshGradient
+                                className="w-full h-full"
+                                options={{
+                                    colors: ['#9AE6F5', '#7DD3C0', '#B4D88B', '#C2E59C'],
+                                    isStatic: true,
+                                    seed: 42
+                                }}
+                            />
                         </div>
 
-                        <div className="flex justify-center items-center w-full lg:w-[40%]">
-                            <PhoneComponent/>
-                        </div>
-                    </div>
-                </section>
-
-                {/* How It Works Section */}
-                {/* add extra bottom padding to give breathing room before the waitlist */}
-                <section className="pt-10 px-6 bg-white">
-                    <div className="max-w-7xl mx-auto">
-                        <Box className="mb-14 mt-12">
-                            <Text size="9" weight="bold" className="block" style={{ color: gray.gray12, marginBottom: '1rem' }}>
-                                Find sponsorships that fit your brand
-                            </Text>
-                            <Text size="4" className="block max-w-2xl" style={{ color: gray.gray11 }}>
-                                From matching to confirmation, Maatchaa handles the entire workflow
-                            </Text>
-                        </Box>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-                            {/* Left side - Cards */}
-                            <div className="grid grid-cols-1 gap-2 max-w-lg">
-                                {/* Card 1 */}
-                                <div
-                                    className="cursor-pointer transition-all"
-                                    onMouseEnter={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = lime.lime2;
-                                        if (iconBox) iconBox.style.backgroundColor = lime.lime3;
-                                        if (icon) icon.style.color = lime.lime11;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = '';
-                                        if (iconBox) iconBox.style.backgroundColor = gray.gray3;
-                                        if (icon) icon.style.color = gray.gray12;
-                                    }}
-                                >
-                                    <Card size="2" data-card style={{ transition: 'background-color 0.2s' }}>
-                                        <Flex gap="4" align="center">
-                                            <div
-                                                data-icon-box
-                                                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                                                style={{
-                                                    backgroundColor: gray.gray3,
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                <TargetIcon
-                                                    data-icon
-                                                    width="24"
-                                                    height="24"
-                                                    style={{ color: gray.gray12, transition: 'color 0.2s' }}
-                                                />
-                                            </div>
-                                            <Box className="flex-1">
-                                                <Text size="2" className="block" style={{ color: gray.gray11, marginBottom: '0.25rem' }}>
-                                                    AI Matching
-                                                </Text>
-                                                <Text size="3" weight="bold" className="block" style={{ color: gray.gray12 }}>
-                                                    Our algorithm matches your store’s products to relevant, trending Youtube creators
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                    </Card>
+                        {/* Content - Grid layout with text and image */}
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[400px] p-8 md:p-12 lg:p-14">
+                            {/* Left: Quote text */}
+                            <div>
+                                {/* Large decorative quote mark - keep green */}
+                                <div className="mb-6">
+                                    <svg width="64" height="64" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M23.5 50C23.5 41.4 28.9 33.8 36.5 30.2V20C22.8 23.6 13.5 35.8 13.5 50C13.5 58.3 20.2 65 28.5 65C36.8 65 43.5 58.3 43.5 50C43.5 41.7 36.8 35 28.5 35C27.2 35 26 35.2 24.8 35.5C24.3 40 23.5 44.9 23.5 50ZM50 50C50 41.4 55.4 33.8 63 30.2V20C49.3 23.6 40 35.8 40 50C40 58.3 46.7 65 55 65C63.3 65 70 58.3 70 50C70 41.7 63.3 35 55 35C53.7 35 52.5 35.2 51.3 35.5C50.8 40 50 44.9 50 50Z" fill="#A8E64A"/>
+                                    </svg>
                                 </div>
 
-                                {/* Arrow between cards */}
-                                <div className="flex items-center justify-center" style={{ marginTop: '-10px', marginBottom: '-10px', pointerEvents: 'none' }}>
-                                    <ArrowDownIcon width={28} height={28} className="text-gray-300" />
-                                </div>
+                                {/* Main quote - black text */}
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1]" style={{ color: gray.gray12 }}>
+                                    Finding sponsorships shouldn&apos;t be this hard.
+                                </h2>
 
-                                {/* Card 2 */}
-                                <div
-                                    className="cursor-pointer transition-all"
-                                    onMouseEnter={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = lime.lime2;
-                                        if (iconBox) iconBox.style.backgroundColor = lime.lime3;
-                                        if (icon) icon.style.color = lime.lime11;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = '';
-                                        if (iconBox) iconBox.style.backgroundColor = gray.gray3;
-                                        if (icon) icon.style.color = gray.gray12;
-                                    }}
-                                >
-                                    <Card size="2" data-card style={{ transition: 'background-color 0.2s' }}>
-                                        <Flex gap="4" align="center">
-                                            <div
-                                                data-icon-box
-                                                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                                                style={{
-                                                    backgroundColor: gray.gray3,
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                <EyeOpenIcon
-                                                    data-icon
-                                                    width="24"
-                                                    height="24"
-                                                    style={{ color: gray.gray12, transition: 'color 0.2s' }}
-                                                />
-                                            </div>
-                                            <Box className="flex-1">
-                                                <Text size="2" className="block" style={{ color: gray.gray11, marginBottom: '0.25rem' }}>
-                                                    Approval Flow
-                                                </Text>
-                                                <Text size="3" weight="bold" className="block" style={{ color: gray.gray12 }}>
-                                                    Swipe through your top creator pairings, Tinder style
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                    </Card>
-                                </div>
-
-                                {/* Arrow between cards */}
-                                <div className="flex items-center justify-center" style={{ marginTop: '-10px', marginBottom: '-10px', pointerEvents: 'none' }}>
-                                    <ArrowDownIcon width={28} height={28} className="text-gray-300" />
-                                </div>
-
-                                {/* Card 3 */}
-                                <div
-                                    className="cursor-pointer transition-all"
-                                    onMouseEnter={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = lime.lime2;
-                                        if (iconBox) iconBox.style.backgroundColor = lime.lime3;
-                                        if (icon) icon.style.color = lime.lime11;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGElement;
-                                        if (card) card.style.backgroundColor = '';
-                                        if (iconBox) iconBox.style.backgroundColor = gray.gray3;
-                                        if (icon) icon.style.color = gray.gray12;
-                                    }}
-                                >
-                                    <Card size="2" data-card style={{ transition: 'background-color 0.2s' }}>
-                                        <Flex gap="4" align="center">
-                                            <div
-                                                data-icon-box
-                                                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                                                style={{
-                                                    backgroundColor: gray.gray3,
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                <EnvelopeClosedIcon
-                                                    data-icon
-                                                    width="24"
-                                                    height="24"
-                                                    style={{ color: gray.gray12, transition: 'color 0.2s' }}
-                                                />
-                                            </div>
-                                            <Box className="flex-1">
-                                                <Text size="2" className="block" style={{ color: gray.gray11, marginBottom: '0.25rem' }}>
-                                                    Outreach
-                                                </Text>
-                                                <Text size="3" weight="bold" className="block" style={{ color: gray.gray12 }}>
-                                                    Maatchaa drafts outreach emails and sponsorship contracts for you
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                    </Card>
-                                </div>
-
-                                {/* Arrow between cards */}
-                                <div className="flex items-center justify-center" style={{ marginTop: '-10px', marginBottom: '-10px', pointerEvents: 'none' }}>
-                                    <ArrowDownIcon width={28} height={28} className="text-gray-300" />
-                                </div>
-
-                                {/* Card 4 */}
-                                <div
-                                    className="cursor-pointer transition-all"
-                                    onMouseEnter={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGSVGElement;
-                                        if (card) card.style.backgroundColor = lime.lime2;
-                                        if (iconBox) iconBox.style.backgroundColor = lime.lime3;
-                                        if (icon) icon.style.color = lime.lime11;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        const card = e.currentTarget.querySelector('[data-card]') as HTMLElement;
-                                        const iconBox = e.currentTarget.querySelector('[data-icon-box]') as HTMLElement;
-                                        const icon = e.currentTarget.querySelector('[data-icon]') as SVGSVGElement;
-                                        if (card) card.style.backgroundColor = '';
-                                        if (iconBox) iconBox.style.backgroundColor = gray.gray3;
-                                        if (icon) icon.style.color = gray.gray12;
-                                    }}
-                                >
-                                    <Card size="2" data-card style={{ transition: 'background-color 0.2s' }}>
-                                        <Flex gap="4" align="center">
-                                            <div
-                                                data-icon-box
-                                                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                                                style={{
-                                                    backgroundColor: gray.gray3,
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                <svg
-                                                    data-icon
-                                                    width="24"
-                                                    height="24"
-                                                    viewBox="0 0 15 15"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    style={{ color: gray.gray12, transition: 'color 0.2s' }}
-                                                >
-                                                    <path d="M7.49991 0.876892C3.84222 0.876892 0.877075 3.84204 0.877075 7.49972C0.877075 11.1574 3.84222 14.1226 7.49991 14.1226C11.1576 14.1226 14.1227 11.1574 14.1227 7.49972C14.1227 3.84204 11.1576 0.876892 7.49991 0.876892ZM1.82707 7.49972C1.82707 4.36671 4.36689 1.82689 7.49991 1.82689C10.6329 1.82689 13.1727 4.36671 13.1727 7.49972C13.1727 10.6327 10.6329 13.1726 7.49991 13.1726C4.36689 13.1726 1.82707 10.6327 1.82707 7.49972ZM10.1589 5.53774C10.3178 5.31191 10.2636 5.00001 10.0378 4.84109C9.81194 4.68217 9.50004 4.73642 9.34112 4.96225L6.51977 8.97154L5.35681 7.78706C5.16334 7.59002 4.84677 7.58711 4.64973 7.78058C4.45268 7.97404 4.44978 8.29061 4.64325 8.48765L6.22658 10.1003C6.33054 10.2062 6.47617 10.2604 6.62407 10.2483C6.77197 10.2363 6.90686 10.1591 6.99226 10.0377L10.1589 5.53774Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-                                                </svg>
-                                            </div>
-                                            <Box className="flex-1">
-                                                <Text size="2" className="block" style={{ color: gray.gray11, marginBottom: '0.25rem' }}>
-                                                    YouTube Integration
-                                                </Text>
-                                                <Text size="3" weight="bold" className="block" style={{ color: gray.gray12 }}>
-                                                    We add our links to their creators’ descriptions so you can track your outreach
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                    </Card>
-                                </div>
+                                {/* Subline - black text */}
+                                <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.7, fontSize: '1.125rem' }}>
+                                    That&apos;s what we think at Maatchaa — connecting creators and brands should feel effortless.
+                                </Text>
                             </div>
 
-                            {/* Right side - Homepage Image */}
-                            <div className="flex items-center justify-start w-full" style={{ marginTop: '-16px', marginBottom: '-16px' }}>
-                                <div className="w-full max-w-lg aspect-square rounded-2xl overflow-hidden shadow-md" style={{ height: 'calc(100% + 32px)', marginTop: '-16px', marginBottom: '-16px', position: 'relative' }}>
-                                    <Image src="/images/homepage.jpeg" alt="Maatchaa Dashboard Preview" fill className="object-cover" />
+                            {/* Right: Image */}
+                            <div className="flex items-center justify-center">
+                                <div className="w-full h-80 rounded-2xl overflow-hidden border border-gray-200">
+                                    <img
+                                        src="/images/homepage.jpeg"
+                                        alt="Creator and brand collaboration"
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <Box className="text-center pt-2 mt-6 mb-20">
-                            <Text size="5" weight="regular" className="block" style={{ color: '#FFFFFF', marginBottom: '1rem' }}>
-                                 Still want to learn more?
-                             </Text>
-                             <Button variant="classic" color="lime" size="3" asChild>
-                                 <Link href="/blog" className="flex items-center gap-2">
-                                     Read Our Tech Blog
-                                     <ArrowRightIcon width="16" height="16" />
-                                 </Link>
-                             </Button>
-                         </Box>
-                     </div>
-                 </section>
+                    {/* Problem + Solution - Figma Style */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
+                        {/* Left: The Problem */}
+                        <div>
+                            {/* Image */}
+                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
+                                <img
+                                    src="/images/img3.png"
+                                    alt="The problem with current sponsorships"
+                                    className="w-[90%] h-full object-cover"
+                                />
+                            </div>
 
-                 {/* Waitlist Section */}
-                 {/* border between sections is limited to the centered content width (moved to inner container) */}
-                 <section id="waitlist" className="px-6 bg-white" style={{backgroundColor: '#ffffff', position: 'relative', zIndex: 1, overflow: 'hidden' }}>
-                     {/* decorative, non-interactive whisk background */}
-                     {/* Hidden on small screens to avoid clutter. Each whisk is wrapped in an absolutely positioned div that uses translate(-50%,-50%) to center and avoid layout shift. Images are lazy-loaded and non-interactive. */}
-                     <div aria-hidden className="absolute inset-0 pointer-events-none hidden sm:block">
-                         {whiskPositions.map((w, i) => {
-                             const transform = `translate(-50%, -50%) rotate(${w.rotate}deg)`;
-                             return (
-                                 <div
-                                     key={i}
-                                     className="absolute"
-                                     style={{
-                                         left: `${w.left}%`,
-                                         top: `${w.top}%`,
-                                         width: `${w.size}vw`,
-                                         height: `${w.size}vw`,
-                                         opacity: 0.3,
-                                         overflow: 'hidden',
-                                         mixBlendMode: 'multiply',
-                                         transform,
-                                         transformOrigin: 'center',
-                                         pointerEvents: 'none',
-                                         willChange: 'transform'
-                                     }}
-                                 >
-                                     <span aria-hidden style={{ display: 'inline-block', width: '100%', height: '100%', textAlign: 'center', fontSize: `${w.size}vw`, lineHeight: 1 }}>
-                                         🍵
-                                     </span>
-                                 </div>
-                             );
-                         })}
-                     </div>
+                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                The Problem
+                            </Text>
+                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
+                                Creators waste countless hours chasing deals, only to face radio silence.
+                            </Text>
+                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
+                                Brands struggle to find authentic creators who truly align with their products.
+                            </Text>
+                        </div>
 
-                     {/* limit the top border to the centered content width so it doesn't span full page width */}
-                     <div className="max-w-7xl mx-auto" style={{ position: 'relative', zIndex: 2, borderTop: `1px solid ${sage.sage6}`, paddingTop: '4rem', paddingBottom: '6rem' }}>
-                         <div className="max-w-4xl mx-auto text-center">
-                             <Text size="9" weight="bold" className="block" style={{ color: gray.gray12, marginBottom: '0.5rem' }}>
-                                 Join the waitlist for early access
-                             </Text>
-                             <div className="flex justify-center mb-5">
-                                 <Text size="4" className="block" style={{ color: gray.gray11, maxWidth: '42rem' }}>
-                                     Be among the first to experience Maatchaa when we launch.
-                                 </Text>
-                             </div>
-                             <WaitlistForm />
-                         </div>
-                     </div>
-                 </section>
+                        {/* Right: Our Solution */}
+                        <div>
+                            {/* Image */}
+                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
+                                <img
+                                    src="/images/img2.png"
+                                    alt="Maatchaa's automated solution"
+                                    className="w-[90%] h-full object-cover"
+                                />
+                            </div>
 
-                <Footer />
-            </div>
-        );
-    }
+                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                Our Solution
+                            </Text>
+                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
+                                Maatchaa automates the entire workflow.
+                            </Text>
+                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
+                                From AI-powered creator matching to personalized outreach, contracts, and performance tracking — all in one seamless platform.
+                            </Text>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* How Maatchaa Helps You Section */}
+            <section className="px-6 py-32 pb-16 relative overflow-hidden" style={{ backgroundColor: '#1A1A1A', minHeight: '100vh' }}>
+                {/* Paper Design Static Radial Gradient Background */}
+                <div className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+                    <StaticRadialGradient
+                        width="100%"
+                        height="100%"
+                        colors={['#90f3c0', '#B4D88B']}
+                        radius={2.5}
+                        colorBack={"#1A1A1A"}
+                        focalDistance={3}
+                        focalAngle={180}
+                        falloff={0.6}
+                        mixing={0.5}
+                        grainMixer={0.7}
+                        offsetY={-1}
+                    />
+                </div>
+
+                <div className="max-w-7xl mx-auto relative z-10">
+                    {/* Section Header */}
+                    <div className="text-center mb-20">
+                        <Text size="2" weight="medium" className="block mb-4" style={{ color: '#97ffc6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                            How It Works
+                        </Text>
+                        <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF' }}>
+                            How Maatchaa Automates Sponsorships
+                        </Text>
+                    </div>
+
+                    {/* Video and Steps with Progress Sync */}
+                    <VideoStepSync />
+
+                    {/* Tech Blog Call-to-Action */}
+                    <Box className="text-center max-w-4xl mx-auto mt-16">
+                        <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF', marginBottom: '1.5rem' }}>
+                            Still want to learn more?
+                        </Text>
+                        <Button variant="solid" color="lime" size="3" asChild>
+                            <Link href="/blog" className="flex items-center gap-2">
+                                Read Our Tech Blog
+                                <ArrowRightIcon width="16" height="16" />
+                            </Link>
+                        </Button>
+                    </Box>
+                </div>
+            </section>
+
+            {/* Waitlist Section */}
+            <section id="waitlist" className="px-6 py-32 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
+                {/* Static Mesh Gradient background - more visible and sophisticated */}
+                <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50">
+                    <MeshGradient
+                        className="w-full h-full"
+                        options={{
+                            colors: ['#A8BF9C', '#7DD3C0', '#B4D88B', '#98E6C8'],
+                            isStatic: true,
+                            seed: 123
+                        }}
+                    />
+                </div>
+
+                <div className="max-w-4xl mx-auto mt-5 mb-5 relative z-10 text-center">
+                    {/* Super heading */}
+                    <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        Get Early Access
+                    </Text>
+
+                    {/* Main heading */}
+                    <Text size="9" weight="bold" className="block mb-4" style={{ color: gray.gray12 }}>
+                        Join the waitlist
+                    </Text>
+
+                    {/* Subheading */}
+                    <Text size="5" className="block pb-4" style={{ color: gray.gray11, lineHeight: 1.7 }}>
+                        Be among the first to experience Maatchaa when we launch.
+                    </Text>
+
+                    {/* Waitlist Form */}
+                    <WaitlistForm />
+                </div>
+            </section>
+
+            <Footer />
+        </div>
+    );
+}
