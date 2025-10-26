@@ -11,10 +11,10 @@ import Footer from "@/components/Footer";
 import WaitlistScrollHandler from "@/components/WaitlistScrollHandler";
 import Link from "next/link";
 import Image from "next/image";
-import Gradient from "@/components/Gradient";
 import VideoStepSync from "@/components/VideoStepSync";
 import { StaticRadialGradient } from '@paper-design/shaders-react';
 import { MeshGradient } from '@mesh-gradient/react';
+import Gradient from "@/components/Gradient";
 
 export default function HomePage() {
     return (
@@ -124,52 +124,52 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Problem + Solution - Figma Style */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
+                    {/* Problem + Solution - Card Style */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
                         {/* Left: The Problem */}
-                        <div>
+                        <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm">
                             {/* Image */}
-                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
+                            <div className="w-full overflow-hidden rounded-xl mb-8" style={{ height: '280px' }}>
                                 <Image
                                     src="/images/img3.png"
                                     alt="The problem with current sponsorships"
                                     width={800}
-                                    height={450}
-                                    className="w-[90%] h-full object-cover"
+                                    height={280}
+                                    className="w-full h-full object-cover"
                                 />
                             </div>
 
-                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                            <Text size="2" weight="medium" className="block mb-5" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                                 The Problem
                             </Text>
-                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Creators waste countless hours chasing deals, only to face radio silence.
+                            <Text size="6" weight="bold" className="block mb-4" style={{ color: gray.gray12, lineHeight: 1.3 }}>
+                                Creators chase deals. Brands can&apos;t find the right creators.
                             </Text>
-                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Brands struggle to find authentic creators who truly align with their products.
+                            <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.6 }}>
+                                The current process rarely leads to authentic partnerships.
                             </Text>
                         </div>
                         {/* Right: Our Solution */}
-                        <div>
+                        <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm">
                             {/* Image */}
-                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
+                            <div className="w-full overflow-hidden rounded-xl mb-8" style={{ height: '280px' }}>
                                 <Image
                                     src="/images/img2.png"
                                     alt="Maatchaa's automated solution"
                                     width={800}
-                                    height={450}
-                                    className="w-[90%] h-full object-cover"
+                                    height={280}
+                                    className="w-full h-full object-cover"
                                 />
                             </div>
 
-                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                            <Text size="2" weight="medium" className="block mb-5" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                                 Our Solution
                             </Text>
-                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Maatchaa automates the entire workflow.
+                            <Text size="6" weight="bold" className="block mb-4" style={{ color: gray.gray12, lineHeight: 1.3 }}>
+                                Maatchaa automates everything.
                             </Text>
-                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                From AI-powered creator matching to personalized outreach, contracts, and performance tracking — all in one seamless platform.
+                            <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.6 }}>
+                                Our AI matches creators to brands, drafts outreach, handles contracts, and tracks performance.
                             </Text>
                         </div>
                     </div>
