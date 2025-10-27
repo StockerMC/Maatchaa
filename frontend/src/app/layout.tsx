@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { Figtree } from "next/font/google"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Theme } from '@radix-ui/themes'
-import Header from "@/components/Header"
+import ConditionalHeader from "@/components/ConditionalHeader"
 import "./globals.css"
 import { Providers } from "@/components/Providers"
 import { Toaster } from 'react-hot-toast'
@@ -32,7 +32,7 @@ export default function RootLayout({
             <Theme appearance="light" accentColor="green" radius="full">
                 <Providers>
                     <div className="flex flex-col min-h-screen overflow-x-hidden">
-                        <Header/>
+                        <ConditionalHeader/>
                         <main className="flex flex-grow w-full">
                             {children}
                         </main>

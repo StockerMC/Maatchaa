@@ -12,8 +12,12 @@ export default function Header() {
     const router = useRouter()
     const isHomePage = pathname === "/"
     const [isScrolled, setIsScrolled] = useState(false)
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        // Mark as mounted to prevent hydration mismatch
+        setMounted(true)
+
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 100)
         }
@@ -35,6 +39,9 @@ export default function Header() {
         }
     }
 
+    // Use mounted state to prevent hydration mismatch
+    const scrolledState = mounted && isScrolled
+
     return (
         <header className="fixed top-0 left-0 right-0 z-20 py-4 flex justify-center bg-transparent">
             <NavigationMenu.Root
@@ -43,10 +50,10 @@ export default function Header() {
                      "px-8 py-2"
                 )}
                 style={{
-                    borderRadius: isScrolled ? '9999px' : '0px',
-                    border: isScrolled ? '1.5px solid rgba(0, 0, 0, 0.15)' : '1.5px solid transparent',
-                    backgroundColor: isScrolled ? 'rgb(255, 255, 255)' : 'transparent',
-                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                    borderRadius: scrolledState ? '9999px' : '0px',
+                    border: scrolledState ? '1.5px solid rgba(0, 0, 0, 0.15)' : '1.5px solid transparent',
+                    backgroundColor: scrolledState ? 'rgb(255, 255, 255)' : 'transparent',
+                    backdropFilter: scrolledState ? 'blur(12px)' : 'none',
                     boxSizing: 'border-box',
                     transition: 'all 500ms ease-in-out',
                 }}
@@ -64,7 +71,7 @@ export default function Header() {
                                 }}
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
-                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
+                                    scrolledState ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
                                 )}
                                 style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
                             >
@@ -79,7 +86,7 @@ export default function Header() {
                                 href="/blog"
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
-                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
+                                    scrolledState ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
                                 )}
                                 style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
                             >
@@ -94,7 +101,7 @@ export default function Header() {
                                 href="/stores"
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
-                                    isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
+                                    scrolledState ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
                                 )}
                                 style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}
                             >
@@ -117,9 +124,9 @@ export default function Header() {
                                 border: '1px solid transparent',
                                 boxSizing: 'border-box',
                                 transition: 'all 500ms ease-in-out',
-                                color: isScrolled ? undefined : 'white',
-                                backgroundColor: isScrolled ? undefined : 'transparent',
-                                boxShadow: isScrolled ? undefined : 'none',
+                                color: scrolledState ? undefined : 'white',
+                                backgroundColor: scrolledState ? undefined : 'transparent',
+                                boxShadow: scrolledState ? undefined : 'none',
                             }}
                         >
                             Waitlist

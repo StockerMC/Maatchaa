@@ -1,6 +1,7 @@
 "use client";
 
 import YouTubeReels from "@/components/YoutubeReels";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
@@ -116,13 +117,15 @@ export default function ReelsPage() {
     }, [isIngesting]);
 
     return (
-        <div className="relative">
-            {isIngesting && (
-                <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-                    Generating new content...
-                </div>
-            )}
-            <YouTubeReels reelsData={data || []} />
-        </div>
+        <DashboardLayout>
+            <div className="relative" style={{ margin: "-2rem", height: "calc(100vh - 64px)" }}>
+                {isIngesting && (
+                    <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+                        Generating new content...
+                    </div>
+                )}
+                <YouTubeReels reelsData={data || []} />
+            </div>
+        </DashboardLayout>
     );
 }

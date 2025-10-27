@@ -73,8 +73,9 @@ export function OnboardingWizard() {
   const progress = ((currentStep + 1) / steps.length) * 100
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Progress Header */}
+    <div className="w-full flex flex-col space-y-6">
+      <div className="max-w-4xl mx-auto w-full">
+        {/* Progress Header */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -142,6 +143,7 @@ export function OnboardingWizard() {
         </Button>
       </div>
     </div>
+  </div>
   )
 }
 
