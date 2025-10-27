@@ -98,7 +98,7 @@ export default function Header() {
                     <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0 }}>
                         <NavigationMenu.Link asChild>
                             <Link
-                                href="/stores"
+                                href="/onboarding"
                                 className={cn(
                                     "text-sm font-medium transition-colors duration-500",
                                     scrolledState ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"

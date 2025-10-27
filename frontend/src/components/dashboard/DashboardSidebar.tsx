@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const mainNavItems = [
-  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Overview", href: "/dashboard/overview", icon: LayoutDashboard },
   { name: "Discover Shorts", href: "/dashboard/reels", icon: Search },
   { name: "Partnerships", href: "/dashboard/partnerships", icon: Users },
   { name: "Products", href: "/dashboard/products", icon: Package },
@@ -56,7 +56,7 @@ export default function DashboardSidebar() {
           padding: "0 1.5rem",
         }}
       >
-        <Link href="/dashboard" style={{ textDecoration: "none" }}>
+        <Link href="/dashboard/overview" style={{ textDecoration: "none" }}>
           <Text size="5" weight="medium" style={{ color: "#B4D88B" }}>
             Maatchaa
           </Text>

@@ -133,7 +133,7 @@ function ShopifyConnectStep() {
               Connect Your Shopify Store
             </Text>
             <Text size="1" style={{ color: "#737373" }}>
-              We'll sync your products automatically
+              We&apos;ll sync your products automatically
             </Text>
           </Box>
 
@@ -300,7 +300,7 @@ function BrandingStep() {
         }}
       >
         <Text size="2" style={{ color: "#737373" }}>
-          <strong>You're all set!</strong> Your MATCHAA account is ready. You can always update these settings later in
+          <strong>You&apos;re all set!</strong> Your MATCHAA account is ready. You can always update these settings later in
           your profile.
         </Text>
       </Box>
@@ -345,10 +345,10 @@ export default function OnboardingPage() {
             <Flex align="center" justify="between">
               <Box>
                 <Text size="8" weight="bold" style={{ color: "#1A1A1A" }}>
-                  Welcome to MATCHAA
+                  Welcome to Maatchaa
                 </Text>
                 <Text size="3" style={{ color: "#737373", marginTop: "0.5rem", display: "block" }}>
-                  Let's get your business set up for creator partnerships
+                  Let&apos;s get your business set up for creator partnerships
                 </Text>
               </Box>
               <Badge size="2">

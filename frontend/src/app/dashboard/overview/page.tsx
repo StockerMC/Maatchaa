@@ -74,7 +74,7 @@ export default function DashboardOverviewPage() {
             Dashboard Overview
           </Text>
           <Text size="3" style={{ color: "#737373", marginTop: "0.5rem", display: "block" }}>
-            Welcome back! Here's what's happening with your partnerships.
+            Welcome back! Here&apos;s what&apos;s happening with your partnerships.
           </Text>
         </Box>
 

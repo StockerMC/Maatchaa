@@ -194,6 +194,7 @@ export default function AnalyticsPage() {
             <Tabs.Trigger value="categories">Reel Categories</Tabs.Trigger>
             <Tabs.Trigger value="products">Product Performance</Tabs.Trigger>
             <Tabs.Trigger value="creators">Creator Outreach</Tabs.Trigger>
+            <Tabs.Trigger value="partnerships">Partnerships</Tabs.Trigger>
           </Tabs.List>
 
           <Box pt="4">
@@ -317,7 +318,7 @@ export default function AnalyticsPage() {
                     Reel Category Distribution
                   </Text>
                   <Text size="2" style={{ color: "#737373", marginBottom: "1.5rem", display: "block" }}>
-                    Breakdown of reel types you've reviewed
+                    Breakdown of reel types you&apos;ve reviewed
                   </Text>
 
                   <div style={{ height: "300px" }}>
@@ -331,8 +332,6 @@ export default function AnalyticsPage() {
                           outerRadius={100}
                           paddingAngle={2}
                           dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}%`}
-                          labelLine={true}
                         >
                           {categoryData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -571,6 +570,242 @@ export default function AnalyticsPage() {
                     </Box>
                   </Flex>
                 </Card>
+              </Flex>
+            </Tabs.Content>
+
+            {/* New Partnerships Tab */}
+            <Tabs.Content value="partnerships">
+              <Flex direction="column" gap="4">
+                {/* Filter Section */}
+                <Flex align="center" justify="between">
+                  <Box>
+                    <Text size="6" weight="bold" style={{ color: "#1A1A1A", display: "block" }}>
+                      Active Partnerships
+                    </Text>
+                    <Text size="2" style={{ color: "#737373", marginTop: "0.25rem", display: "block" }}>
+                      Track performance by creator
+                    </Text>
+                  </Box>
+                  <Select.Root defaultValue="all">
+                    <Select.Trigger placeholder="Filter by creator" style={{ minWidth: "200px" }} />
+                    <Select.Content>
+                      <Select.Item value="all">All Creators</Select.Item>
+                      <Select.Item value="sarah">Sarah Johnson</Select.Item>
+                      <Select.Item value="mike">Mike Fitness</Select.Item>
+                      <Select.Item value="tech">Tech Reviewer</Select.Item>
+                    </Select.Content>
+                  </Select.Root>
+                </Flex>
+
+                {/* Partnership Cards */}
+                <Flex direction="column" gap="3">
+                  {/* Sarah Johnson */}
+                  <Card style={{ padding: "1rem" }}>
+                    <Flex align="center" justify="between" mb="3">
+                      <Flex align="center" gap="3">
+                        <Box
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            background: "#B4D88B",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text size="3" weight="bold" style={{ color: "#000" }}>SJ</Text>
+                        </Box>
+                        <Box>
+                          <Text size="3" weight="bold" style={{ display: "block", color: "#1A1A1A" }}>
+                            Sarah Johnson
+                          </Text>
+                          <Text size="1" style={{ color: "#737373" }}>
+                            @CookingHacks • 125K followers
+                          </Text>
+                        </Box>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Badge color="green" size="1">Active</Badge>
+                        <Text size="1" style={{ color: "#737373" }}>
+                          • 45 days
+                        </Text>
+                      </Flex>
+                    </Flex>
+
+                    <Flex gap="4" wrap="wrap">
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Clicks
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#1A1A1A" }}>342</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Sales
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#1A1A1A" }}>28</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Revenue
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#10B981" }}>$1,247</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Content
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#1A1A1A" }}>3/5</Text>
+                      </Box>
+                    </Flex>
+
+                    <Flex gap="2" mt="2">
+                      <Badge variant="soft" size="1">Kitchen Scale</Badge>
+                      <Badge variant="soft" size="1">Non-Stick Pan</Badge>
+                    </Flex>
+                  </Card>
+
+                  {/* Mike Fitness */}
+                  <Card style={{ padding: "1rem" }}>
+                    <Flex align="center" justify="between" mb="3">
+                      <Flex align="center" gap="3">
+                        <Box
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            background: "#7DD3C0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text size="3" weight="bold" style={{ color: "#000" }}>MF</Text>
+                        </Box>
+                        <Box>
+                          <Text size="3" weight="bold" style={{ display: "block", color: "#1A1A1A" }}>
+                            Mike Fitness
+                          </Text>
+                          <Text size="1" style={{ color: "#737373" }}>
+                            @FitLife • 89K followers
+                          </Text>
+                        </Box>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Badge color="green" size="1">Active</Badge>
+                        <Text size="1" style={{ color: "#737373" }}>
+                          • 62 days
+                        </Text>
+                      </Flex>
+                    </Flex>
+
+                    <Flex gap="4" wrap="wrap">
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Clicks
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#1A1A1A" }}>518</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Sales
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#1A1A1A" }}>42</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Revenue
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#10B981" }}>$1,876</Text>
+                      </Box>
+                      <Box>
+                        <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                          Content
+                        </Text>
+                        <Text size="5" weight="bold" style={{ color: "#10B981" }}>5/5</Text>
+                      </Box>
+                    </Flex>
+
+                    <Flex gap="2" mt="2">
+                      <Badge variant="soft" size="1">Yoga Mat</Badge>
+                      <Badge variant="soft" size="1">Resistance Bands</Badge>
+                    </Flex>
+                  </Card>
+
+                  {/* Tech Reviewer */}
+                  <Card style={{ padding: "1rem" }}>
+                    <Flex align="center" justify="between" mb="3">
+                      <Flex align="center" gap="3">
+                        <Box
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            background: "#9AE6F5",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text size="3" weight="bold" style={{ color: "#000" }}>TR</Text>
+                        </Box>
+                        <Box>
+                          <Text size="3" weight="bold" style={{ display: "block", color: "#1A1A1A" }}>
+                            Tech Reviewer
+                          </Text>
+                          <Text size="1" style={{ color: "#737373" }}>
+                            @TechReviews • 234K followers
+                          </Text>
+                        </Box>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Badge color="yellow" size="1">Pending</Badge>
+                        <Text size="1" style={{ color: "#737373" }}>
+                          • 3 days ago
+                        </Text>
+                      </Flex>
+                    </Flex>
+
+                    <Box p="2" style={{ background: "#F9FAFB", borderRadius: "6px" }}>
+                      <Text size="1" style={{ color: "#737373" }}>
+                        Awaiting response — follow up scheduled
+                      </Text>
+                    </Box>
+
+                    <Flex gap="2" mt="2">
+                      <Badge variant="soft" size="1">Phone Case</Badge>
+                    </Flex>
+                  </Card>
+                </Flex>
+
+                {/* Summary Stats */}
+                <Flex gap="4" wrap="wrap" mt="2">
+                  <Card style={{ flex: "1 1 200px", padding: "1.25rem" }}>
+                    <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.5rem" }}>
+                      Total Clicks
+                    </Text>
+                    <Text size="7" weight="bold" style={{ color: "#1A1A1A" }}>860</Text>
+                  </Card>
+                  <Card style={{ flex: "1 1 200px", padding: "1.25rem" }}>
+                    <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.5rem" }}>
+                      Total Sales
+                    </Text>
+                    <Text size="7" weight="bold" style={{ color: "#1A1A1A" }}>70</Text>
+                  </Card>
+                  <Card style={{ flex: "1 1 200px", padding: "1.25rem" }}>
+                    <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.5rem" }}>
+                      Total Revenue
+                    </Text>
+                    <Text size="7" weight="bold" style={{ color: "#10B981" }}>$3,124</Text>
+                  </Card>
+                  <Card style={{ flex: "1 1 200px", padding: "1.25rem" }}>
+                    <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.5rem" }}>
+                      Conversion Rate
+                    </Text>
+                    <Text size="7" weight="bold" style={{ color: "#1A1A1A" }}>8.1%</Text>
+                  </Card>
+                </Flex>
               </Flex>
             </Tabs.Content>
           </Box>
