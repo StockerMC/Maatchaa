@@ -15,6 +15,7 @@ import Iridescence from "@/components/Iridescence";
 import VideoStepSync from "@/components/VideoStepSync";
 import { StaticRadialGradient } from '@paper-design/shaders-react';
 import { MeshGradient } from '@mesh-gradient/react';
+import CardSwap, { Card } from "@/components/CardSwap";
 
 export default function HomePage() {
     return (
@@ -89,7 +90,7 @@ export default function HomePage() {
                                 </h2>
 
                                 {/* Subline - black text */}
-                                <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.7, fontSize: '1.125rem' }}>
+                                <Text size="5" className="block" style={{ color: gray.gray11}}>
                                     That&apos;s what we think at Maatchaa — connecting creators and brands should feel effortless.
                                 </Text>
                             </div>
@@ -109,53 +110,91 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Problem + Solution - Figma Style */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
-                        {/* Left: The Problem */}
-                        <div>
-                            {/* Image */}
-                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
-                                <Image
-                                    src="/images/img3.png"
-                                    alt="The problem with current sponsorships"
-                                    width={800}
-                                    height={450}
-                                    className="w-[90%] h-full object-cover"
-                                />
+                    <div className="w-full h-px my-20" style={{ backgroundColor: gray.gray7 }}></div>
+                    {/* Maatchaa Solves Problems - Card Swap */}
+                    <div className="relative mb-16">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Left: Text Content */}
+                            <div className="flex items-center">
+                                <div>
+                                    <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                        What We Solve
+                                    </Text>
+                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6" style={{ color: gray.gray12, lineHeight: 1.2 }}>
+                                        Maatchaa solves your biggest sponsorship headaches
+                                    </h3>
+                                    <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.7 }}>
+                                        From discovery to campaign management, we automate the entire workflow so you can focus on building great partnerships.
+                                    </Text>
+                                </div>
                             </div>
 
-                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                The Problem
-                            </Text>
-                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Creators waste countless hours chasing deals, only to face radio silence.
-                            </Text>
-                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Brands struggle to find authentic creators who truly align with their products.
-                            </Text>
-                        </div>
-                        {/* Right: Our Solution */}
-                        <div>
-                            {/* Image */}
-                            <div className="w-full overflow-hidden mb-6" style={{ height: '450px' }}>
-                                <Image
-                                    src="/images/img2.png"
-                                    alt="Maatchaa's automated solution"
-                                    width={800}
+                            {/* Right: Rotating Cards */}
+                            <div style={{ height: '480px', position: 'relative', marginTop: '-100px' }}>
+                                <CardSwap
+                                    width={450}
                                     height={450}
-                                    className="w-[90%] h-full object-cover"
-                                />
-                            </div>
+                                    cardDistance={40}
+                                    verticalDistance={50}
+                                    delay={2800}
+                                    pauseOnHover={false}
+                                    easing="smooth"
+                                >
+                                    <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                            Finding Creators
+                                        </Text>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                            Stop finding creators for hours. Get matched with creators whose audiences actually want your product.
+                                        </Text>
+                                        <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
+                                            <Image
+                                                src="/images/img3.png"
+                                                alt="Finding creators"
+                                                width={400}
+                                                height={265}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </Card>
 
-                            <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                Our Solution
-                            </Text>
-                            <Text size="6" weight="bold" className="block mb-3" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                Maatchaa automates the entire workflow.
-                            </Text>
-                            <Text size="6" className="block" style={{ color: gray.gray12, lineHeight: 1.5 }}>
-                                From AI-powered creator matching to personalized outreach, contracts, and performance tracking — all in one seamless platform.
-                            </Text>
+                                    <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                            Busywork
+                                        </Text>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                            Stop copying engagement rates into spreadsheets. Maatchaa does the research, outreach, and vetting automatically.
+                                        </Text>
+                                        <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
+                                            <Image
+                                                src="/images/img2.png"
+                                                alt="Automated busywork"
+                                                width={400}
+                                                height={265}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </Card>
+
+                                    <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                            Campaign Automation
+                                        </Text>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                            Contracts, approvals, tracking, payments — all automated. Manage 50 creators as easily as one.
+                                        </Text>
+                                        <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
+                                            <Image
+                                                src="/images/img2.png"
+                                                alt="Campaign automation"
+                                                width={400}
+                                                height={265}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </Card>
+                                </CardSwap>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -163,12 +202,13 @@ export default function HomePage() {
 
             {/* How Maatchaa Helps You Section */}
             <section className="px-6 py-32 pb-16 relative overflow-hidden" style={{ backgroundColor: '#1A1A1A', minHeight: '100vh' }}>
+
                 {/* Paper Design Static Radial Gradient Background */}
                 <div className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
                     <StaticRadialGradient
                         width="100%"
                         height="100%"
-                        colors={['#90f3c0', '#B4D88B']}
+                        colors={['#b1fa8b', '#B4D88B']}
                         radius={2.5}
                         colorBack={"#1A1A1A"}
                         focalDistance={3}
@@ -183,7 +223,7 @@ export default function HomePage() {
                 <div className="max-w-7xl mx-auto relative z-10">
                     {/* Section Header */}
                     <div className="text-center mb-20">
-                        <Text size="2" weight="medium" className="block mb-4" style={{ color: '#97ffc6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                             How It Works
                         </Text>
                         <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF' }}>

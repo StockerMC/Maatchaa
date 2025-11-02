@@ -9,10 +9,12 @@ import { Providers } from "@/components/Providers"
 import { Toaster } from 'react-hot-toast'
 
 const figtree = Figtree({
-    subsets: ["latin"],
-    weight: ["400", "500", "600", "700"],
+    subsets: ["latin", "latin-ext"],
+    weight: ["300", "400", "500", "600", "700", "800"],
     variable: "--font-figtree",
     display: "swap",
+    preload: true,
+    fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
 })
 
 export const metadata: Metadata = {

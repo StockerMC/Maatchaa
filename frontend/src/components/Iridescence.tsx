@@ -56,11 +56,11 @@ void main() {
   col.b += shimmer2 * 0.5;
   col.r -= shimmer2 * 0.1;
 
-  // Boost saturation but keep darker for text readability
-  vec3 boosted = col * 1.2;
+  // Boost saturation moderately for natural matcha look
+  vec3 boosted = col * 1.1;
 
   // Subtle brightness variation - keep controlled
-  boosted *= (1.0 + (shimmer + shimmer2) * 0.15);
+  boosted *= (1.0 + (shimmer + shimmer2) * 0.12);
 
   gl_FragColor = vec4(boosted, 1.0);
 }
@@ -75,9 +75,9 @@ export interface IridescenceProps {
 }
 
 export default function Iridescence({
-  color = [0.46, 0.55, 0.35],
-  speed = 1.0,
-  amplitude = 0.1,
+  color = [0.588, 0.710, 0.51], // #96B58A - Natural matcha (darker for text readability)
+  speed,
+  amplitude,
   mouseReact = true,
   className,
   ...rest
@@ -164,7 +164,6 @@ export default function Iridescence({
       }
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color, speed, amplitude, mouseReact]);
 
   return <div ref={ctnDom} className={className} style={{ width: '100%', height: '100%' }} {...rest} />;

@@ -85,8 +85,8 @@ export default function VideoStepSync() {
     return (
         <>
             {/* Video */}
-            <div className="mb-20 max-w-5xl mx-auto">
-                <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative' }}>
+            <div className="-mt-6 mb-12 max-w-4xl mx-auto">
+                <div className="rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative' }}>
                     <video
                         ref={videoRef}
                         className="w-full h-full object-cover"
@@ -100,31 +100,91 @@ export default function VideoStepSync() {
                 </div>
             </div>
 
-            {/* 4-Step Flow with Animated Progress Bars */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* 4-Step Flow with Modern Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {steps.map((step) => {
                     const progress = getStepProgress(step.number);
+                    const isActive = progress > 0 && progress < 100;
 
                     return (
-                        <div key={step.number} className="space-y-4">
-                            <div className="mb-4 relative">
-                                {/* Gray outline background */}
-                                <div className="w-full h-0.5 bg-white/20 rounded-full"></div>
-                                {/* Green fill that animates smoothly */}
+                        <div
+                            key={step.number}
+                            className="relative overflow-hidden rounded-2xl p-6 transition-all duration-300"
+                            style={{
+                                background: isActive
+                                    ? 'rgba(177, 250, 139, 0.08)'
+                                    : 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(10px)',
+                                border: isActive
+                                    ? '1px solid rgba(177, 250, 139, 0.25)'
+                                    : '1px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: isActive
+                                    ? '0 4px 20px rgba(177, 250, 139, 0.1)'
+                                    : '0 4px 16px rgba(0, 0, 0, 0.1)'
+                            }}
+                        >
+                            {/* Progress Bar at Top */}
+                            <div className="mb-6 relative h-1 bg-white/10 rounded-full overflow-hidden">
                                 <div
-                                    className="absolute top-0 left-0 h-0.5 bg-[#90f485] rounded-full"
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b1fa8b] to-[#d4ff9a] rounded-full transition-all duration-300"
                                     style={{
-                                        width: `${progress}%`
+                                        width: `${progress}%`,
+                                        boxShadow: isActive ? '0 0 8px rgba(177, 250, 139, 0.4)' : 'none'
                                     }}
                                 ></div>
                             </div>
-                            <Text size="2" weight="medium" className="block" style={{ color: 'rgba(255, 255, 255, 0.6)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                Step {step.number}
-                            </Text>
-                            <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF' }}>
+
+                            {/* Step Number */}
+                            <div className="flex items-center gap-3 mb-4">
+                                <div
+                                    className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-base transition-all duration-300"
+                                    style={{
+                                        background: isActive
+                                            ? 'linear-gradient(135deg, #b1fa8b 0%, #d4ff9a 100%)'
+                                            : 'rgba(255, 255, 255, 0.1)',
+                                        color: isActive ? '#1A1A1A' : 'rgba(255, 255, 255, 0.6)',
+                                        boxShadow: isActive ? '0 2px 12px rgba(177, 250, 139, 0.25)' : 'none'
+                                    }}
+                                >
+                                    {step.number}
+                                </div>
+                                <Text
+                                    size="1"
+                                    weight="medium"
+                                    className="block"
+                                    style={{
+                                        color: isActive ? '#b1fa8b' : 'rgba(255, 255, 255, 0.5)',
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase',
+                                        fontSize: '11px'
+                                    }}
+                                >
+                                    Step {step.number}
+                                </Text>
+                            </div>
+
+                            {/* Title */}
+                            <Text
+                                size="5"
+                                weight="bold"
+                                className="block mb-3 transition-colors duration-300"
+                                style={{
+                                    color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.9)',
+                                    lineHeight: 1.3
+                                }}
+                            >
                                 {step.title}
                             </Text>
-                            <Text size="3" className="block" style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
+
+                            {/* Description */}
+                            <Text
+                                size="2"
+                                className="block"
+                                style={{
+                                    color: 'rgba(255, 255, 255, 0.65)',
+                                    lineHeight: 1.6
+                                }}
+                            >
                                 {step.description}
                             </Text>
                         </div>
