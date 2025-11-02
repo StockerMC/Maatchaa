@@ -108,11 +108,12 @@ export default function HomePage() {
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+
+                    </div>
                     <div className="w-full h-px my-20" style={{ backgroundColor: gray.gray7 }}></div>
                     {/* Maatchaa Solves Problems - Card Swap */}
-                    <div className="relative mb-16">
+                    <div className="relative">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Left: Text Content */}
                             <div className="flex items-center">
@@ -130,7 +131,7 @@ export default function HomePage() {
                             </div>
 
                             {/* Right: Rotating Cards */}
-                            <div style={{ height: '480px', position: 'relative', marginTop: '-100px' }}>
+                            <div className="flex items-center justify-center" style={{ height: '480px', position: 'relative', paddingTop: '45px'}}>
                                 <CardSwap
                                     width={450}
                                     height={450}

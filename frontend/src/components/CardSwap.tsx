@@ -89,7 +89,7 @@ const CardSwap = ({
   easing = 'elastic',
   children
 }: CardSwapProps) => {
-  const config =
+  const config = useMemo(() =>
     easing === 'elastic'
       ? {
           ease: 'elastic.out(0.6,0.9)',
@@ -106,21 +106,22 @@ const CardSwap = ({
           durReturn: 0.8,
           promoteOverlap: 0.45,
           returnDelay: 0.2
-        };
+        }, [easing]);
 
   const childArr = useMemo(() => Children.toArray(children), [children]);
   const refs = useMemo(
     () => childArr.map(() => React.createRef<HTMLDivElement>()),
-    [childArr.length]
+    [childArr]
   );
 
   const order = useRef(Array.from({ length: childArr.length }, (_, i) => i));
 
   const tlRef = useRef<gsap.core.Timeline | null>(null);
-  const intervalRef = useRef<number>();
+  const intervalRef = useRef<number | undefined>(undefined);
   const container = useRef<HTMLDivElement>(null);
   const isAnimating = useRef(false);
 
+  // Initial card placement - runs once
   useEffect(() => {
     const total = refs.length;
     refs.forEach((r, i) => {
@@ -128,31 +129,32 @@ const CardSwap = ({
         placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount);
       }
     });
+  }, [refs, cardDistance, verticalDistance, skewAmount]);
 
+  // Animation loop
+  useEffect(() => {
     const swap = () => {
       if (order.current.length < 2 || isAnimating.current) return;
 
       isAnimating.current = true;
 
-      const [front, ...rest] = order.current;
+      const front = order.current[0];
       const elFront = refs[front].current;
       if (!elFront) {
         isAnimating.current = false;
         return;
       }
 
-      // Kill any existing timeline
       if (tlRef.current) {
         tlRef.current.kill();
       }
 
-      // Failsafe timeout to reset animation flag if something goes wrong
       const failsafeTimeout = setTimeout(() => {
         if (isAnimating.current) {
           console.warn('Animation stuck, resetting...');
           isAnimating.current = false;
         }
-      }, config.durDrop + config.durMove + config.durReturn + 2) * 1000;
+      }, (config.durDrop + config.durMove + config.durReturn + 2) * 1000);
 
       const resetAnimation = () => {
         isAnimating.current = false;
@@ -165,6 +167,10 @@ const CardSwap = ({
       });
       tlRef.current = tl;
 
+      // Ensure front card stays on top during the entire drop animation
+      const highestZIndex = refs.length + 10;
+      gsap.set(elFront, { zIndex: highestZIndex });
+
       tl.to(elFront, {
         x: '+=600',
         duration: config.durDrop,
@@ -172,7 +178,7 @@ const CardSwap = ({
       });
 
       tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
-      rest.forEach((idx, i) => {
+      order.current.slice(1).forEach((idx, i) => {
         const el = refs[idx].current;
         if (!el) return;
         const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
@@ -192,13 +198,8 @@ const CardSwap = ({
 
       const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
       tl.addLabel('return', `promote+=${config.durMove * 0.5}`);
-      tl.call(
-        () => {
-          if (elFront) gsap.set(elFront, { zIndex: backSlot.zIndex });
-        },
-        undefined,
-        'return'
-      );
+      // Only change z-index to back position right before returning
+      tl.set(elFront, { zIndex: backSlot.zIndex }, 'return');
       tl.to(
         elFront,
         {
@@ -212,11 +213,13 @@ const CardSwap = ({
       );
 
       tl.call(() => {
+        const [front, ...rest] = order.current;
         order.current = [...rest, front];
       });
     };
 
-    swap();
+    // Start with first swap after a short delay to let cards settle
+    const initialTimeout = setTimeout(swap, 100);
     intervalRef.current = window.setInterval(swap, delay);
 
     if (pauseOnHover) {
@@ -237,14 +240,16 @@ const CardSwap = ({
         node.removeEventListener('mouseenter', pause);
         node.removeEventListener('mouseleave', resume);
         clearInterval(intervalRef.current);
+        clearTimeout(initialTimeout);
         tlRef.current?.kill();
       };
     }
     return () => {
       clearInterval(intervalRef.current);
+      clearTimeout(initialTimeout);
       tlRef.current?.kill();
     };
-  }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing, refs, config]);
+  }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, config]);
 
   const rendered = childArr.map((child, i) =>
     isValidElement(child)
@@ -261,13 +266,9 @@ const CardSwap = ({
   );
 
   const containerStyle: CSSProperties = {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
+    position: 'relative',
     width,
     height,
-    transform: 'translate(5%, 20%)',
-    transformOrigin: 'bottom right',
     perspective: '900px',
     overflow: 'visible'
   };
