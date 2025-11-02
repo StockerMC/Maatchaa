@@ -34,56 +34,55 @@ const steps: Step[] = [
 
 export default function VideoStepSync() {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(10);
-    const animationFrameRef = useRef<number | null>(null);
+    const [progressTime, setProgressTime] = useState(0);
+    const startTimeRef = useRef<number>(Date.now());
+    const pausedAtEndRef = useRef(false);
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        // Independent 60fps timer that loops every 10 seconds (9.9s progress + 0.1s pause)
+        let animationFrameId: number;
 
-        const handleLoadedMetadata = () => {
-            setDuration(video.duration || 10);
-        };
-
-        // Use requestAnimationFrame for 60fps smooth updates
         const updateProgress = () => {
-            if (video && !video.paused) {
-                setCurrentTime(video.currentTime);
+            const elapsed = (Date.now() - startTimeRef.current) / 1000; // Convert to seconds
+            const loopedTime = elapsed % 10; // Loop every 10 seconds total
+
+            // Hold at 9.9 seconds for 0.1 seconds before resetting
+            if (loopedTime >= 9.9) {
+                setProgressTime(9.9);
+                pausedAtEndRef.current = true;
+            } else {
+                setProgressTime(loopedTime);
+                pausedAtEndRef.current = false;
             }
-            animationFrameRef.current = requestAnimationFrame(updateProgress);
+
+            animationFrameId = requestAnimationFrame(updateProgress);
         };
 
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
-        animationFrameRef.current = requestAnimationFrame(updateProgress);
+        animationFrameId = requestAnimationFrame(updateProgress);
 
         return () => {
-            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
+            cancelAnimationFrame(animationFrameId);
         };
     }, []);
 
-    // Calculate progress based on video time divided equally among steps
+    // Calculate which step is active based on independent progress time
     const getStepProgress = (stepNumber: number) => {
-        const totalSteps = steps.length;
-        const stepDuration = duration / totalSteps;
+        const stepDuration = 2.475; // Each step is 2.475 seconds (9.9 / 4)
         const stepStart = (stepNumber - 1) * stepDuration;
         const stepEnd = stepNumber * stepDuration;
 
-        if (currentTime < stepStart) return 0;
-        if (currentTime >= stepEnd) return 100;
+        if (progressTime < stepStart) return 0;
+        if (progressTime >= stepEnd) return 100;
 
-        const progress = ((currentTime - stepStart) / stepDuration) * 100;
-        return Math.min(Math.max(progress, 0), 100);
+        const progress = ((progressTime - stepStart) / stepDuration) * 100;
+        return Math.min(progress, 100);
     };
 
     return (
         <>
             {/* Video */}
             <div className="mb-12 max-w-4xl mx-auto">
-                <div className="rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative', height: '500px' }}>
+                <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative' }}>
                     <video
                         ref={videoRef}
                         className="w-full h-full object-cover"
@@ -121,9 +120,9 @@ export default function VideoStepSync() {
                             }}
                         >
                             {/* Progress Bar at Top */}
-                            <div className="relative h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+                            <div className="relative h-1 bg-white/10 rounded-full overflow-hidden mb-3.5">
                                 <div
-                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b1fa8b] to-[#d4ff9a] rounded-full transition-all duration-300"
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#b1fa8b] to-[#d4ff9a] rounded-full"
                                     style={{
                                         width: `${progress}%`,
                                         boxShadow: isActive ? '0 0 6px rgba(177, 250, 139, 0.3)' : 'none'

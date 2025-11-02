@@ -223,7 +223,7 @@ export default function HomePage() {
 
                 <div className="max-w-7xl mx-auto relative z-10">
                     {/* Section Header */}
-                    <div className="text-center mb-20">
+                    <div className="text-center mb-12">
                         <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                             How It Works
                         </Text>
@@ -236,7 +236,7 @@ export default function HomePage() {
                     <VideoStepSync />
 
                     {/* Tech Blog Call-to-Action */}
-                    <Box className="text-center max-w-4xl mx-auto mt-16">
+                    <Box className="text-center max-w-4xl mx-auto mt-12">
                         <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF', marginBottom: '1.5rem' }}>
                             Still want to learn more?
                         </Text>
