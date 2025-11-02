@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, TextArea, Select } from "@radix-ui/themes";
 import { CheckCircle, Store, Target, Palette, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { Progress } from "@radix-ui/themes";
+import Iridescence from "@/components/Iridescence";
 
 interface OnboardingStep {
   id: string;
@@ -405,8 +406,17 @@ export default function OnboardingPage() {
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", zIndex: 50 }}>
-      <Box style={{ width: "100%", maxWidth: "650px", maxHeight: "90vh", padding: "2rem", background: "#FFFFFF", border: "1px solid #D1D5DB", borderRadius: "12px", overflowY: "auto" }}>
+    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", zIndex: 50, overflow: "hidden" }}>
+      {/* Iridescence Gradient Background */}
+      <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: -1 }}>
+        <Iridescence
+          mouseReact={false}
+          amplitude={0.1}
+          speed={0.1}
+        />
+      </div>
+
+      <Box style={{ width: "100%", maxWidth: "650px", maxHeight: "90vh", padding: "2rem", background: "#FFFFFF", border: "1px solid rgba(255, 255, 255, 0.3)", borderRadius: "16px", overflowY: "auto", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)" }}>
         <Flex direction="column" gap="4">
           {/* Progress Header */}
           <Flex direction="column" gap="4">

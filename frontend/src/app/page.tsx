@@ -56,82 +56,84 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Manifesto / Quote Section + Problem/Solution */}
+            {/* Manifesto / Quote Section */}
+            <section className="px-6 pt-32 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto relative">
+                    {/* Clean minimal layout - no card wrapper */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                        {/* Left: Quote text */}
+                        <div>
+                            {/* Large decorative quote mark - keep green */}
+                            <div className="mb-6">
+                                <svg width="64" height="64" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M23.5 50C23.5 41.4 28.9 33.8 36.5 30.2V20C22.8 23.6 13.5 35.8 13.5 50C13.5 58.3 20.2 65 28.5 65C36.8 65 43.5 58.3 43.5 50C43.5 41.7 36.8 35 28.5 35C27.2 35 26 35.2 24.8 35.5C24.3 40 23.5 44.9 23.5 50ZM50 50C50 41.4 55.4 33.8 63 30.2V20C49.3 23.6 40 35.8 40 50C40 58.3 46.7 65 55 65C63.3 65 70 58.3 70 50C70 41.7 63.3 35 55 35C53.7 35 52.5 35.2 51.3 35.5C50.8 40 50 44.9 50 50Z" fill="#A8E64A"/>
+                                </svg>
+                            </div>
+
+                            {/* Main quote - black text */}
+                            <h2 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold mb-6 leading-[1.1]" style={{ color: gray.gray12 }}>
+                                Finding sponsorships shouldn&apos;t be <span style={{ backgroundColor: lime.lime4, color: gray.gray12, padding: '0.05em 0.1em', borderRadius: '8px', fontWeight: 'bold', display: 'inline' }}>this hard.</span>
+                            </h2>
+
+                            {/* Subline - black text */}
+                            <Text size="5" className="block" style={{ color: gray.gray11}}>
+                                That&apos;s what we think at Maatchaa — connecting creators and brands should feel effortless.
+                            </Text>
+                        </div>
+
+                        {/* Right: Image */}
+                        <div className="flex items-center justify-center">
+                            <div className="w-full h-80 rounded-2xl overflow-hidden border border-gray-200">
+                                <Image
+                                    src="/images/homepage.jpeg"
+                                    alt="Creator and brand collaboration"
+                                    width={800}
+                                    height={600}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Divider line */}
+                    <div className="w-full h-px mt-32" style={{ backgroundColor: gray.gray7 }}></div>
+                </div>
+            </section>
+
+            {/* What We Solve - Card Swap Section */}
             <section className="px-6 py-20 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto relative">
-                    {/* Card with mesh gradient background */}
                     <div className="relative rounded-3xl overflow-hidden bg-white" style={{ minHeight: '400px' }}>
-                        {/* Mesh Gradient Background - cyan to grass gradient */}
-                        <div className="absolute inset-0 opacity-30">
+                        {/* Mesh Gradient Background - coral/lime/lavender/mint gradient */}
+                        <div className="absolute inset-0 opacity-65">
                             <MeshGradient
                                 className="w-full h-full"
                                 options={{
-                                    colors: ['#9AE6F5', '#7DD3C0', '#B4D88B', '#C2E59C'],
+                                    colors: ['#FFB5A7', '#B4FF9F', '#C7B3FF', '#8FFFD7'],
                                     isStatic: true,
-                                    seed: 42
+                                    seed: 99
                                 }}
                             />
                         </div>
 
-                        {/* Content - Grid layout with text and image */}
-                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[400px] p-8 md:p-12 lg:p-14">
-                            {/* Left: Quote text */}
-                            <div>
-                                {/* Large decorative quote mark - keep green */}
-                                <div className="mb-6">
-                                    <svg width="64" height="64" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M23.5 50C23.5 41.4 28.9 33.8 36.5 30.2V20C22.8 23.6 13.5 35.8 13.5 50C13.5 58.3 20.2 65 28.5 65C36.8 65 43.5 58.3 43.5 50C43.5 41.7 36.8 35 28.5 35C27.2 35 26 35.2 24.8 35.5C24.3 40 23.5 44.9 23.5 50ZM50 50C50 41.4 55.4 33.8 63 30.2V20C49.3 23.6 40 35.8 40 50C40 58.3 46.7 65 55 65C63.3 65 70 58.3 70 50C70 41.7 63.3 35 55 35C53.7 35 52.5 35.2 51.3 35.5C50.8 40 50 44.9 50 50Z" fill="#A8E64A"/>
-                                    </svg>
-                                </div>
-
-                                {/* Main quote - black text */}
-                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1]" style={{ color: gray.gray12 }}>
-                                    Finding sponsorships shouldn&apos;t be this hard.
-                                </h2>
-
-                                {/* Subline - black text */}
-                                <Text size="5" className="block" style={{ color: gray.gray11}}>
-                                    That&apos;s what we think at Maatchaa — connecting creators and brands should feel effortless.
-                                </Text>
-                            </div>
-
-                            {/* Right: Image */}
-                            <div className="flex items-center justify-center">
-                                <div className="w-full h-80 rounded-2xl overflow-hidden border border-gray-200">
-                                    <Image
-                                        src="/images/homepage.jpeg"
-                                        alt="Creator and brand collaboration"
-                                        width={800}
-                                        height={600}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-                    <div className="w-full h-px my-20" style={{ backgroundColor: gray.gray7 }}></div>
-                    {/* Maatchaa Solves Problems - Card Swap */}
-                    <div className="relative">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 md:p-12 lg:p-14">
                             {/* Left: Text Content */}
                             <div className="flex items-center">
                                 <div>
-                                    <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                    <Text size="2" weight="medium" className="block mb-4" style={{ color: "#6a9a23", letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: '700' }}>
                                         What We Solve
                                     </Text>
-                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6" style={{ color: gray.gray12, lineHeight: 1.2 }}>
+                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6" style={{ color: "#26302c", lineHeight: 1.2 }}>
                                         Maatchaa solves your biggest sponsorship headaches
                                     </h3>
-                                    <Text size="5" className="block" style={{ color: gray.gray11, lineHeight: 1.7 }}>
+                                    <Text size="5" className="block" style={{ color: "rgba(33,43,43,0.69)", lineHeight: 1.7, fontWeight: '500' }}>
                                         From discovery to campaign management, we automate the entire workflow so you can focus on building great partnerships.
                                     </Text>
                                 </div>
                             </div>
 
                             {/* Right: Rotating Cards */}
-                            <div className="flex items-center justify-center" style={{ height: '480px', position: 'relative', paddingTop: '45px'}}>
+                            <div className="flex items-center justify-center" style={{ height: '480px', position: 'relative', paddingTop: '55px'}}>
                                 <CardSwap
                                     width={450}
                                     height={450}
@@ -252,14 +254,13 @@ export default function HomePage() {
 
             {/* Waitlist Section */}
             <section id="waitlist" className="px-6 py-32 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
-                {/* Static Mesh Gradient background - more visible and sophisticated */}
-                <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50">
+                <div className="absolute inset-0 w-full h-full pointer-events-none opacity-70">
                     <MeshGradient
                         className="w-full h-full"
                         options={{
-                            colors: ['#A8BF9C', '#7DD3C0', '#B4D88B', '#98E6C8'],
+                            colors: ['#b7ef9a', '#7DD3C0', '#B4D88B', '#98E6C8'],
                             isStatic: true,
-                            seed: 123
+                            seed: 130
                         }}
                     />
                 </div>

@@ -10,6 +10,7 @@ import {
   Package,
   BarChart3,
   MessageSquare,
+  Bot,
   Settings,
   HelpCircle,
   LogOut
@@ -22,6 +23,7 @@ const mainNavItems = [
   { name: "Products", href: "/dashboard/products", icon: Package },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Communications", href: "/dashboard/communications", icon: MessageSquare },
+  { name: "Agents", href: "/dashboard/agents", icon: Bot },
 ];
 
 const footerNavItems = [

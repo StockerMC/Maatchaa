@@ -1,66 +1,74 @@
 import { BlogContent } from "@/components/blog/blog-content";
 import Link from "next/link";
+import { Text, Button, Box } from "@radix-ui/themes";
+import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
+import Footer from "@/components/Footer";
+import { MeshGradient } from '@mesh-gradient/react';
 
 export default function BlogPage() {
   return (
-    <div className="w-full min-h-screen py-16 px-6">
-      <article className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-8 md:p-12">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-8"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <div className="w-full min-h-screen">
+      {/* Hero Section with Gradient */}
+      <section className="relative overflow-hidden" style={{ backgroundColor: '#0f172a' }}>
+        {/* Vibrant Mesh Gradient Background */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50">
+          <MeshGradient
+            className="w-full h-full"
+            options={{
+              colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
+              isStatic: true,
+              seed: 456
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 md:py-32">
+          {/* Back link */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm mb-8 transition-colors font-semibold"
+            style={{ color: '#FFF' }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to home
-        </Link>
+            <ArrowLeftIcon width="16" height="16" />
+            Back to home
+          </Link>
 
-        {/* Meta */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <time dateTime="2025-09-15">September 15, 2025</time>
-            <span>•</span>
-            <span>8 min read</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-            How We Built Maatchaa
-          </h1>
-          <p className="text-xl text-gray-600">
-            How we built a Tinder-like experience for brand partnerships in 36
-            hours at Hack the North 2025.
-          </p>
-        </div>
+          {/* Meta */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 text-sm mb-6 font-medium" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <time dateTime="2025-09-15">September 15, 2025</time>
+              <span>•</span>
+              <span>8 min read</span>
+            </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="text-sm px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-200">
-            Hackathon
-          </span>
-          <span className="text-sm px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-200">
-            Product
-          </span>
-        </div>
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              <span className="text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', color: '#FFF', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+                Hackathon
+              </span>
+              <span className="text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', color: '#FFF', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+                Product
+              </span>
+            </div>
 
-        {/* Featured image */}
-        <div className="aspect-video w-full rounded-xl bg-gray-100 mb-12 overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            [Hero Image Placeholder]
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: '#FFFFFF', textShadow: '0 2px 20px rgba(0, 0, 0, 0.3)' }}>
+              How We Built Maatchaa
+            </h1>
+            <Text size="6" className="block font-medium" style={{ color: 'rgba(255, 255, 255, 0.85)', lineHeight: 1.6 }}>
+              How we built a Tinder-like experience for brand partnerships in 36 hours at Hack the North 2025.
+            </Text>
           </div>
         </div>
+      </section>
 
-        {/* Content */}
-        <BlogContent>
+      {/* Article Content Section */}
+      <section className="relative py-16" style={{ backgroundColor: '#FFFFFF' }}>
+        <article className="max-w-6xl mx-auto px-6">
+
+          <div className="max-w-3xl mx-auto">
+            {/* Content */}
+            <BlogContent>
           <h2>The Problem</h2>
           <p>
             As first-year Software Engineering and CS students at the University
@@ -160,14 +168,63 @@ export default function BlogPage() {
             problems for real people. We can&apos;t wait to see where this journey
             takes us.&rdquo; — The Maatchaa Team
           </blockquote>
-
-          <p>
-            <Link href="/#waitlist" className="text-primary font-semibold">
-              Join the waitlist →
-            </Link>
-          </p>
         </BlogContent>
-      </article>
+              <div className="w-full mb-6">
+                  <div className="aspect-video w-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+                      <Image
+                          src="/images/homepage.jpeg"
+                          alt="How we built Maatchaa"
+                          width={1920}
+                          height={1080}
+                          className="w-full h-full object-cover"
+                          priority
+                      />
+                  </div>
+                  <Text size="2" className="block pt-3 text-center" style={{ color: '#737373', fontStyle: 'italic' }}>
+                      The Maatchaa team building the platform at Hack the North 2025
+                  </Text>
+              </div>
+
+          </div>
+        </article>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative px-6 py-20 overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
+        {/* Green Gradient Background */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+          <MeshGradient
+            className="w-full h-full"
+            options={{
+                colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
+              isStatic: true,
+              seed: 321
+            }}
+          />
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10 text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <Text size="2" weight="medium" style={{ color: '#059669', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Get Early Access
+          </Text>
+          <Text size="8" weight="bold" style={{ color: '#1A1A1A', lineHeight: 1.2 }}>
+            Ready to automate your sponsorships?
+          </Text>
+          <Text size="5" weight="medium" style={{ color: '#475569', lineHeight: 1.7, maxWidth: '600px' }}>
+            Join creators and brands using Maatchaa to build authentic partnerships.
+          </Text>
+          <Box style={{ marginTop: '0.5rem' }}>
+            <Button variant="solid" color="lime" size="4" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Link href="/#waitlist" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                Join the waitlist
+                <ArrowRightIcon width="18" height="18" />
+              </Link>
+            </Button>
+          </Box>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
