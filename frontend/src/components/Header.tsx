@@ -14,15 +14,16 @@ export default function Header() {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        // Mark as mounted to prevent hydration mismatch
-        setMounted(true)
-
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 100)
         }
 
-        // Set initial state
-        handleScroll()
+        // Batch initial state updates to prevent flickering
+        requestAnimationFrame(() => {
+            const initialScrollY = window.scrollY > 100
+            setMounted(true)
+            setIsScrolled(initialScrollY)
+        })
 
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)

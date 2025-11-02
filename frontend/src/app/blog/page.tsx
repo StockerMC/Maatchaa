@@ -204,7 +204,7 @@ export default function BlogPage() {
         </div>
 
         <div className="max-w-4xl mx-auto relative z-10 text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <Text size="2" weight="medium" style={{ color: '#059669', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <Text size="2" weight="medium" style={{ color: '#286352', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Get Early Access
           </Text>
           <Text size="8" weight="bold" style={{ color: '#1A1A1A', lineHeight: 1.2 }}>
