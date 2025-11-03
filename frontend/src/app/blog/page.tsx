@@ -18,13 +18,14 @@ export default async function BlogPage() {
       {/* Hero Section with Gradient */}
       <section className="relative overflow-hidden min-h-screen flex items-center" style={{ backgroundColor: '#0f172a' }}>
         {/* Vibrant Mesh Gradient Background */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50">
+        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50" style={{ willChange: 'auto' }}>
           <MeshGradient
             className="w-full h-full"
             options={{
               colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
               isStatic: true,
-              seed: 456
+              seed: 456,
+              appearance: 'default'
             }}
           />
         </div>
@@ -100,13 +101,14 @@ export default async function BlogPage() {
       {/* CTA Section */}
       <section className="relative px-6 py-20 overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
         {/* Green Gradient Background */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40" style={{ willChange: 'auto' }}>
           <MeshGradient
             className="w-full h-full"
             options={{
                 colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
               isStatic: true,
-              seed: 321
+              seed: 321,
+              appearance: 'default'
             }}
           />
         </div>

@@ -1,10 +1,11 @@
 "use client";
 
+// fixme: use radix cards
 import { useState } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, TextArea, Select } from "@radix-ui/themes";
 import { CheckCircle, Store, Target, Palette, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { Progress } from "@radix-ui/themes";
-import Iridescence from "@/components/Iridescence";
+import {MeshGradient, meshGradient} from "@mesh-gradient/react";
 
 interface OnboardingStep {
   id: string;
@@ -409,11 +410,15 @@ export default function OnboardingPage() {
     <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", zIndex: 50, overflow: "hidden" }}>
       {/* Iridescence Gradient Background */}
       <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: -1 }}>
-        <Iridescence
-          mouseReact={false}
-          amplitude={0.1}
-          speed={0.1}
-        />
+              <MeshGradient
+                  className="w-full h-full opacity-80"
+                  options={{
+                      colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
+                      isStatic: true,
+                      seed: 456,
+                      appearance: 'default'
+                  }}
+              />
       </div>
 
       <Box style={{ width: "100%", maxWidth: "650px", maxHeight: "90vh", padding: "2rem", background: "#FFFFFF", border: "1px solid rgba(255, 255, 255, 0.3)", borderRadius: "16px", overflowY: "auto", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)" }}>
