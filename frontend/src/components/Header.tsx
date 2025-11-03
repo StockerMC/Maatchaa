@@ -1,3 +1,5 @@
+//FIXME: There's a weird bug that occurs on refresh where the Waitlist button briefly flashes the wrong style on initial scroll. Need to investigate further.
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"

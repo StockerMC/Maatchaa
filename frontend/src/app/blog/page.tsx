@@ -5,12 +5,18 @@ import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 import { MeshGradient } from '@mesh-gradient/react';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import fs from 'fs';
+import path from 'path';
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  // Read the MDX file from public/blogs
+  const mdxPath = path.join(process.cwd(), 'public', 'blogs', 'blog.mdx');
+  const mdxContent = fs.readFileSync(mdxPath, 'utf8');
   return (
     <div className="w-full min-h-screen">
       {/* Hero Section with Gradient */}
-      <section className="relative overflow-hidden" style={{ backgroundColor: '#0f172a' }}>
+      <section className="relative overflow-hidden min-h-screen flex items-center" style={{ backgroundColor: '#0f172a' }}>
         {/* Vibrant Mesh Gradient Background */}
         <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50">
           <MeshGradient
@@ -53,10 +59,10 @@ export default function BlogPage() {
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: '#FFFFFF', textShadow: '0 2px 20px rgba(0, 0, 0, 0.3)' }}>
-              How We Built Maatchaa
+              Building an Algorithm to Automate Business-to-Video Sponsorships
             </h1>
             <Text size="6" className="block font-medium" style={{ color: 'rgba(255, 255, 255, 0.85)', lineHeight: 1.6 }}>
-              How we built a Tinder-like experience for brand partnerships in 36 hours at Hack the North 2025.
+              How did a goofy matcha project end up winning Canada's biggest hackathon? Well, here's a technical blog for what this project is all about!
             </Text>
           </div>
         </div>
@@ -69,106 +75,8 @@ export default function BlogPage() {
           <div className="max-w-3xl mx-auto">
             {/* Content */}
             <BlogContent>
-          <h2>The Problem</h2>
-          <p>
-            As first-year Software Engineering and CS students at the University
-            of Waterloo, we noticed a glaring inefficiency in how creators and
-            brands discover partnership opportunities. The traditional process is
-            slow, opaque, and heavily reliant on middlemen.
-          </p>
-          <p>
-            YouTube creators with engaged audiences struggle to find brands that
-            align with their content. Meanwhile, Shopify merchants looking to
-            expand their reach through influencer marketing don&apos;t have an easy
-            way to discover authentic creators in their niche.
-          </p>
-
-          <h2>The Idea: Tinder for Brand Deals</h2>
-          <p>
-            During Hack the North 2025, we asked ourselves: <strong>What if
-            discovering brand partnerships was as easy as swiping on a dating
-            app?</strong>
-          </p>
-          <p>
-            Maatchaa was born from this simple insight. We built a dual-sided
-            matching platform where:
-          </p>
-          <ul>
-            <li>
-              <strong>Creators</strong> can swipe through curated Shopify brands
-              that match their content niche
-            </li>
-            <li>
-              <strong>Brands</strong> can discover YouTube creators whose
-              audiences align with their products
-            </li>
-            <li>
-              When both parties swipe right, a <strong>match</strong> is created,
-              opening a direct line of communication
-            </li>
-          </ul>
-
-          <h2>Building in 36 Hours</h2>
-          <p>
-            With limited time and ambitious goals, we focused on three core
-            technical challenges:
-          </p>
-
-          <h3>1. Seamless OAuth Integration</h3>
-          <p>
-            We integrated both Shopify and YouTube OAuth flows to pull real-time
-            data. This allowed us to show creators actual store metrics and brands
-            to see authentic creator analytics—no manual data entry required.
-          </p>
-
-          <h3>2. Smart Matching Algorithm</h3>
-          <p>
-            We built a recommendation engine that considers content categories,
-            audience demographics, engagement rates, and brand values. The goal
-            was to show each user only the most relevant potential partners.
-          </p>
-
-          <h3>3. Mobile-First Swipe UI</h3>
-          <p>
-            Using React and Framer Motion, we created a buttery-smooth card-swipe
-            interface that works seamlessly on mobile devices. The interaction
-            needed to feel native and intuitive.
-          </p>
-
-          <h2>The Results</h2>
-          <p>
-            After 36 hours of coding, debugging, and iterating, we presented
-            Maatchaa to the judges. Our demo showcased:
-          </p>
-          <ul>
-            <li>Live Shopify store integration</li>
-            <li>Real YouTube channel data via the YouTube API</li>
-            <li>A working match system with in-app messaging</li>
-            <li>Mobile-responsive design</li>
-          </ul>
-
-          <h2>What&apos;s Next</h2>
-          <p>
-            Hack the North was just the beginning. We&apos;re now refining the product
-            based on feedback from creators and brands. Our roadmap includes:
-          </p>
-          <ul>
-            <li>Enhanced matching algorithm with ML-based recommendations</li>
-            <li>Contract templates and payment escrow for secure transactions</li>
-            <li>Analytics dashboard for tracking partnership performance</li>
-            <li>Expanding to TikTok and Instagram creators</li>
-          </ul>
-          <p>
-            If you&apos;re a creator or brand interested in trying Maatchaa, join our
-            waitlist. We&apos;re rolling out early access soon.
-          </p>
-
-          <blockquote>
-            &ldquo;Building Maatchaa taught us that the best products solve real
-            problems for real people. We can&apos;t wait to see where this journey
-            takes us.&rdquo; — The Maatchaa Team
-          </blockquote>
-        </BlogContent>
+              <MDXRemote source={mdxContent} />
+            </BlogContent>
               <div className="w-full mb-6">
                   <div className="aspect-video w-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
                       <Image
