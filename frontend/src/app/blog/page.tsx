@@ -89,7 +89,7 @@ export default async function BlogPage() {
                       />
                   </div>
                   <Text size="2" className="block pt-3 text-center" style={{ color: '#737373', fontStyle: 'italic' }}>
-                      The Maatchaa team building the platform at Hack the North 2025
+                      Our team presenting Maatchaa at the closing ceremony of Hack the North 2025!
                   </Text>
               </div>
 
