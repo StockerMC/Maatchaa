@@ -42,7 +42,7 @@ export default function HomePage() {
                             Connect your brand with relevant creators in minutes, struggle free.
                         </p>
                         <Button variant="classic" color="lime" size="4" asChild
-                                style={{ backgroundColor: 'var(--lime-10)' }}>
+                                style={{ backgroundColor: 'var(--lime-10)', borderRadius:'30px'}}>
                             <Link href="/onboarding" className="flex items-center gap-2">
                                 Try Our Demo
                                 <ArrowTopRightIcon width="18" height="18" />
@@ -242,7 +242,7 @@ export default function HomePage() {
                         <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF', marginBottom: '1.5rem' }}>
                             Still want to learn more?
                         </Text>
-                        <Button variant="solid" color="lime" size="3" asChild>
+                        <Button variant="solid" color="lime" size="3" radius="full" asChild>
                             <Link href="/blog" className="flex items-center gap-2">
                                 Read Our Tech Blog
                                 <ArrowRightIcon width="16" height="16" />

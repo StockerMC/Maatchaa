@@ -2,25 +2,22 @@
 
 import { useState } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, TextArea, Dialog, Tabs, Avatar, Separator } from "@radix-ui/themes";
+import { sage, lime, gray, sand } from "@radix-ui/colors";
 import {
   Search,
   Send,
   MessageSquare,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   Plus,
   Star,
   Archive,
-  Trash2,
   Reply,
   MoreVertical,
   Paperclip,
   ArrowLeft,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Share2,
 } from "lucide-react";
-import Image from "next/image";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 interface Message {
@@ -208,17 +205,31 @@ export default function CommunicationsPage() {
   });
 
   const getStatusBadge = (status: string) => {
+    const neutral = (
+      <Badge size="1" variant="soft" color="gray">
+        {status === "responded" ? "Responded" : status === "partnered" ? "Partnered" : "Unknown"}
+      </Badge>
+    );
+
     switch (status) {
       case "responded":
-        return <Badge color="green" size="1"><CheckCircle size={12} /> Responded</Badge>;
+        return neutral;
       case "partnered":
-        return <Badge color="blue" size="1"><CheckCircle size={12} /> Partnered</Badge>;
+        return neutral;
       case "pending":
-        return <Badge color="yellow" size="1"><Clock size={12} /> Pending</Badge>;
+        return (
+          <Badge size="1" variant="soft" color="yellow">
+            Pending
+          </Badge>
+        );
       case "declined":
-        return <Badge color="red" size="1"><AlertCircle size={12} /> Declined</Badge>;
+        return (
+          <Badge size="1" variant="soft" color="red">
+            Declined
+          </Badge>
+        );
       default:
-        return <Badge color="gray" size="1">Unknown</Badge>;
+        return neutral;
     }
   };
 
@@ -242,17 +253,17 @@ export default function CommunicationsPage() {
         {/* Header */}
         <Flex align="center" justify="between">
           <Box>
-            <Text size="8" weight="bold" style={{ color: "#1A1A1A" }}>
+            <Text size="8" weight="bold" style={{ color: "sage.sage12" }}>
               Communications
             </Text>
-            <Text size="2" style={{ color: "#737373", marginTop: "0.25rem", display: "block" }}>
+            <Text size="2" style={{ color: "sage.sage11", marginTop: "0.25rem", display: "block" }}>
               All conversations from {businessEmail}
             </Text>
           </Box>
 
           <Dialog.Root open={isComposeOpen} onOpenChange={setIsComposeOpen}>
             <Dialog.Trigger>
-              <Button style={{ background: "#B4D88B", color: "#000" }}>
+              <Button style={{ background: "lime.lime9", color: "#000" }}>
                 <Plus size={16} />
                 New Message
               </Button>
@@ -266,7 +277,7 @@ export default function CommunicationsPage() {
               <Flex direction="column" gap="3">
                 <Box>
                   <Text size="2" weight="medium" mb="1" style={{ display: "block" }}>From:</Text>
-                  <TextField.Root value={businessEmail} readOnly style={{ background: "#F5F5F5" }} />
+                  <TextField.Root value={businessEmail} readOnly style={{ background: "sage.sage3" }} />
                 </Box>
                 <Box>
                   <Text size="2" weight="medium" mb="1" style={{ display: "block" }}>To:</Text>
@@ -285,7 +296,7 @@ export default function CommunicationsPage() {
                   <Dialog.Close>
                     <Button variant="soft" color="gray">Cancel</Button>
                   </Dialog.Close>
-                  <Button style={{ background: "#B4D88B", color: "#000" }}>
+                  <Button style={{ background: "lime.lime9", color: "#000" }}>
                     <Send size={16} />
                     Send Message
                   </Button>
@@ -306,7 +317,7 @@ export default function CommunicationsPage() {
               padding: "1rem",
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden"
+              overflow: "hidden",
             }}
           >
             {/* Filters */}
@@ -328,7 +339,7 @@ export default function CommunicationsPage() {
                   left: "10px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#737373",
+                  color: sand.sand11,
                 }}
               />
               <TextField.Root
@@ -350,11 +361,10 @@ export default function CommunicationsPage() {
                   }}
                   style={{
                     padding: "0.75rem",
-                    borderRadius: "6px",
-                    background: selectedConversation?.id === conversation.id ? "#F0FDF4" : "transparent",
-                    border: selectedConversation?.id === conversation.id ? "1px solid #BBF7D0" : "1px solid transparent",
+                    borderRadius: "10px",
+                    background: selectedConversation?.id === conversation.id ? sand.sand3 : "transparent",
                     cursor: "pointer",
-                    transition: "all 0.2s",
+                    transition: "background 0.2s",
                   }}
                 >
                   <Flex align="start" gap="2">
@@ -363,26 +373,27 @@ export default function CommunicationsPage() {
                       src={conversation.creatorAvatar}
                       fallback={conversation.creatorName.charAt(0)}
                       radius="full"
+                      color="gray"
                     />
                     <Box style={{ flex: 1, minWidth: 0 }}>
                       <Flex align="center" justify="between" mb="1">
-                        <Text size="2" weight="bold" style={{
-                          color: conversation.unreadCount > 0 ? "#000" : "#1A1A1A",
+                        <Text size="2" weight="medium" style={{
+                          color: conversation.unreadCount > 0 ? "#000" : "sage.sage12",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                         }}>
                           {conversation.creatorName}
                         </Text>
-                        {conversation.isStarred && <Star size={12} fill="#EAB308" color="#EAB308" />}
+                        {conversation.isStarred && <Star size={12} fill="#F59E0B" color="#F59E0B" />}
                       </Flex>
-                      <Text size="1" style={{ color: "#737373", display: "block", marginBottom: "0.25rem" }}>
+                      <Text size="1" style={{ color: "sage.sage11", display: "block", marginBottom: "0.25rem" }}>
                         {conversation.creatorHandle}
                       </Text>
                       <Text
                         size="1"
                         style={{
-                          color: "#737373",
+                          color: "sage.sage11",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -393,11 +404,11 @@ export default function CommunicationsPage() {
                         {conversation.lastMessage}
                       </Text>
                       <Flex align="center" justify="between" mt="1">
-                        <Text size="1" style={{ color: "#737373" }}>
+                        <Text size="1" style={{ color: "sage.sage11" }}>
                           {conversation.lastMessageTime}
                         </Text>
                         {conversation.unreadCount > 0 && (
-                          <Badge color="blue" size="1">{conversation.unreadCount}</Badge>
+                          <Badge color="gray" size="1">{conversation.unreadCount}</Badge>
                         )}
                       </Flex>
                     </Box>
@@ -415,45 +426,38 @@ export default function CommunicationsPage() {
                 padding: 0,
                 display: "flex",
                 flexDirection: "column",
-                overflow: "hidden"
+                overflow: "hidden",
               }}
             >
               {/* Thread Header */}
-              <Box p="4" style={{ borderBottom: "1px solid #F5F5F5" }}>
+              <Box p="4" style={{ borderBottom: `1px solid ${sand.sand4}` }}>
                 <Flex align="center" justify="between">
                   <Flex align="center" gap="3">
-                    <Button
-                      variant="ghost"
-                      size="2"
-                      onClick={() => setShowMobileThread(false)}
-                      style={{ display: "none" }}
-                    >
-                      <ArrowLeft size={16} />
-                    </Button>
                     <Avatar
                       size="3"
                       src={selectedConversation.creatorAvatar}
                       fallback={selectedConversation.creatorName.charAt(0)}
                       radius="full"
+                      color="gray"
                     />
                     <Box>
-                      <Text size="3" weight="bold" style={{ display: "block" }}>
+                      <Text size="3" weight="medium" style={{ display: "block" }}>
                         {selectedConversation.creatorName}
                       </Text>
-                      <Text size="1" style={{ color: "#737373" }}>
+                      <Text size="1" style={{ color: "sage.sage11" }}>
                         {selectedConversation.creatorEmail} • {selectedConversation.followers} followers
                       </Text>
                     </Box>
                   </Flex>
                   <Flex gap="2">
                     {getStatusBadge(selectedConversation.status)}
-                    <Button variant="ghost" size="2">
-                      <Star size={16} fill={selectedConversation.isStarred ? "#EAB308" : "none"} />
+                    <Button variant="ghost" size="2" style={{ color: sand.sand11 }}>
+                      <Star size={16} fill={selectedConversation.isStarred ? "#F59E0B" : "none"} color={selectedConversation.isStarred ? "#F59E0B" : sand.sand11} strokeWidth={1.5} />
                     </Button>
-                    <Button variant="ghost" size="2">
-                      <Archive size={16} />
+                    <Button variant="ghost" size="2" style={{ color: sand.sand11 }}>
+                      <Archive size={16} strokeWidth={1.5} />
                     </Button>
-                    <Button variant="ghost" size="2">
+                    <Button variant="ghost" size="2" style={{ color: sand.sand11 }}>
                       <MoreVertical size={16} />
                     </Button>
                   </Flex>
@@ -461,26 +465,34 @@ export default function CommunicationsPage() {
 
                 {/* Context Info */}
                 {selectedConversation.relatedReel && (
-                  <Box mt="3" p="2" style={{ background: "#F9FAFB", borderRadius: "6px", border: "1px solid #F5F5F5" }}>
-                    <Flex align="center" gap="2">
-                      <MessageSquare size={14} color="#737373" />
-                      <Text size="1" style={{ color: "#737373" }}>
-                        Related to reel: <strong>{selectedConversation.relatedReel}</strong>
-                      </Text>
-                    </Flex>
-                    {selectedConversation.relatedProducts && (
-                      <Flex gap="1" mt="1">
-                        {selectedConversation.relatedProducts.map(product => (
-                          <Badge key={product} size="1" variant="soft">{product}</Badge>
-                        ))}
+                  <Box mt="3" p="2" style={{ background: sand.sand2, borderRadius: "8px", border: `1px solid ${sand.sand4}` }}>
+                    <Flex align="center" justify="between">
+                      <Flex direction="column" gap="1" style={{ flex: 1 }}>
+                        <Flex align="center" gap="2">
+                          <MessageSquare size={14} color={sand.sand11} />
+                          <Text size="1" style={{ color: "sage.sage11" }}>
+                            Related to reel: <strong>{selectedConversation.relatedReel}</strong>
+                          </Text>
+                        </Flex>
+                        {selectedConversation.relatedProducts && (
+                          <Flex gap="1">
+                            {selectedConversation.relatedProducts.map(product => (
+                              <Badge key={product} size="1" variant="soft" color="blue">{product}</Badge>
+                            ))}
+                          </Flex>
+                        )}
                       </Flex>
-                    )}
+                      <Button size="1" variant="solid" color="lime">
+                        <Share2 size={14} />
+                        View Reel
+                      </Button>
+                    </Flex>
                   </Box>
                 )}
               </Box>
 
               {/* Messages Thread */}
-              <Box style={{ flex: 1, overflowY: "auto", padding: "1.5rem", background: "#FAFAFA" }}>
+              <Box style={{ flex: 1, overflowY: "auto", padding: "1.5rem", background: sand.sand2 }}>
                 <Flex direction="column" gap="0">
                   {selectedConversation.messages.map((message, index) => {
                     const isFromBusiness = message.from === businessName;
@@ -489,9 +501,8 @@ export default function CommunicationsPage() {
                       <Box
                         key={message.id}
                         style={{
-                          background: "#FFFFFF",
-                          border: "1px solid #E5E5E5",
-                          borderTop: index === 0 ? "1px solid #E5E5E5" : "none",
+                          background: "#FFFEFB",
+                          borderBottom: `1px solid ${sand.sand4}`,
                           padding: "1.5rem",
                         }}
                       >
@@ -499,7 +510,7 @@ export default function CommunicationsPage() {
                         <Flex direction="column" gap="2" mb="3">
                           {/* Subject Line (first email only) */}
                           {index === 0 && (
-                            <Text size="4" weight="bold" style={{ display: "block", marginBottom: "0.5rem" }}>
+                            <Text size="4" weight="medium" style={{ display: "block", marginBottom: "0.5rem" }}>
                               {message.subject}
                             </Text>
                           )}
@@ -512,19 +523,20 @@ export default function CommunicationsPage() {
                                 src={isFromBusiness ? "/placeholder-logo.svg" : selectedConversation.creatorAvatar}
                                 fallback={message.from.charAt(0)}
                                 radius="full"
+                                color="gray"
                               />
                               <Box style={{ flex: 1, minWidth: 0 }}>
                                 <Flex align="center" gap="2" style={{ minWidth: 0 }}>
-                                  <Text size="2" weight="bold" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  <Text size="2" weight="medium" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                     {message.from}
                                   </Text>
                                 </Flex>
-                                <Text size="1" style={{ color: "#737373", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <Text size="1" style={{ color: "sage.sage11", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   to {message.to}
                                 </Text>
                               </Box>
                             </Flex>
-                            <Text size="1" style={{ color: "#737373", whiteSpace: "nowrap", marginLeft: "1rem" }}>
+                            <Text size="1" style={{ color: "sage.sage11", whiteSpace: "nowrap", marginLeft: "1rem" }}>
                               {message.timestamp}
                             </Text>
                           </Flex>
@@ -538,7 +550,7 @@ export default function CommunicationsPage() {
                             lineHeight: 1.6,
                           }}
                         >
-                          <Text size="2" style={{ color: "#1A1A1A" }}>
+                          <Text size="2" style={{ color: "sage.sage12" }}>
                             {message.body}
                           </Text>
 
@@ -549,17 +561,17 @@ export default function CommunicationsPage() {
                               mt="3"
                               p="2"
                               style={{
-                                background: "#F9FAFB",
+                                background: sand.sand2,
                                 borderRadius: "6px",
-                                border: "1px solid #E5E5E5",
+                                border: `1px solid ${sand.sand4}`,
                                 width: "fit-content"
                               }}
                             >
-                              <FileText size={16} color="#737373" />
-                              <Text size="1" style={{ color: "#737373" }}>
+                              <FileText size={16} color={sand.sand11} />
+                              <Text size="1" style={{ color: "sage.sage11" }}>
                                 {message.attachmentType === "contract" ? "Partnership_Contract.pdf" : "Attachment"}
                               </Text>
-                              <Button size="1" variant="ghost">
+                              <Button size="1" variant="ghost" style={{ color: sand.sand11 }}>
                                 <ExternalLink size={12} />
                               </Button>
                             </Flex>
@@ -569,11 +581,11 @@ export default function CommunicationsPage() {
                         {/* Reply/Forward Actions (on hover) */}
                         {index === selectedConversation.messages.length - 1 && (
                           <Flex gap="2" mt="3" style={{ paddingLeft: "3rem" }}>
-                            <Button size="1" variant="ghost">
+                            <Button size="1" variant="soft" color="gray">
                               <Reply size={14} />
                               Reply
                             </Button>
-                            <Button size="1" variant="ghost">
+                            <Button size="1" variant="soft" color="gray">
                               <ArrowLeft size={14} />
                               Forward
                             </Button>
@@ -586,44 +598,50 @@ export default function CommunicationsPage() {
               </Box>
 
               {/* Reply Box - Email Composer Style */}
-              <Box style={{ borderTop: "1px solid #E5E5E5", background: "#FFFFFF" }}>
+              <Box style={{ borderTop: `1px solid ${sand.sand4}`, background: "#FFFFFF" }}>
                 <Box p="4">
                   <Flex direction="column" gap="3">
                     {/* Email Body */}
-                    <TextArea
+                    <textarea
                       placeholder="Type your reply..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       rows={6}
                       style={{
+                        width: "100%",
                         resize: "vertical",
-                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontFamily: "var(--font-satoshi), system-ui, sans-serif",
                         fontSize: "14px",
-                        border: "1px solid #E5E5E5"
+                        border: "1px solid #D4D7C7",
+                        borderRadius: "8px",
+                        padding: "1rem",
+                        background: "#FFFFFF",
+                        color: "#1F2611",
                       }}
                     />
 
                     {/* Actions */}
                     <Flex align="center" justify="between">
-                      <Flex gap="3">
-                        <Button variant="ghost" size="2">
+                      <Flex gap="2">
+                        <Button variant="soft" size="2" color="gray">
                           <Paperclip size={16} />
                           Attach
                         </Button>
-                        <Button variant="ghost" size="2">
+                        <Button variant="soft" size="2" color="gray">
                           <FileText size={16} />
                           Contract
                         </Button>
                       </Flex>
                       <Flex gap="2">
-                        <Button variant="outline" size="2" onClick={() => setReplyText("")}>
+                        <Button variant="soft" size="2" color="gray" onClick={() => setReplyText("")}>
                           Discard
                         </Button>
                         <Button
+                          variant="solid"
                           size="2"
+                          color="lime"
                           onClick={handleSendReply}
                           disabled={!replyText.trim()}
-                          style={{ background: "#B4D88B", color: "#000" }}
                         >
                           <Send size={16} />
                           Send Email
@@ -637,11 +655,11 @@ export default function CommunicationsPage() {
           ) : (
             <Card style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Box style={{ textAlign: "center", padding: "3rem" }}>
-                <MessageSquare size={48} color="#D1D5DB" style={{ margin: "0 auto 1rem" }} />
-                <Text size="4" weight="bold" style={{ display: "block", color: "#737373", marginBottom: "0.5rem" }}>
+                <MessageSquare size={48} color={sand.sand11} style={{ margin: "0 auto 1rem" }} />
+                <Text size="4" weight="medium" style={{ display: "block", color: sand.sand12, marginBottom: "0.5rem" }}>
                   No conversation selected
                 </Text>
-                <Text size="2" style={{ color: "#737373" }}>
+                <Text size="2" style={{ color: sand.sand11 }}>
                   Select a conversation from the list to view messages
                 </Text>
               </Box>

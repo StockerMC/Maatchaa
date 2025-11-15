@@ -20,51 +20,93 @@ export default function ReelsPage() {
     };
     const [data, setData] = useState<Reel[] | null>(null);
     const [isIngesting, setIsIngesting] = useState(false);
-    
+
     useEffect(() => {
         const fetchData = async () => {
-            const shop_name = localStorage.getItem("shop_name");
-            const { data: yt_shorts_pending, error } = await supabase
-                .from("yt_shorts_pending")
-                .select("*")
-                .eq("company", shop_name);
-            
-            if (error) {
-                console.error("Error fetching reels:", error);
-                return;
-            }
+            // MOCK DATA FOR TESTING - just fake 5 reels
+            const mockReels: Reel[] = [
+                {
+                    id: "1",
+                    company: "matchamatcha.ca",
+                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    product_imgs: ["https://picsum.photos/200/300"],
+                    product_titles: ["Test Product 1"],
+                    short_id: "dQw4w9WgXcQ",
+                    email: "test@example.com",
+                    channel_id: "test_channel",
+                    company_id: "matchamatcha.ca"
+                },
+                {
+                    id: "2",
+                    company: "matchamatcha.ca",
+                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    product_imgs: ["https://picsum.photos/200/301"],
+                    product_titles: ["Test Product 2"],
+                    short_id: "dQw4w9WgXcQ",
+                    email: "test@example.com",
+                    channel_id: "test_channel",
+                    company_id: "matchamatcha.ca"
+                },
+                {
+                    id: "3",
+                    company: "matchamatcha.ca",
+                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    product_imgs: ["https://picsum.photos/200/302"],
+                    product_titles: ["Test Product 3"],
+                    short_id: "dQw4w9WgXcQ",
+                    email: "test@example.com",
+                    channel_id: "test_channel",
+                    company_id: "matchamatcha.ca"
+                },
+                {
+                    id: "4",
+                    company: "matchamatcha.ca",
+                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    product_imgs: ["https://picsum.photos/200/303"],
+                    product_titles: ["Test Product 4"],
+                    short_id: "dQw4w9WgXcQ",
+                    email: "test@example.com",
+                    channel_id: "test_channel",
+                    company_id: "matchamatcha.ca"
+                },
+                {
+                    id: "5",
+                    company: "matchamatcha.ca",
+                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    product_imgs: ["https://picsum.photos/200/304"],
+                    product_titles: ["Test Product 5"],
+                    short_id: "dQw4w9WgXcQ",
+                    email: "test@example.com",
+                    channel_id: "test_channel",
+                    company_id: "matchamatcha.ca"
+                }
+            ];
 
-            console.log("Fetched data:", yt_shorts_pending);
-            console.log("Data length:", yt_shorts_pending?.length);
-            
-            // Transform the data to match ReelData interface
-            const transformedData = (yt_shorts_pending || []).map((reel: Reel) => ({
-                ...reel,
-                company_id: reel.company // Map company to company_id
-            }));
-            
-            console.log("Setting data:", transformedData);
-            setData(transformedData);
-            
-            // If no shorts were found, check if we should trigger ingestion
-            if (!transformedData || transformedData.length === 0) {
-                await checkAndTriggerIngestion(shop_name);
-            }
+            console.log("Using MOCK data for testing:", mockReels);
+            setData(mockReels);
         };
-        
+
         const checkAndTriggerIngestion = async (shop_name: string | null) => {
             if (!shop_name || isIngesting) return;
-            
+
             try {
+                console.log("Checking ingestion for shop:", shop_name);
+
                 // Get company data to check last ingestion attempt
                 const { data: company, error: companyError } = await supabase
                     .from("companies")
                     .select("last_ingest_attempt, access_token")
                     .eq("shop_name", shop_name)
                     .single();
-                
+
                 if (companyError) {
                     console.error("Error fetching company data:", companyError);
+                    console.log("Company lookup failed - this might mean the shop isn't registered yet");
+                    return;
+                }
+
+                if (!company) {
+                    console.log("No company found with shop_name:", shop_name);
                     return;
                 }
                 
@@ -117,8 +159,12 @@ export default function ReelsPage() {
     }, [isIngesting]);
 
     return (
-        <DashboardLayout>
-            <div className="relative" style={{ margin: "-2rem", height: "calc(100vh - 64px)" }}>
+        <DashboardLayout
+            initialSidebarOpen={true}
+            allowSidebarToggle={false}
+            hideHeader={true}
+        >
+            <div className="fixed inset-0">
                 {isIngesting && (
                     <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
                         Generating new content...

@@ -2,51 +2,60 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, Flex, Text } from "@radix-ui/themes";
+import { Box, Flex, Text, Separator } from "@radix-ui/themes";
+import { sand } from "@radix-ui/colors";
 import {
-  LayoutDashboard,
-  Search,
-  Users,
-  Package,
-  BarChart3,
-  MessageSquare,
-  Bot,
-  Settings,
-  HelpCircle,
-  LogOut
-} from "lucide-react";
+  DashboardIcon,
+  MagnifyingGlassIcon,
+  Link2Icon,
+  CubeIcon,
+  BarChartIcon,
+  ChatBubbleIcon,
+  MixIcon,
+  GearIcon,
+  QuestionMarkCircledIcon,
+  ExitIcon
+} from "@radix-ui/react-icons";
+import SquigglyUnderlineTextLogo from '../SquigglyUnderlineTextLogo';
 
 const mainNavItems = [
-  { name: "Overview", href: "/dashboard/overview", icon: LayoutDashboard },
-  { name: "Discover Shorts", href: "/dashboard/reels", icon: Search },
-  { name: "Partnerships", href: "/dashboard/partnerships", icon: Users },
-  { name: "Products", href: "/dashboard/products", icon: Package },
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "Communications", href: "/dashboard/communications", icon: MessageSquare },
-  { name: "Agents", href: "/dashboard/agents", icon: Bot },
+  { name: "Overview", href: "/dashboard/overview", icon: DashboardIcon },
+  { name: "Discover Shorts", href: "/dashboard/reels", icon: MagnifyingGlassIcon },
+  { name: "Partnerships", href: "/dashboard/partnerships", icon: Link2Icon },
+  { name: "Products", href: "/dashboard/products", icon: CubeIcon },
+  { name: "Analytics", href: "/dashboard/analytics", icon: BarChartIcon },
+  { name: "Communications", href: "/dashboard/communications", icon: ChatBubbleIcon },
+  { name: "Agents", href: "/dashboard/agents", icon: MixIcon },
 ];
 
 const footerNavItems = [
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
-  { name: "Help & Support", href: "/dashboard/help", icon: HelpCircle },
-  { name: "Logout", href: "/logout", icon: LogOut },
+  { name: "Settings", href: "/dashboard/settings", icon: GearIcon },
+  { name: "Help & Support", href: "/dashboard/help", icon: QuestionMarkCircledIcon },
+  { name: "Logout", href: "/logout", icon: ExitIcon },
 ];
 
-export default function DashboardSidebar() {
+interface DashboardSidebarProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+}
+
+export default function DashboardSidebar({ isOpen = true, onToggle }: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
     <Box
       style={{
         position: "fixed",
-        left: 0,
+        left: isOpen ? 0 : "-280px",
         top: 0,
         bottom: 0,
         width: "280px",
-        background: "#1A1A1A",
-        borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+        background: sand.sand2,
+        borderRight: `1px solid ${sand.sand6}`,
         display: "flex",
         flexDirection: "column",
+        transition: "left 0.3s ease",
+        zIndex: 1000,
       }}
     >
       {/* Logo */}
@@ -54,21 +63,21 @@ export default function DashboardSidebar() {
         align="center"
         style={{
           height: "64px",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          borderBottom: `1px solid ${sand.sand6}`,
           padding: "0 1.5rem",
         }}
       >
         <Link href="/dashboard/overview" style={{ textDecoration: "none" }}>
-          <Text size="5" weight="medium" style={{ color: "#B4D88B" }}>
+          <SquigglyUnderlineTextLogo>
             Maatchaa
-          </Text>
+          </SquigglyUnderlineTextLogo>
         </Link>
       </Flex>
 
       {/* Main Navigation */}
       <Flex direction="column" style={{ flex: 1, overflowY: "auto", padding: "1rem 0.75rem" }}>
-        <Box style={{ marginBottom: "1rem", paddingLeft: "0.75rem" }}>
-          <Text size="1" weight="medium" style={{ color: "rgba(255, 255, 255, 0.4)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        <Box style={{ marginBottom: "0.75rem", paddingLeft: "0.75rem" }}>
+          <Text size="1" weight="medium" style={{ color: sand.sand11, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Main
           </Text>
         </Box>
@@ -87,36 +96,32 @@ export default function DashboardSidebar() {
                 gap: "0.75rem",
                 padding: "0.625rem 0.75rem",
                 marginBottom: "0.25rem",
-                borderRadius: "0.5rem",
+                borderRadius: "12px",
                 textDecoration: "none",
-                background: isActive ? "#B4D88B" : "transparent",
-                color: isActive ? "#000" : "rgba(255, 255, 255, 0.7)",
-                transition: "all 0.2s",
+                background: "transparent",
+                color: sand.sand11,
+                transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                  e.currentTarget.style.color = "#FFF";
-                }
+                e.currentTarget.style.background = sand.sand3;
+                e.currentTarget.style.color = sand.sand12;
               }}
               onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                }
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = sand.sand11;
               }}
             >
-              <Icon size={20} />
-              <Text size="2" weight="medium">{item.name}</Text>
+              <Icon width={20} height={20} />
+              <Text size="2" weight="regular">{item.name}</Text>
             </Link>
           );
         })}
       </Flex>
 
       {/* Footer Navigation */}
-      <Box style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)", padding: "0.75rem" }}>
-        <Box style={{ marginBottom: "1rem", paddingLeft: "0.75rem" }}>
-          <Text size="1" weight="medium" style={{ color: "rgba(255, 255, 255, 0.4)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+      <Box style={{ borderTop: `1px solid ${sand.sand6}`, padding: "0.75rem" }}>
+        <Box style={{ marginBottom: "0.75rem", paddingLeft: "0.75rem" }}>
+          <Text size="1" weight="medium" style={{ color: sand.sand11, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Account
           </Text>
         </Box>
@@ -135,27 +140,23 @@ export default function DashboardSidebar() {
                 gap: "0.75rem",
                 padding: "0.625rem 0.75rem",
                 marginBottom: "0.25rem",
-                borderRadius: "0.5rem",
+                borderRadius: "12px",
                 textDecoration: "none",
-                background: isActive ? "#B4D88B" : "transparent",
-                color: isActive ? "#000" : "rgba(255, 255, 255, 0.7)",
-                transition: "all 0.2s",
+                background: "transparent",
+                color: sand.sand11,
+                transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                  e.currentTarget.style.color = "#FFF";
-                }
+                e.currentTarget.style.background = sand.sand3;
+                e.currentTarget.style.color = sand.sand12;
               }}
               onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.7)";
-                }
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = sand.sand11;
               }}
             >
-              <Icon size={20} />
-              <Text size="2" weight="medium">{item.name}</Text>
+              <Icon width={20} height={20} />
+              <Text size="2" weight="regular">{item.name}</Text>
             </Link>
           );
         })}

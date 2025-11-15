@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, Select, Dialog } from "@radix-ui/themes";
+import { sage, lime } from "@radix-ui/colors";
 import { Search, ExternalLink, Eye, Loader2, X, Package } from "lucide-react";
 import Image from "next/image";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+
+const POSITIVE_COLOR = "#5c9a31";
+const NEGATIVE_COLOR = "#f81f1f";
 
 interface ShopifyVariant {
   id: number;
@@ -185,7 +189,7 @@ export default function ProductsPage() {
     return (
       <DashboardLayout>
         <Flex align="center" justify="center" style={{ minHeight: "400px" }}>
-          <Loader2 size={32} className="animate-spin" color="#B4D88B" />
+          <Loader2 size={32} className="animate-spin" color={lime.lime9} />
         </Flex>
       </DashboardLayout>
     );
@@ -197,10 +201,10 @@ export default function ProductsPage() {
         {/* Header */}
         <Flex align="center" justify="between">
           <Box>
-            <Text size="8" weight="bold" style={{ color: "#1A1A1A" }}>
+            <Text size="8" weight="bold" style={{ color: sage.sage12 }}>
               Product List
             </Text>
-            <Text size="3" style={{ color: "#737373", marginTop: "0.5rem", display: "block" }}>
+            <Text size="3" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
               Products from your Shopify store
             </Text>
           </Box>
@@ -211,7 +215,7 @@ export default function ProductsPage() {
               onChange={(e) => setShopifyStoreUrl(e.target.value)}
               style={{ width: "200px" }}
             />
-            <Button variant="outline" onClick={fetchShopifyProducts}>
+            <Button variant="solid" onClick={fetchShopifyProducts} color="lime">
               Sync Store
             </Button>
           </Flex>
@@ -223,12 +227,14 @@ export default function ProductsPage() {
             {
               label: "Total Products",
               value: products.length,
-              subtext: `${products.filter((p) => p.status === "Active").length} active, ${products.filter((p) => p.status === "Out of Stock").length} out of stock`,
+              changeNumber: `+${products.filter((p) => p.status === "Active").length}`,
+              changeDesc: "active",
             },
             {
               label: "Total Variants",
               value: products.reduce((sum, p) => sum + p.variants.length, 0),
-              subtext: "Across all products",
+              changeNumber: `+${Math.floor(products.reduce((sum, p) => sum + p.variants.length, 0) * 0.1)}`,
+              changeDesc: "new",
             },
             {
               label: "Avg. Price",
@@ -236,31 +242,42 @@ export default function ProductsPage() {
                 products.length > 0
                   ? `$${(products.reduce((sum, p) => sum + p.price, 0) / products.length).toFixed(2)}`
                   : "$0.00",
-              subtext: "Per product",
+              changeNumber: "",
+              changeDesc: "Across all products",
             },
             {
               label: "Categories",
               value: categories.length - 1,
-              subtext: `${Array.from(new Set(products.map((p) => p.vendor))).length} vendors`,
+              changeNumber: `${Array.from(new Set(products.map((p) => p.vendor))).length}`,
+              changeDesc: "vendors",
             },
           ].map((stat) => (
             <Card
               key={stat.label}
               style={{
                 flex: "1 1 calc(25% - 1rem)",
-                minWidth: "200px",
-                padding: "1.25rem",
+                minWidth: "240px",
+                padding: "1.5rem",
               }}
             >
-              <Text size="2" style={{ color: "#737373", display: "block", marginBottom: "0.5rem" }}>
-                {stat.label}
-              </Text>
-              <Text size="6" weight="bold" style={{ display: "block", marginBottom: "0.25rem" }}>
-                {stat.value}
-              </Text>
-              <Text size="1" style={{ color: "#737373" }}>
-                {stat.subtext}
-              </Text>
+              <Flex direction="column" gap="3">
+                <Text size="2" style={{ color: "sage.sage11", fontWeight: 500 }}>
+                  {stat.label}
+                </Text>
+                <Text size="7" weight="medium" style={{ color: "#000" }}>
+                  {stat.value}
+                </Text>
+                <Flex align="center" gap="1">
+                  {stat.changeNumber && (
+                    <Text size="1" style={{ color: POSITIVE_COLOR, fontWeight: 600 }}>
+                      {stat.changeNumber}
+                    </Text>
+                  )}
+                  <Text size="1" style={{ color: "#000", fontWeight: 400 }}>
+                    {stat.changeDesc}
+                  </Text>
+                </Flex>
+              </Flex>
             </Card>
           ))}
         </Flex>
@@ -281,7 +298,7 @@ export default function ProductsPage() {
                   left: "12px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#737373",
+                  color: sage.sage11,
                 }}
               />
               <TextField.Root
@@ -305,26 +322,27 @@ export default function ProductsPage() {
 
           {/* Product Grid */}
           <Flex direction="column" gap="3">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, index) => (
               <Flex
                 key={product.id}
                 align="center"
                 gap="4"
                 p="3"
                 style={{
-                  border: "1px solid #E5E5E5",
+                  border: "1px solid {sage.sage6}",
                   borderRadius: "8px",
                   cursor: "pointer",
                   transition: "all 0.2s",
+                  background: index % 2 === 0 ? "white" : "#FAFAF9",
                 }}
                 onClick={() => setSelectedProduct(product)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#B4D88B";
-                  e.currentTarget.style.background = "#F9FAFB";
+                  e.currentTarget.style.borderColor = `${lime.lime9}`;
+                  e.currentTarget.style.background = index % 2 === 0 ? "#F5F5F4" : "#F0F0EF";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#E5E5E5";
-                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = sage.sage6;
+                  e.currentTarget.style.background = index % 2 === 0 ? "white" : "#FAFAF9";
                 }}
               >
                 <Box
@@ -357,28 +375,28 @@ export default function ProductsPage() {
                       </Badge>
                     )}
                   </Flex>
-                  <Text size="1" style={{ color: "#737373", lineHeight: 1.4 }}>
+                  <Text size="1" style={{ color: sage.sage11, lineHeight: 1.4, fontWeight: 400 }}>
                     {product.vendor} • {product.description}
                   </Text>
                   {product.options.length > 0 && (
-                    <Text size="1" style={{ color: "#A3A3A3" }}>
+                    <Text size="1" style={{ color: sage.sage10 }}>
                       Options: {product.options.map((opt) => opt.name).join(", ")}
                     </Text>
                   )}
                 </Flex>
 
                 {/* Category */}
-                <Badge variant="outline" style={{ flexShrink: 0 }}>
+                <Badge variant="soft" style={{ flexShrink: 0 }}>
                   {product.category}
                 </Badge>
 
                 {/* Price */}
                 <Flex direction="column" align="end" style={{ width: "100px" }}>
-                  <Text size="3" weight="bold">
+                  <Text size="3" weight="medium">
                     ${product.price.toFixed(2)}
                   </Text>
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <Text size="1" style={{ color: "#A3A3A3", textDecoration: "line-through" }}>
+                    <Text size="1" style={{ color: sage.sage10, textDecoration: "line-through" }}>
                       ${product.compareAtPrice.toFixed(2)}
                     </Text>
                   )}
@@ -386,26 +404,26 @@ export default function ProductsPage() {
 
                 {/* Status */}
                 <Box style={{ width: "80px", display: "flex", justifyContent: "center" }}>
-                  <Badge color={getStatusColor(product.status)}>
+                  <Badge color={product.status === "Active" ? "purple" : getStatusColor(product.status)}>
                     {product.status}
                   </Badge>
                 </Box>
 
                 {/* Matches */}
                 <Flex align="center" gap="1" style={{ width: "60px" }}>
-                  <Eye size={14} color="#737373" />
+                  <Eye size={14} color={sage.sage11} />
                   <Text size="2" weight="medium">
                     {product.matchCount}
                   </Text>
                 </Flex>
 
                 {/* Last Matched */}
-                <Text size="1" style={{ color: "#737373", width: "100px" }}>
+                <Text size="1" style={{ color: sage.sage11, width: "100px" }}>
                   {product.lastMatched}
                 </Text>
 
                 {/* Actions */}
-                <Flex gap="2">
+                <Flex gap="2" align="center">
                   <Button
                     variant="soft"
                     size="1"
@@ -422,6 +440,14 @@ export default function ProductsPage() {
                     size="1"
                     asChild
                     onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      padding: 0,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
                     <a href={product.shopifyUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink size={14} />
@@ -478,7 +504,7 @@ export default function ProductsPage() {
                               height: "90px",
                               borderRadius: "8px",
                               overflow: "hidden",
-                              border: "1px solid #E5E5E5",
+                              border: "1px solid {sage.sage6}",
                             }}
                           >
                             <Image
@@ -500,9 +526,9 @@ export default function ProductsPage() {
                         <Badge color={getStatusColor(selectedProduct.status)}>
                           {selectedProduct.status}
                         </Badge>
-                        <Badge variant="outline">{selectedProduct.category}</Badge>
+                        <Badge variant="soft">{selectedProduct.category}</Badge>
                       </Flex>
-                      <Text size="2" style={{ color: "#737373" }}>
+                      <Text size="2" style={{ color: sage.sage11 }}>
                         by {selectedProduct.vendor}
                       </Text>
                     </Box>
@@ -510,17 +536,17 @@ export default function ProductsPage() {
                     {/* Pricing */}
                     <Box>
                       <Flex align="baseline" gap="2">
-                        <Text size="7" weight="bold">
+                        <Text size="7" weight="medium">
                           ${selectedProduct.price.toFixed(2)}
                         </Text>
                         {selectedProduct.compareAtPrice && selectedProduct.compareAtPrice > selectedProduct.price && (
-                          <Text size="4" style={{ color: "#A3A3A3", textDecoration: "line-through" }}>
+                          <Text size="4" style={{ color: sage.sage10, textDecoration: "line-through" }}>
                             ${selectedProduct.compareAtPrice.toFixed(2)}
                           </Text>
                         )}
                       </Flex>
                       {selectedProduct.variants.length > 1 && (
-                        <Text size="1" style={{ color: "#737373" }}>
+                        <Text size="1" style={{ color: sage.sage11 }}>
                           Starting price
                         </Text>
                       )}
@@ -531,7 +557,7 @@ export default function ProductsPage() {
                       <Text size="2" weight="medium" mb="2" style={{ display: "block" }}>
                         Description
                       </Text>
-                      <Text size="2" style={{ color: "#737373", lineHeight: 1.6 }}>
+                      <Text size="2" style={{ color: sage.sage11, lineHeight: 1.6 }}>
                         {selectedProduct.description}
                       </Text>
                     </Box>
@@ -545,7 +571,7 @@ export default function ProductsPage() {
                         <Flex direction="column" gap="2">
                           {selectedProduct.options.map((option) => (
                             <Box key={option.name}>
-                              <Text size="1" weight="medium" style={{ color: "#737373" }}>
+                              <Text size="1" weight="medium" style={{ color: sage.sage11 }}>
                                 {option.name}:
                               </Text>
                               <Flex gap="1" wrap="wrap" mt="1">
@@ -574,14 +600,14 @@ export default function ProductsPage() {
                             justify="between"
                             p="2"
                             style={{
-                              border: "1px solid #E5E5E5",
+                              border: "1px solid {sage.sage6}",
                               borderRadius: "6px",
-                              background: variant.available ? "white" : "#F9FAFB",
+                              background: variant.available ? "white" : sage.sage2,
                             }}
                           >
                             <Flex direction="column" gap="1">
                               <Text size="2">{variant.title}</Text>
-                              <Text size="1" style={{ color: "#737373" }}>
+                              <Text size="1" style={{ color: sage.sage11 }}>
                                 SKU: {variant.sku}
                               </Text>
                             </Flex>
@@ -606,7 +632,7 @@ export default function ProductsPage() {
                         </Text>
                         <Flex gap="1" wrap="wrap">
                           {selectedProduct.tags.slice(0, 10).map((tag) => (
-                            <Badge key={tag} variant="outline" size="1">
+                            <Badge key={tag} variant="soft" size="1">
                               {tag}
                             </Badge>
                           ))}
@@ -638,4 +664,3 @@ export default function ProductsPage() {
     </DashboardLayout>
   );
 }
-

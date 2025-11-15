@@ -1,6 +1,6 @@
 import { BlogContent } from "@/components/blog/blog-content";
 import Link from "next/link";
-import { Text, Button, Box } from "@radix-ui/themes";
+import { Text, Button, Box, Badge } from "@radix-ui/themes";
 import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import Footer from "@/components/Footer";
@@ -51,12 +51,12 @@ export default async function BlogPage() {
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-8">
-              <span className="text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', color: '#FFF', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              <Badge size="2" variant="soft" color="blue" style={{ color: '#FFF' }}>
                 Hackathon
-              </span>
-              <span className="text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', color: '#FFF', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              </Badge>
+              <Badge size="2" variant="soft" color="blue" style={{ color: '#FFF' }}>
                 Product
-              </span>
+              </Badge>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: '#FFFFFF', textShadow: '0 2px 20px rgba(0, 0, 0, 0.3)' }}>
@@ -114,7 +114,7 @@ export default async function BlogPage() {
         </div>
 
         <div className="max-w-4xl mx-auto relative z-10 text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <Text size="2" weight="medium" style={{ color: '#286352', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <Text size="2" weight="medium" style={{ color: '#4e8f7c', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Get Early Access
           </Text>
           <Text size="8" weight="bold" style={{ color: '#1A1A1A', lineHeight: 1.2 }}>
