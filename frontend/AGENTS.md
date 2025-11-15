@@ -1,14 +1,16 @@
 # Frontend Architecture & Context
 
+This document provides essential architectural context for AI agents working on this codebase. Redundant information that can be gathered from file reading is intentionally omitted.
+
 ## Tech Stack
 
 - **Framework**: Next.js 15.5.3 (App Router, React Server Components, Turbopack)
 - **React**: 19.1.0
-- **UI Library**: Radix UI Themes 3.2.1 + Radix Primitives
+- **UI Library**: Radix UI Themes 3.2.1 + Radix Primitives (PRIMARY - use first)
 - **Styling**: Tailwind CSS 4 + Radix Colors
-- **Icons**: Lucide React
-- **Animations**: GSAP, Framer Motion concepts
-- **Drag & Drop**: @dnd-kit
+- **Icons**: Lucide React (minimal usage only)
+- **Animations**: GSAP, Framer Motion
+- **Drag & Drop**: @dnd-kit (used in Kanban boards)
 - **Auth**: NextAuth.js
 - **Database**: Supabase (PostgreSQL)
 - **Type Safety**: TypeScript
@@ -69,93 +71,112 @@ import { sage, lime, sand, gray, blue, cyan } from "@radix-ui/colors";
 - 9-10: Solid colors (buttons, badges)
 - 11-12: Text colors
 
-## File Structure
+## File Index
 
-### `/src/app` - Next.js App Router
-- **`page.tsx`**: Homepage with hero, features, waitlist
-- **`layout.tsx`**: Root layout with providers, fonts, metadata
-- **`globals.css`**: Global styles, Radix theme config
-- **`dashboard/`**: Protected dashboard routes
-  - `partnerships/page.tsx`: Kanban board for creator partnerships
-  - `communications/page.tsx`: Email thread management
-  - `agents/page.tsx`: AI agent chat interface
-  - `analytics/page.tsx`: Performance metrics
-  - `creators/page.tsx`: Creator discovery
-- **`api/`**: API routes (auth, data fetching)
+### Core Pages (`/src/app`)
+- **`page.tsx`** - Landing page: hero, features, waitlist CTA, video demos
+- **`layout.tsx`** - Root layout: Radix Theme provider, fonts (Figtree, Instrument Serif, Satoshi), metadata
+- **`globals.css`** - Global styles, CSS variables, Radix theme configuration, custom font faces
+- **`blog/page.tsx`** - MDX blog rendering
+- **`onboarding/page.tsx`** - User onboarding flow
 
-### `/src/components`
-- **Landing Page**: `Header.tsx`, `Footer.tsx`, `VideoStepSync.tsx`, `PhoneImageScroller.tsx`
-- **Dashboard**: `dashboard/DashboardLayout.tsx`, `dashboard/Sidebar.tsx`
-- **Utilities**: `Providers.tsx` (NextAuth, React context), `ConditionalHeader.tsx`
-- **UI Primitives**: `ui/` (shared components)
+### Dashboard Pages (`/src/app/dashboard`)
+- **`partnerships/page.tsx`** - Kanban board with drag-and-drop (4 columns: To Contact → Contacted → In Discussion → Active), validation rules, embedded YouTube modals, LaTeX contract generation
+- **`communications/page.tsx`** - Gmail-style email thread UI, two-pane layout (conversation list + message thread), draft composer
+- **`agents/page.tsx`** - AI agent chat interface, agent selection sidebar, action tracking (email, contract, research, analysis)
+- **`analytics/page.tsx`** - Performance metrics dashboard
+- **`products/page.tsx`** - Product management
+- **`reels/page.tsx`** - YouTube Shorts discovery and matching
+- **`overview/page.tsx`** - Dashboard home
 
-### `/src/lib`
-- **`supabase.ts`**: Supabase client (browser)
-- **`supabaseAdmin.ts`**: Supabase admin client (server)
-- **`utils.ts`**: Helper functions (cn, formatters)
-- **`cookies.ts`**: Cookie utilities for auth
+### Components (`/src/components`)
+- **`dashboard/DashboardLayout.tsx`** - Two-column layout wrapper for all dashboard pages
+- **`dashboard/DashboardSidebar.tsx`** - Navigation sidebar with route highlighting
+- **`dashboard/DashboardHeader.tsx`** - Top header for dashboard
+- **`Header.tsx`** - Landing page navigation
+- **`Footer.tsx`** - Site footer
+- **`VideoStepSync.tsx`** - Scroll-synced video component
+- **`PhoneImageScroller.tsx`** - Phone mockup with scrolling images
+- **`YoutubeReels.tsx`** - YouTube Shorts grid display
+- **`PartnershipPrompt.tsx`** - Partnership CTA component
+- **`SquigglyUnderlineTextLogo.tsx`** - Animated logo component
+- **`waitlist/waitlist-form.tsx`** - Email collection form
 
-### `/src/types`
-- **`next-auth.d.ts`**: NextAuth type extensions
+### Utilities (`/src/lib`)
+- **`supabase.ts`** - Browser-side Supabase client
+- **`supabaseAdmin.ts`** - Server-side Supabase client (service role)
+- **`utils.ts`** - Helper functions (cn for className merging, formatters)
+- **`cookies.ts`** - Cookie management for auth
 
-## Design System Rules
+### Types (`/src/types`)
+- **`next-auth.d.ts`** - NextAuth session/user type extensions
 
-### Buttons
+## Critical Design System Rules
+
+### Button Variants (STRICT)
 ```tsx
-// Primary action
+// ✅ PRIMARY ACTION - ALWAYS use solid lime
 <Button variant="solid" color="lime">Submit</Button>
 
-// Secondary action  
+// ✅ SECONDARY ACTION - soft gray only
 <Button variant="soft" color="gray">Cancel</Button>
 
-// External link
+// ✅ EXTERNAL LINKS / WATCH ACTIONS - soft cyan to differentiate from blue badges
 <Button variant="soft" color="cyan" asChild>
   <a href="..." target="_blank">
     <ExternalLink size={16} />
     Watch Video
   </a>
 </Button>
+
+// ❌ NEVER use outline or surface variants
+// ❌ NEVER use 100% width buttons - use 220px fixed width in modals
 ```
 
-### Badges
-```tsx
-// Status indicators
-<Badge color="blue">To Contact</Badge>
-<Badge color="amber">Contacted</Badge>
-<Badge color="orange">In Discussion</Badge>
-<Badge color="purple">Active</Badge>
+### Status Badge Colors (Partnerships)
+- **To Contact**: `blue`
+- **Contacted**: `amber` (NOT yellow)
+- **In Discussion**: `orange`
+- **Active**: `purple`
+- **Product Tags**: `blue` variant="soft"
 
-// Product tags
-<Badge variant="soft" size="1" color="blue">Product Name</Badge>
-```
+### Typography Scale
+- **size="8"** weight="bold" - H1 page titles
+- **size="6"** weight="bold" - H2 section headers
+- **size="3"** weight="medium" - Card titles
+- **size="2"** - Body text
+- **size="1"** - Captions/meta (color: sage.sage11)
 
 ### Cards
 ```tsx
-// Use Radix Card - no custom borders
+// ✅ Use Radix Card - it has built-in borders
 <Card style={{ padding: "1rem" }}>
-  <Flex direction="column" gap="2">
-    {/* Content */}
-  </Flex>
+  <Flex direction="column" gap="2">{/* Content */}</Flex>
 </Card>
+
+// ❌ NEVER add custom borders to Card (double border anti-pattern)
 ```
 
-### Typography Hierarchy
+### Color Usage
 ```tsx
-<Text size="8" weight="bold">H1 - Page Title</Text>
-<Text size="6" weight="bold">H2 - Section Header</Text>
-<Text size="3" weight="medium">Body - Card Titles</Text>
-<Text size="2">Body - Regular Text</Text>
-<Text size="1" style={{ color: "var(--sage-11)" }}>Caption/Meta</Text>
-```
+// Import colors for consistency
+import { sage, sand, lime } from "@radix-ui/colors";
 
-### Color Variables
-```tsx
-// Prefer Radix color tokens
-style={{ color: "var(--sage-11)", background: "var(--sage-2)" }}
+// Backgrounds
+sand.sand1  // Base background
+sand.sand2  // Subtle highlight (selected items)
+sand.sand3  // Slightly darker
 
-// Or import directly
-import { sage } from "@radix-ui/colors";
-style={{ color: sage.sage11, background: sage.sand2 }}
+// Text
+sage.sage11 // Muted text
+sage.sage12 // Primary text
+
+// Borders
+sand.sand4  // Subtle borders
+sand.sand6  // Stronger borders
+
+// Brand
+lime.lime9  // Primary brand color (#DDEBB2 approximation)
 ```
 
 ## State Management
@@ -202,27 +223,45 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 </Flex>
 ```
 
-## Key Features
+## Key Implementation Patterns
 
-### Partnerships Kanban Board
-- 4 columns: To Contact → Contacted → In Discussion → Active
-- Drag-and-drop with validation rules
-- Equal-height columns using flexbox (`flex: 1`, `alignItems: "stretch"`)
-- Minimum height: 400px (approximately 2 cards tall)
-- Fixed-width buttons (220px) in action modals
-- Embedded YouTube videos in partnership modals
+### Partnerships Kanban (`partnerships/page.tsx`)
+**Critical Details:**
+- **Drag & Drop**: Uses `@dnd-kit/core` with `PointerSensor` (8px activation distance)
+- **Validation Rules**:
+  - Can't move to "In Discussion" from "To Contact" (must go through "Contacted")
+  - Can't move to "Active" without `contractSigned` and `affiliateLinkGenerated`
+  - Shows `AlertDialog` on validation failure
+- **Column Layout**:
+  - 320px fixed width per column
+  - `flex: 1`, `minHeight: "400px"` for equal heights
+  - `alignItems: "stretch"` on parent Flex
+- **Actions Modal**:
+  - 700px max width
+  - Embedded YouTube iframe (16:9 aspect ratio)
+  - Button width: 220px fixed
+  - "Watch Video" button always `soft` `cyan`
+- **LaTeX Contract Generation**: Generates partnership contracts with heredoc-style templates
 
-### Communications Hub
-- Two-pane layout (conversation list + message thread)
-- Selected conversation highlighted with `sand.sand2` background
-- Real-time message threading
-- Email draft generation with AI
+### Communications (`communications/page.tsx`)
+**Gmail-Style Implementation:**
+- **Layout**: Two-pane (400px sidebar + flexible message area)
+- **Selected State**: `sand.sand2` background (NOT sand.sand3)
+- **Message Thread**:
+  - Email-style headers (From/To/Subject)
+  - No message bubbles - plain text with left padding (3rem from avatar)
+  - Attachments shown as clickable cards
+- **Reply Composer**: Bottom-anchored textarea with "Send Email" button (solid lime)
+- **Status Tabs**: All/Pending/Replied/Active filters
 
-### Agents Dashboard
-- AI agent chat interface
-- Agent cards with status badges
-- Selected agent highlighted with `sand.sand2` background
-- Task tracking and performance metrics
+### Agents (`agents/page.tsx`)
+**Chat Interface:**
+- **Agent Selection**: Sidebar with status badges (Working: blue, Active: purple, Idle: amber)
+- **Message Types**:
+  - Regular messages (user/agent roles)
+  - Action cards (email, contract, research, schedule, analysis)
+- **Action Display**: Beige cards with icon, description, timestamp
+- **Input**: Bottom-anchored TextField with Send button
 
 ## Development Commands
 
@@ -233,32 +272,31 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
-## Important Notes
+## Anti-Patterns (NEVER DO THIS)
 
-- **No Double Borders**: Radix Card already has borders - don't add custom borders
-- **Icon Usage**: Minimal - only ExternalLink, MoreVertical, status icons
-- **Metrics Display**: Show as text "X views" not with icons
-- **Column Heights**: Always equal in Kanban - use `flex: 1` and `alignItems: "stretch"`
-- **Button Widths**: Fixed width (220px) for consistency in modals
-- **Highlighted States**: Use `sand.sand2` not `sand.sand3` for subtle highlights
-- **Watch Video Buttons**: Always `soft` `cyan` to differentiate from blue product badges
+1. **❌ Double Borders**: Radix Card has built-in borders - don't add `border: "1px solid ..."`
+2. **❌ Icon Overuse**: Don't use icons for metrics (show "1.2M views" not Eye icon + number)
+3. **❌ Wrong Button Variants**: Never use `outline` or `surface` - only `solid` lime or `soft` gray/cyan
+4. **❌ 100% Width Buttons**: Use 220px fixed width in modals for consistency
+5. **❌ Wrong Highlight Color**: Use `sand.sand2` for selected states, NOT `sand.sand3`
+6. **❌ Watch Video Button Color**: Must be `soft` `cyan` (NOT blue) to differentiate from product badges
+7. **❌ Unequal Kanban Columns**: Always use `flex: 1` + `alignItems: "stretch"` on parent
+8. **❌ Custom UI Primitives**: Always use Radix components first before creating custom ones
 
-## Supabase Integration
+## Common Gotchas
 
-- **Client**: Browser-side queries via `@supabase/ssr`
-- **Admin**: Server-side operations with service role
-- **Auth**: Row-level security policies
-- **Tables**: partnerships, conversations, agents, products, users
+- **Drag & Drop Validation**: Partnership status changes have business logic constraints (see validation rules above)
+- **Message Bubbles**: Communications page uses email-style threading, NOT chat bubbles
+- **Agent Purpose Colors**: All agent purpose badges use `lime` color (not differentiated by purpose)
+- **Font Loading**: Satoshi font files in `/public/fonts/satoshi/` - loaded via `@font-face` in globals.css
+- **Color Imports**: Must import from `@radix-ui/colors` for consistency
+- **Modal Button Order**: Primary action first (top/left), secondary actions below/right
 
-## Testing Checklist
+## Radix UI Documentation Links
 
-- [ ] All buttons have consistent styling (solid lime or soft gray/cyan)
-- [ ] Cards don't have double borders
-- [ ] Kanban columns are equal height
-- [ ] Icons are minimal and purposeful
-- [ ] Typography follows hierarchy
-- [ ] Colors use Radix palette
-- [ ] Responsive layout works on mobile
-- [ ] Drag & drop works smoothly
-- [ ] Modals have proper close handlers
+**Always reference these when implementing new features:**
+- Components: https://www.radix-ui.com/themes/docs/components
+- Colors: https://www.radix-ui.com/colors
+- Typography: https://www.radix-ui.com/themes/docs/theme/typography
+- Layout: https://www.radix-ui.com/themes/docs/components/flex
 
