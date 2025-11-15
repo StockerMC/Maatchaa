@@ -712,7 +712,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                       id="to_contact"
                       style={{
                         flex: 1,
-                        minHeight: "600px",
+                        minHeight: "400px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -746,7 +746,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                       id="contacted"
                       style={{
                         flex: 1,
-                        minHeight: "600px",
+                        minHeight: "400px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -780,7 +780,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                       id="in_discussion"
                       style={{
                         flex: 1,
-                        minHeight: "600px",
+                        minHeight: "400px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -814,7 +814,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                       id="active"
                       style={{
                         flex: 1,
-                        minHeight: "600px",
+                        minHeight: "400px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
