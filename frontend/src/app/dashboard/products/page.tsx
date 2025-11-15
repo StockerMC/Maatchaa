@@ -227,14 +227,8 @@ export default function ProductsPage() {
             {
               label: "Total Products",
               value: products.length,
-              changeNumber: `+${products.filter((p) => p.status === "Active").length}`,
+              changeNumber: `${products.filter((p) => p.status === "Active").length}`,
               changeDesc: "active",
-            },
-            {
-              label: "Total Variants",
-              value: products.reduce((sum, p) => sum + p.variants.length, 0),
-              changeNumber: `+${Math.floor(products.reduce((sum, p) => sum + p.variants.length, 0) * 0.1)}`,
-              changeDesc: "new",
             },
             {
               label: "Avg. Price",
@@ -243,13 +237,21 @@ export default function ProductsPage() {
                   ? `$${(products.reduce((sum, p) => sum + p.price, 0) / products.length).toFixed(2)}`
                   : "$0.00",
               changeNumber: "",
-              changeDesc: "Across all products",
+              changeDesc: "across all products",
             },
             {
-              label: "Categories",
-              value: categories.length - 1,
-              changeNumber: `${Array.from(new Set(products.map((p) => p.vendor))).length}`,
-              changeDesc: "vendors",
+              label: "Unmatched Products",
+              value: products.filter((p) => p.matchCount === 0).length,
+              changeNumber: products.filter((p) => p.matchCount > 0 && p.matchCount < 5).length.toString(),
+              changeDesc: "matching",
+            },
+            {
+              label: "Total Matches",
+              value: products.reduce((sum, p) => sum + p.matchCount, 0),
+              changeNumber: products.length > 0
+                ? (products.reduce((sum, p) => sum + p.matchCount, 0) / products.length).toFixed(1)
+                : "0",
+              changeDesc: "matches per product",
             },
           ].map((stat) => (
             <Card

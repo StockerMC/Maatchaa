@@ -4,7 +4,7 @@ import PhoneComponent from "@/components/Phone";
 import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
 import { Button } from "@/components/ui/button";
 import { Box, Text } from "@radix-ui/themes";
-import { gray, lime } from "@radix-ui/colors";
+import { gray, lime, grass } from "@radix-ui/colors";
 import { ArrowTopRightIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import { WaitlistForm } from "@/components/waitlist/waitlist-form";
 import Footer from "@/components/Footer";
@@ -120,13 +120,13 @@ export default function HomePage() {
                             {/* Left: Text Content */}
                             <div className="flex items-center">
                                 <div>
-                                    <Text size="2" weight="medium" className="block mb-4" style={{ color: "#6a9a23", letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: '700' }}>
+                                    <Text size="2" weight="medium" className="block mb-4" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: '700', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                         What We Solve
                                     </Text>
-                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6" style={{ color: "#26302c", lineHeight: 1.2 }}>
+                                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6" style={{ color: "#1F2611", lineHeight: 1.2, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                         Maatchaa solves your biggest sponsorship headaches
                                     </h3>
-                                    <Text size="5" className="block" style={{ color: "rgba(33,43,43,0.69)", lineHeight: 1.7, fontWeight: '500' }}>
+                                    <Text size="5" className="block" style={{ color: "rgba(33,43,43,0.69)", lineHeight: 1.7, fontWeight: '500', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                         From discovery to campaign management, we automate the entire workflow so you can focus on building great partnerships.
                                     </Text>
                                 </div>
@@ -144,10 +144,10 @@ export default function HomePage() {
                                     easing="smooth"
                                 >
                                     <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Finding Creators
                                         </Text>
-                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Stop finding creators for hours. Get matched with creators whose audiences actually want your product.
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
@@ -162,10 +162,10 @@ export default function HomePage() {
                                     </Card>
 
                                     <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Busywork
                                         </Text>
-                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Stop copying engagement rates into spreadsheets. Maatchaa does the research, outreach, and vetting automatically.
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
@@ -180,10 +180,10 @@ export default function HomePage() {
                                     </Card>
 
                                     <Card style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                        <Text size="2" weight="medium" className="block mb-6" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Campaign Automation
                                         </Text>
-                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6 }}>
+                                        <Text size="4" className="block mb-5" style={{ color: gray.gray12, lineHeight: 1.6, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                             Contracts, approvals, tracking, payments — all automated. Manage 50 creators as easily as one.
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
@@ -226,10 +226,10 @@ export default function HomePage() {
                 <div className="max-w-7xl mx-auto relative z-10">
                     {/* Section Header */}
                     <div className="text-center mb-12">
-                        <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How It Works
                         </Text>
-                        <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF' }}>
+                        <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How Maatchaa Automates Sponsorships
                         </Text>
                     </div>
@@ -239,11 +239,11 @@ export default function HomePage() {
 
                     {/* Tech Blog Call-to-Action */}
                     <Box className="text-center max-w-4xl mx-auto mt-12">
-                        <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF', marginBottom: '1.5rem' }}>
+                        <Text size="5" weight="bold" className="block" style={{ color: '#FFFFFF', marginBottom: '1.5rem', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             Still want to learn more?
                         </Text>
                         <Button variant="solid" color="lime" size="3" radius="full" asChild>
-                            <Link href="/blog" className="flex items-center gap-2">
+                            <Link href="/blog" className="flex items-center gap-2" style={{ fontFamily: 'var(--font-satoshi), sans-serif' }}>
                                 Read Our Tech Blog
                                 <ArrowRightIcon width="16" height="16" />
                             </Link>
@@ -267,17 +267,17 @@ export default function HomePage() {
 
                 <div className="max-w-4xl mx-auto mt-5 mb-5 relative z-10 text-center">
                     {/* Super heading */}
-                    <Text size="2" weight="medium" className="block mb-4" style={{ color: lime.lime11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    <Text size="2" weight="medium" className="block mb-4" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                         Get Early Access
                     </Text>
 
                     {/* Main heading */}
-                    <Text size="9" weight="bold" className="block mb-4" style={{ color: gray.gray12 }}>
+                    <Text size="9" weight="bold" className="block mb-4" style={{ color: gray.gray12, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                         Join the waitlist
                     </Text>
 
                     {/* Subheading */}
-                    <Text size="5" className="block pb-4" style={{ color: gray.gray11, lineHeight: 1.7 }}>
+                    <Text size="5" weight="medium" className="block pb-4" style={{ color: gray.gray11, lineHeight: 1.7, fontFamily: 'var(--font-satoshi), sans-serif' }}>
                         Be among the first to experience Maatchaa when we launch.
                     </Text>
 

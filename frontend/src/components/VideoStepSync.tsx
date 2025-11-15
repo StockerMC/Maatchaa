@@ -133,12 +133,13 @@ export default function VideoStepSync() {
                             {/* Title */}
                             <Text
                                 size="5"
-                                weight="bold"
+                                weight="medium"
                                 className="block transition-colors duration-300"
                                 style={{
                                     color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.9)',
                                     lineHeight: 1.3,
-                                    marginBottom: '0.75rem'
+                                    marginBottom: '0.75rem',
+                                    fontFamily: 'var(--font-satoshi), sans-serif'
                                 }}
                             >
                                 {step.title}
@@ -156,10 +157,12 @@ export default function VideoStepSync() {
                                 />
                                 <Text
                                     size="2"
+                                    weight="regular"
                                     className="block"
                                     style={{
                                         color: 'rgba(255, 255, 255, 0.65)',
-                                        lineHeight: 1.6
+                                        lineHeight: 1.6,
+                                        fontFamily: 'var(--font-satoshi), sans-serif'
                                     }}
                                 >
                                     {step.description}

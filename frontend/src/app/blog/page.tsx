@@ -114,18 +114,18 @@ export default async function BlogPage() {
         </div>
 
         <div className="max-w-4xl mx-auto relative z-10 text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <Text size="2" weight="medium" style={{ color: '#4e8f7c', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <Text size="2" weight="medium" style={{ color: '#4A8F57', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
             Get Early Access
           </Text>
-          <Text size="8" weight="bold" style={{ color: '#1A1A1A', lineHeight: 1.2 }}>
+          <Text size="8" weight="bold" style={{ color: '#1A1A1A', lineHeight: 1.2, fontFamily: 'var(--font-satoshi), sans-serif' }}>
             Ready to automate your sponsorships?
           </Text>
-          <Text size="5" weight="medium" style={{ color: '#475569', lineHeight: 1.7, maxWidth: '600px' }}>
+          <Text size="5" weight="medium" style={{ color: '#475569', lineHeight: 1.7, maxWidth: '600px', fontFamily: 'var(--font-satoshi), sans-serif' }}>
             Join creators and brands using Maatchaa to build authentic partnerships.
           </Text>
           <Box style={{ marginTop: '0.5rem' }}>
-            <Button variant="solid" color="lime" size="4" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Link href="/#waitlist" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+            <Button variant="solid" color="lime" size="4" asChild>
+              <Link href="/#waitlist" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                 Join the waitlist
                 <ArrowRightIcon width="18" height="18" />
               </Link>
