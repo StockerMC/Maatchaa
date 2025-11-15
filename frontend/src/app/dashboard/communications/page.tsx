@@ -362,7 +362,7 @@ export default function CommunicationsPage() {
                   style={{
                     padding: "0.75rem",
                     borderRadius: "10px",
-                    background: selectedConversation?.id === conversation.id ? sand.sand3 : "transparent",
+                    background: selectedConversation?.id === conversation.id ? sand.sand2 : "transparent",
                     cursor: "pointer",
                     transition: "background 0.2s",
                   }}

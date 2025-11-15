@@ -1,24 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Flex, Text, Box, Tabs, Badge, Button, Dialog, TextField, TextArea, Checkbox, Avatar, AlertDialog } from "@radix-ui/themes";
+ import { Card, Flex, Text, Box, Tabs, Badge, Button, Dialog, TextField, TextArea, Avatar, AlertDialog } from "@radix-ui/themes";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  Users,
-  Eye,
-  Heart,
-  MessageCircle,
   Clock,
   CheckCircle,
   XCircle,
   Mail,
   FileText,
   Link as LinkIcon,
-  Search,
   ExternalLink,
-  TrendingUp,
   Send,
   Copy,
   Download,
@@ -31,7 +25,6 @@ import Link from "next/link";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 const POSITIVE_COLOR = "#5c9a31";
-const NEGATIVE_COLOR = "#f81f1f";
 
 interface Partnership {
   id: string;
@@ -102,7 +95,7 @@ const mockPartnerships: Partnership[] = [
     videoTitle: "Why I Switched to Ceremonial Grade Matcha",
     videoThumbnail: "/fitness-workout-video.png",
     videoUrl: "https://youtube.com/shorts/example2",
-    status: "to_contact",
+    status: "contacted",
     matchedProducts: ["Horii Shichimeien Matcha Can", "MATCHA MATCHA Measuring Spoon"],
     views: 850000,
     likes: 32000,
@@ -120,17 +113,12 @@ const mockPartnerships: Partnership[] = [
     videoTitle: "Bougie Morning Routine Essentials",
     videoThumbnail: "/tech-review-video.jpg",
     videoUrl: "https://youtube.com/shorts/example3",
-    status: "in_discussion",
+    status: "contacted",
     matchedProducts: ["Bougie Candle by Le Labo", "Hand Lotion by Le Labo", "Hand Soap by Le Labo"],
     views: 650000,
     likes: 28000,
     comments: 1200,
     initiatedDate: "3 days ago",
-    contractDrafted: true,
-    contractSent: false,
-    contractSigned: false,
-    affiliateLinkGenerated: true,
-    affiliateLink: "https://matchamatcha.ca/ref/emmalifestyle?pid=3",
     commissionRate: 20,
     paymentTerms: "Net 30 days",
     contractDuration: "90 days",
@@ -150,6 +138,142 @@ const mockPartnerships: Partnership[] = [
     comments: 800,
     initiatedDate: "2 days ago",
     commissionRate: 15,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+  },
+  {
+    id: "5",
+    creatorName: "Maya Johnson",
+    creatorHandle: "@mayacooks",
+    creatorAvatar: "/cooking-channel-avatar.jpg",
+    videoTitle: "Easy Matcha Latte Recipe",
+    videoThumbnail: "/youtube-shorts-cooking-video.jpg",
+    videoUrl: "https://youtube.com/shorts/example5",
+    status: "to_contact",
+    matchedProducts: ["MATCHA MATCHA Can", "Milk Frother"],
+    views: 920000,
+    likes: 38000,
+    comments: 1900,
+    initiatedDate: "1 hour ago",
+    commissionRate: 15,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+  },
+  {
+    id: "6",
+    creatorName: "David Park",
+    creatorHandle: "@davidfitness",
+    creatorAvatar: "/fitness-channel-avatar.jpg",
+    videoTitle: "Pre-Workout Matcha Energy Boost",
+    videoThumbnail: "/fitness-workout-video.png",
+    videoUrl: "https://youtube.com/shorts/example6",
+    status: "in_discussion",
+    matchedProducts: ["MATCHA MATCHA Can", "Shaker Bottle"],
+    views: 780000,
+    likes: 29000,
+    comments: 1500,
+    initiatedDate: "1 day ago",
+    contractDrafted: true,
+    contractSent: true,
+    contractSigned: false,
+    affiliateLinkGenerated: false,
+    commissionRate: 18,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+  },
+  {
+    id: "7",
+    creatorName: "Sophie Laurent",
+    creatorHandle: "@sophiestyle",
+    creatorAvatar: "/tech-channel-avatar.png",
+    videoTitle: "Aesthetic Desk Setup Essentials",
+    videoThumbnail: "/tech-review-video.jpg",
+    videoUrl: "https://youtube.com/shorts/example7",
+    status: "in_discussion",
+    matchedProducts: ["Bougie Candle by Le Labo", "Desk Mat"],
+    views: 560000,
+    likes: 22000,
+    comments: 980,
+    initiatedDate: "4 days ago",
+    contractDrafted: true,
+    contractSent: true,
+    contractSigned: false,
+    affiliateLinkGenerated: false,
+    commissionRate: 20,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+  },
+  {
+    id: "8",
+    creatorName: "Ryan Mitchell",
+    creatorHandle: "@ryaneats",
+    creatorAvatar: "/cooking-channel-avatar.jpg",
+    videoTitle: "Ultimate Matcha Taste Test",
+    videoThumbnail: "/youtube-shorts-cooking-video.jpg",
+    videoUrl: "https://youtube.com/shorts/example8",
+    status: "active",
+    matchedProducts: ["MATCHA MATCHA Can", "Horii Shichimeien Matcha Can"],
+    views: 1450000,
+    likes: 52000,
+    comments: 2800,
+    initiatedDate: "60 days ago",
+    contractSigned: true,
+    affiliateLinkGenerated: true,
+    affiliateLink: "https://matchamatcha.ca/ref/ryaneats?pid=8",
+    commissionRate: 15,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+    performanceMetrics: {
+      clicks: 498,
+      sales: 42,
+      revenue: 1876.00,
+      postsCompleted: 4,
+      postsRequired: 5,
+    },
+  },
+  {
+    id: "12",
+    creatorName: "Marco Rossi",
+    creatorHandle: "@marcobarista",
+    creatorAvatar: "/cooking-channel-avatar.jpg",
+    videoTitle: "Professional Latte Art Tutorial",
+    videoThumbnail: "/youtube-shorts-cooking-video.jpg",
+    videoUrl: "https://youtube.com/shorts/example12",
+    status: "active",
+    matchedProducts: ["Pro Kettle by Stagg", "Milk Frother"],
+    views: 1100000,
+    likes: 48000,
+    comments: 2400,
+    initiatedDate: "50 days ago",
+    contractSigned: true,
+    affiliateLinkGenerated: true,
+    affiliateLink: "https://matchamatcha.ca/ref/marcobarista?pid=12",
+    commissionRate: 18,
+    paymentTerms: "Net 30 days",
+    contractDuration: "90 days",
+    performanceMetrics: {
+      clicks: 412,
+      sales: 35,
+      revenue: 1568.50,
+      postsCompleted: 5,
+      postsRequired: 5,
+    },
+  },
+  {
+    id: "14",
+    creatorName: "Chris Anderson",
+    creatorHandle: "@chrisathome",
+    creatorAvatar: "/tech-channel-avatar.png",
+    videoTitle: "My WFH Setup Tour 2025",
+    videoThumbnail: "/tech-review-video.jpg",
+    videoUrl: "https://youtube.com/shorts/example14",
+    status: "contacted",
+    matchedProducts: ["Bougie Candle by Le Labo", "Desk Mat", "Hand Lotion by Le Labo"],
+    views: 920000,
+    likes: 37000,
+    comments: 1800,
+    initiatedDate: "3 days ago",
+    commissionRate: 20,
     paymentTerms: "Net 30 days",
     contractDuration: "90 days",
   },
@@ -275,7 +399,6 @@ export default function PartnershipsPage() {
             padding: "1rem",
             cursor: "grab",
             background: "#FFFFFF",
-            border: "1px solid #E8E6DF",
             marginBottom: "0.75rem",
           }}
         >
@@ -320,18 +443,12 @@ export default function PartnershipsPage() {
 
             {/* Metrics */}
             <Flex gap="3" align="center">
-              <Flex align="center" gap="1">
-                <Eye size={12} color="#737373" />
-                <Text size="1" style={{ color: "#737373" }}>
-                  {formatNumber(partnership.views)}
-                </Text>
-              </Flex>
-              <Flex align="center" gap="1">
-                <Heart size={12} color="#737373" />
-                <Text size="1" style={{ color: "#737373" }}>
-                  {formatNumber(partnership.likes)}
-                </Text>
-              </Flex>
+              <Text size="1" style={{ color: "#737373" }}>
+                {formatNumber(partnership.views)} views
+              </Text>
+              <Text size="1" style={{ color: "#737373" }}>
+                {formatNumber(partnership.likes)} likes
+              </Text>
             </Flex>
 
             {/* Actions Button */}
@@ -566,18 +683,18 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
           })}
         </Flex>
 
-        {/* Kanban Board */}
-        <Card style={{ padding: "1.5rem" }}>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <Box style={{ overflowX: "auto" }}>
-              <Flex gap="4" style={{ minWidth: "max-content", paddingBottom: "1rem" }}>
+          {/* Kanban Board */}
+          <Card>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <Box style={{ overflowX: "auto", margin: "-1.5rem", padding: "1.5rem" }}>
+                <Flex gap="4" style={{ minWidth: "max-content", alignItems: "stretch" }}>
                 {/* To Contact Column */}
-                <Box style={{ width: "320px", flexShrink: 0 }}>
-                  <Flex direction="column" gap="3">
+                <Box style={{ width: "320px", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                  <Flex direction="column" gap="3" style={{ height: "100%" }}>
                     <Flex align="center" gap="2">
                       <Text size="3" weight="medium" style={{ color: "sage.sage12" }}>
                         To Contact
@@ -594,7 +711,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Box
                       id="to_contact"
                       style={{
-                        minHeight: "200px",
+                        flex: 1,
+                        minHeight: "600px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -609,8 +727,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
               </Box>
 
               {/* Contacted Column */}
-              <Box style={{ width: "320px", flexShrink: 0 }}>
-                <Flex direction="column" gap="3">
+              <Box style={{ width: "320px", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                <Flex direction="column" gap="3" style={{ height: "100%" }}>
                   <Flex align="center" gap="2">
                     <Text size="3" weight="medium" style={{ color: "sage.sage12" }}>
                       Contacted
@@ -627,7 +745,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Box
                       id="contacted"
                       style={{
-                        minHeight: "200px",
+                        flex: 1,
+                        minHeight: "600px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -642,8 +761,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
               </Box>
 
               {/* In Discussion Column */}
-              <Box style={{ width: "320px", flexShrink: 0 }}>
-                <Flex direction="column" gap="3">
+              <Box style={{ width: "320px", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                <Flex direction="column" gap="3" style={{ height: "100%" }}>
                   <Flex align="center" gap="2">
                     <Text size="3" weight="medium" style={{ color: "sage.sage12" }}>
                       In Discussion
@@ -660,7 +779,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Box
                       id="in_discussion"
                       style={{
-                        minHeight: "200px",
+                        flex: 1,
+                        minHeight: "600px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -675,8 +795,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
               </Box>
 
               {/* Active Column */}
-              <Box style={{ width: "320px", flexShrink: 0 }}>
-                <Flex direction="column" gap="3">
+              <Box style={{ width: "320px", flexShrink: 0, display: "flex", flexDirection: "column" }}>
+                <Flex direction="column" gap="3" style={{ height: "100%" }}>
                   <Flex align="center" gap="2">
                     <Text size="3" weight="medium" style={{ color: "sage.sage12" }}>
                       Active
@@ -693,7 +813,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Box
                       id="active"
                       style={{
-                        minHeight: "200px",
+                        flex: 1,
+                        minHeight: "600px",
                         padding: "0.5rem",
                         background: "#FAFAF9",
                         borderRadius: "8px",
@@ -712,146 +833,192 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
       </Card>
     </Flex>
 
-      {/* Actions Dialog */}
-      <Dialog.Root open={showActionsDialog} onOpenChange={setShowActionsDialog}>
-        <Dialog.Content style={{ maxWidth: "400px" }}>
-          <Dialog.Title>Partnership Actions</Dialog.Title>
-          <Dialog.Description size="2" mb="4">
-            Choose an action for {selectedPartnership?.creatorName}
-          </Dialog.Description>
+        {/* Actions Dialog */}
+        <Dialog.Root open={showActionsDialog} onOpenChange={setShowActionsDialog}>
+          <Dialog.Content style={{ maxWidth: "700px" }}>
+            <Dialog.Title>{selectedPartnership?.creatorName}</Dialog.Title>
+            <Dialog.Description size="2" mb="4">
+              {selectedPartnership?.videoTitle}
+            </Dialog.Description>
 
-          <Flex direction="column" gap="2">
-            {selectedPartnership?.status === "to_contact" && (
-              <>
-                <Button
-                  variant="soft"
-                  onClick={() => {
-                    handleDraftEmail(selectedPartnership);
-                    setShowActionsDialog(false);
-                  }}
-                >
-                  <Mail size={16} />
-                  Draft Email
-                </Button>
-                <Button
-                  variant="soft"
-                  asChild
-                >
-                  <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={16} />
-                    View Video
-                  </a>
-                </Button>
-              </>
-            )}
+            <Flex direction="column" gap="4">
+              {/* Video Embed */}
+              <Box style={{ width: "100%", aspectRatio: "16/9", borderRadius: "8px", overflow: "hidden" }}>
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/i6U5ksYrd0M"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ display: "block" }}
+                />
+              </Box>
 
-            {selectedPartnership?.status === "contacted" && (
-              <>
-                <Button variant="soft" asChild>
-                  <Link href="/dashboard/communications">
-                    <MessageSquare size={16} />
-                    View Conversation
-                  </Link>
-                </Button>
-                <Button variant="soft" asChild>
-                  <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={16} />
-                    View Video
-                  </a>
-                </Button>
-              </>
-            )}
+              {/* Partnership Info */}
+              <Flex direction="column" gap="3">
+                <Flex align="center" gap="2">
+                  <Avatar
+                    size="3"
+                    src={selectedPartnership?.creatorAvatar}
+                    fallback={selectedPartnership?.creatorName.charAt(0) || "?"}
+                    radius="full"
+                    color="gray"
+                  />
+                  <Box>
+                    <Text size="2" weight="medium" style={{ display: "block" }}>
+                      {selectedPartnership?.creatorName}
+                    </Text>
+                    <Text size="1" style={{ color: "var(--sage-11)" }}>
+                      {selectedPartnership?.creatorHandle}
+                    </Text>
+                  </Box>
+                </Flex>
 
-            {selectedPartnership?.status === "in_discussion" && (
-              <>
-                <Button
-                  variant="soft"
-                  onClick={() => {
-                    handleDraftContract(selectedPartnership);
-                    setShowActionsDialog(false);
-                  }}
-                >
-                  <FileText size={16} />
-                  Draft Contract
-                </Button>
-                <Button
-                  variant="soft"
-                  onClick={() => {
-                    handleGenerateAffiliateLink(selectedPartnership);
-                    setShowActionsDialog(false);
-                  }}
-                >
-                  <LinkIcon size={16} />
-                  Generate Link
-                </Button>
-                <Button variant="soft" asChild>
-                  <Link href="/dashboard/communications">
-                    <Mail size={16} />
-                    Send Email
-                  </Link>
-                </Button>
-              </>
-            )}
+                {/* Products */}
+                {selectedPartnership && selectedPartnership.matchedProducts.length > 0 && (
+                  <Box>
+                    <Text size="1" weight="medium" style={{ color: "var(--sage-11)", display: "block", marginBottom: "0.5rem" }}>
+                      Matched Products
+                    </Text>
+                    <Flex gap="1" wrap="wrap">
+                      {selectedPartnership.matchedProducts.map((product) => (
+                        <Badge key={product} variant="soft" size="1" color="blue">
+                          {product}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
 
-            {selectedPartnership?.status === "active" && (
-              <>
-                <Button
-                  variant="soft"
-                  onClick={() => {
-                    handleGenerateAffiliateLink(selectedPartnership);
-                    setShowActionsDialog(false);
-                  }}
-                >
-                  <Copy size={16} />
-                  Copy Affiliate Link
-                </Button>
-                <Button
-                  variant="soft"
-                  onClick={() => {
-                    handleDraftContract(selectedPartnership);
-                    setShowActionsDialog(false);
-                  }}
-                >
-                  <FileText size={16} />
-                  View Contract
-                </Button>
-                <Button variant="soft" asChild>
-                  <Link href="/dashboard/communications">
-                    <MessageSquare size={16} />
-                    Message Creator
-                  </Link>
-                </Button>
-                <Button variant="soft" asChild>
-                  <Link href="/dashboard/analytics">
-                    <BarChart3 size={16} />
-                    View Analytics
-                  </Link>
-                </Button>
-              </>
-            )}
+                {/* Metrics */}
+                <Flex gap="4">
+                  <Text size="1" style={{ color: "var(--sage-11)" }}>
+                    {selectedPartnership?.views.toLocaleString()} views
+                  </Text>
+                  <Text size="1" style={{ color: "var(--sage-11)" }}>
+                    {selectedPartnership?.likes.toLocaleString()} likes
+                  </Text>
+                </Flex>
+              </Flex>
 
-            {/* Always show View Details */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowDetailsDialog(true);
-                setShowActionsDialog(false);
-              }}
-            >
-              <Info size={16} />
-              View Details
-            </Button>
-          </Flex>
+              {/* Actions */}
+              <Flex direction="column" gap="2" align="start">
+                {selectedPartnership?.status === "to_contact" && (
+                  <>
+                    <Button
+                      variant="solid"
+                      color="lime"
+                      asChild
+                      style={{ width: "220px" }}
+                    >
+                      <Link href="/dashboard/communications">
+                        Draft Outreach Email
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="soft"
+                      color="cyan"
+                      asChild
+                      style={{ width: "220px" }}
+                    >
+                      <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={16} />
+                        Watch Video
+                      </a>
+                    </Button>
+                  </>
+                )}
 
-          <Flex gap="2" mt="4" justify="end">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">
-                Close
-              </Button>
-            </Dialog.Close>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+                {selectedPartnership?.status === "contacted" && (
+                  <>
+                    <Button variant="soft" color="cyan" asChild style={{ width: "220px" }}>
+                      <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={16} />
+                        Watch Video
+                      </a>
+                    </Button>
+                  </>
+                )}
+
+                {selectedPartnership?.status === "in_discussion" && (
+                  <>
+                    <Button
+                      variant="solid"
+                      color="lime"
+                      onClick={() => {
+                        handleDraftContract(selectedPartnership);
+                        setShowActionsDialog(false);
+                      }}
+                      style={{ width: "220px" }}
+                    >
+                      Download Partnership PDF
+                    </Button>
+                    <Button
+                      variant="solid"
+                      color="lime"
+                      onClick={() => {
+                        handleGenerateAffiliateLink(selectedPartnership);
+                        setShowActionsDialog(false);
+                      }}
+                      style={{ width: "220px" }}
+                    >
+                      Generate Affiliate Link
+                    </Button>
+                    <Button
+                      variant="solid"
+                      color="lime"
+                      onClick={() => {
+                        handleDraftContract(selectedPartnership);
+                        setShowActionsDialog(false);
+                      }}
+                      style={{ width: "220px" }}
+                    >
+                      Send PDF to Creator
+                    </Button>
+                    <Button variant="soft" color="cyan" asChild style={{ width: "220px" }}>
+                      <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={16} />
+                        Watch Video
+                      </a>
+                    </Button>
+                  </>
+                )}
+
+                {selectedPartnership?.status === "active" && (
+                  <>
+                    <Button
+                      variant="solid"
+                      color="lime"
+                      onClick={() => {
+                        handleGenerateAffiliateLink(selectedPartnership);
+                        setShowActionsDialog(false);
+                      }}
+                      style={{ width: "220px" }}
+                    >
+                      Copy Affiliate Link
+                    </Button>
+                    <Button variant="soft" color="cyan" asChild style={{ width: "220px" }}>
+                      <a href={selectedPartnership.videoUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={16} />
+                        Watch Video
+                      </a>
+                    </Button>
+                  </>
+                )}
+              </Flex>
+            </Flex>
+
+            <Flex gap="2" mt="4" justify="end">
+              <Dialog.Close>
+                <Button variant="soft" color="gray">
+                  Close
+                </Button>
+              </Dialog.Close>
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Root>
 
       {/* Validation Alert Dialog */}
       <AlertDialog.Root open={showValidationAlert} onOpenChange={setShowValidationAlert}>
@@ -878,10 +1045,10 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
           {partnerships.map((partnership) => (
               <Card
                 key={partnership.id}
-                p="4"
                 style={{
                   border: "1px solid #F5F5F5",
                   borderRadius: "8px",
+                  padding: "1rem",
                 }}
               >
                 <Flex gap="4" align="start">
@@ -910,24 +1077,15 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     </Text>
 
                     <Flex gap="4" align="center">
-                      <Flex align="center" gap="1">
-                        <Eye size={14} color="#737373" />
-                        <Text size="1" style={{ color: "#737373" }}>
-                          {formatNumber(partnership.views)}
-                        </Text>
-                      </Flex>
-                      <Flex align="center" gap="1">
-                        <Heart size={14} color="#737373" />
-                        <Text size="1" style={{ color: "#737373" }}>
-                          {formatNumber(partnership.likes)}
-                        </Text>
-                      </Flex>
-                      <Flex align="center" gap="1">
-                        <MessageCircle size={14} color="#737373" />
-                        <Text size="1" style={{ color: "#737373" }}>
-                          {formatNumber(partnership.comments)}
-                        </Text>
-                      </Flex>
+                      <Text size="1" style={{ color: "#737373" }}>
+                        {formatNumber(partnership.views)} views
+                      </Text>
+                      <Text size="1" style={{ color: "#737373" }}>
+                        {formatNumber(partnership.likes)} likes
+                      </Text>
+                      <Text size="1" style={{ color: "#737373" }}>
+                        {formatNumber(partnership.comments)} comments
+                      </Text>
                     </Flex>
 
                     <Flex gap="1" wrap="wrap">
@@ -1317,7 +1475,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
 
           <Box mt="3" p="3" style={{ background: "#FEF3C7", borderRadius: "6px", border: "1px solid #FDE68A" }}>
             <Text size="1" style={{ color: "#92400E" }}>
-              💡 This link tracks all clicks and conversions. Share it with the creator to include in their content.
+              This link tracks all clicks and conversions. Share it with the creator to include in their content.
             </Text>
           </Box>
 

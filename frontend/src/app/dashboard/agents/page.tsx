@@ -447,7 +447,7 @@ export default function AgentsPage() {
                   style={{
                     padding: "1rem",
                     borderRadius: "10px",
-                    background: selectedAgent?.id === agent.id ? sand.sand3 : "transparent",
+                    background: selectedAgent?.id === agent.id ? sand.sand2 : "transparent",
                     cursor: "pointer",
                     transition: "all 0.2s",
                   }}
