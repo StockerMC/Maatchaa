@@ -2,12 +2,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from utils import shopify, vectordb, yt_search
-from blacksheep import Request, Application, delete, get, post, json
+from blacksheep import Request, Application, delete, get, post, json, redirect
 from blacksheep.server.cors import CORSPolicy
 from utils.supabase import SupabaseClient
 import product_showcase as ps
 from utils.video import parse_video
 import json as json_lib
+from utils.shopify_oauth import (
+    generate_nonce,
+    build_install_url,
+    exchange_code_for_token,
+    verify_shopify_request,
+    validate_shop_domain,
+    get_shop_info,
+    create_uninstall_webhook,
+    ShopifyOAuthError,
+    APP_URL
+)
+from utils.shopify_api import ShopifyAPIClient
 
 app = Application()
 
@@ -512,6 +524,325 @@ async def get_product_matches(product_id: str):
             "matches": matches,
             "count": len(matches)
         })
+
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+# ============ Shopify OAuth Endpoints ============
+
+@get("/shopify/install")
+async def shopify_install(request: Request):
+    """
+    Initiate Shopify OAuth flow
+
+    Query params:
+        - shop: Shopify store domain (e.g., 'my-store.myshopify.com' or 'my-store')
+        - company_id: The company ID from our database
+
+    Redirects merchant to Shopify authorization page
+    """
+    try:
+        assert supabase_client
+
+        shop = request.query.get("shop")
+        company_id = request.query.get("company_id")
+
+        # Handle if parameters are returned as lists
+        if isinstance(shop, list):
+            shop = shop[0] if shop else None
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        if not shop:
+            return json({"error": "Missing 'shop' parameter"}, status=400)
+
+        if not company_id:
+            return json({"error": "Missing 'company_id' parameter"}, status=400)
+
+        # Extract and clean shop domain
+        shop = shop.replace("https://", "").replace("http://", "")
+
+        # Remove trailing slashes
+        shop = shop.rstrip("/")
+
+        # Handle admin URL format: admin.shopify.com/store/my-store
+        if "admin.shopify.com/store/" in shop:
+            shop = shop.split("admin.shopify.com/store/")[-1]
+            shop = shop.split("/")[0]  # Remove any trailing paths
+
+        # Remove .myshopify.com if present, we'll add it back
+        shop = shop.replace(".myshopify.com", "")
+
+        # Add .myshopify.com
+        shop = f"{shop}.myshopify.com"
+
+        # Validate shop domain
+        if not validate_shop_domain(shop):
+            return json({"error": "Invalid shop domain"}, status=400)
+
+        # Generate random state for CSRF protection
+        state = generate_nonce()
+
+        # Store state in database for verification
+        await supabase_client.client.table("shopify_oauth_states").insert({
+            "state": state,
+            "company_id": company_id,
+            "shop_domain": shop
+        }).execute()
+
+        # Build OAuth authorization URL
+        auth_url = build_install_url(shop, state)
+
+        # Redirect merchant to Shopify
+        return redirect(auth_url)
+
+    except ShopifyOAuthError as e:
+        return json({"error": str(e)}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return json({"error": str(e)}, status=500)
+
+@get("/shopify/callback")
+async def shopify_callback(request: Request):
+    """
+    OAuth callback endpoint - Shopify redirects here after merchant authorizes
+
+    Query params (from Shopify):
+        - code: Authorization code
+        - hmac: HMAC signature for verification
+        - shop: Shop domain
+        - state: CSRF protection token
+        - timestamp: Request timestamp
+    """
+    try:
+        assert supabase_client
+
+        # Extract query parameters
+        query_params = dict(request.query)
+
+        code = query_params.get("code")
+        hmac_param = query_params.get("hmac")
+        shop = query_params.get("shop")
+        state = query_params.get("state")
+
+        # Handle if parameters are returned as lists by BlackSheep
+        if isinstance(code, list):
+            code = code[0] if code else None
+        if isinstance(hmac_param, list):
+            hmac_param = hmac_param[0] if hmac_param else None
+        if isinstance(shop, list):
+            shop = shop[0] if shop else None
+        if isinstance(state, list):
+            state = state[0] if state else None
+
+        # Validate required parameters
+        if not all([code, hmac_param, shop, state]):
+            return json({"error": "Missing required OAuth parameters"}, status=400)
+
+        # Verify HMAC signature
+        if not verify_shopify_request(query_params):
+            return json({"error": "Invalid HMAC signature"}, status=403)
+
+        # Verify and retrieve state from database
+        state_result = await supabase_client.client.table("shopify_oauth_states").select("*").eq("state", state).eq("used", False).execute()
+
+        if not state_result.data or len(state_result.data) == 0:
+            return json({"error": "Invalid or expired state parameter"}, status=403)
+
+        state_record = state_result.data[0]
+        company_id = state_record["company_id"]
+
+        # Mark state as used
+        await supabase_client.client.table("shopify_oauth_states").update({"used": True}).eq("state", state).execute()
+
+        # Exchange authorization code for access token
+        token_data = exchange_code_for_token(shop, code)
+
+        access_token = token_data["access_token"]
+        scope = token_data["scope"]
+
+        # Get shop information
+        shop_info = get_shop_info(shop, access_token)
+
+        # Store access token in database
+        token_insert = {
+            "company_id": company_id,
+            "shop_domain": shop,
+            "access_token": access_token,
+            "scope": scope,
+            "token_type": "offline",
+            "is_active": True
+        }
+
+        # Upsert token (update if exists, insert if new)
+        await supabase_client.client.table("shopify_oauth_tokens").upsert(
+            token_insert,
+            on_conflict="shop_domain"
+        ).execute()
+
+        # Store shop information
+        shop_insert = {
+            "company_id": company_id,
+            "shop_domain": shop,
+            "shop_id": shop_info.get("id"),
+            "shop_name": shop_info.get("name"),
+            "shop_owner": shop_info.get("shop_owner"),
+            "email": shop_info.get("email"),
+            "domain": shop_info.get("domain"),
+            "country": shop_info.get("country"),
+            "currency": shop_info.get("currency"),
+            "timezone": shop_info.get("timezone"),
+            "iana_timezone": shop_info.get("iana_timezone"),
+            "plan_name": shop_info.get("plan_name"),
+            "plan_display_name": shop_info.get("plan_display_name"),
+            "shop_created_at": shop_info.get("created_at"),
+            "province": shop_info.get("province"),
+            "city": shop_info.get("city"),
+            "address1": shop_info.get("address1"),
+            "zip": shop_info.get("zip"),
+            "phone": shop_info.get("phone"),
+            "latitude": shop_info.get("latitude"),
+            "longitude": shop_info.get("longitude"),
+            "primary_locale": shop_info.get("primary_locale"),
+            "money_format": shop_info.get("money_format"),
+            "money_with_currency_format": shop_info.get("money_with_currency_format"),
+            "weight_unit": shop_info.get("weight_unit"),
+            "myshopify_domain": shop_info.get("myshopify_domain"),
+            "last_synced_at": "now()"
+        }
+
+        await supabase_client.client.table("shopify_shops").upsert(
+            shop_insert,
+            on_conflict="shop_domain"
+        ).execute()
+
+        # Create uninstall webhook
+        try:
+            create_uninstall_webhook(shop, access_token)
+        except Exception as webhook_error:
+            print(f"Warning: Failed to create uninstall webhook: {webhook_error}")
+            # Don't fail the OAuth flow if webhook creation fails
+
+        # Redirect to success page in frontend
+        success_url = f"{APP_URL}/dashboard/settings?shopify=connected&shop={shop}"
+        return redirect(success_url)
+
+    except ShopifyOAuthError as e:
+        # Redirect to error page
+        error_url = f"{APP_URL}/dashboard/settings?shopify=error&message={str(e)}"
+        return redirect(error_url)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        error_url = f"{APP_URL}/dashboard/settings?shopify=error&message=OAuth+failed"
+        return redirect(error_url)
+
+@post("/shopify/webhooks/uninstall")
+async def shopify_webhook_uninstall(request: Request):
+    """
+    Webhook endpoint for app uninstall events
+    Shopify calls this when a merchant uninstalls the app
+    """
+    try:
+        assert supabase_client
+
+        # Verify webhook authenticity
+        # TODO: Add webhook HMAC verification
+
+        data = await request.json()
+        shop_domain = data.get("domain") or data.get("myshopify_domain")
+
+        if not shop_domain:
+            return json({"error": "Missing shop domain"}, status=400)
+
+        # Deactivate the OAuth token
+        await supabase_client.client.table("shopify_oauth_tokens").update({
+            "is_active": False
+        }).eq("shop_domain", shop_domain).execute()
+
+        print(f"App uninstalled from shop: {shop_domain}")
+
+        return json({"status": "success"})
+
+    except Exception as e:
+        print(f"Error handling uninstall webhook: {str(e)}")
+        return json({"error": str(e)}, status=500)
+
+@get("/shopify/status")
+async def shopify_status(request: Request):
+    """
+    Check Shopify connection status for a company
+
+    Query params:
+        - company_id: The company ID
+    """
+    try:
+        assert supabase_client
+
+        company_id = request.query.get("company_id")
+
+        # Handle if company_id is returned as a list
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        if not company_id:
+            return json({"error": "Missing company_id parameter"}, status=400)
+
+        # Get active token for company
+        result = await supabase_client.client.table("shopify_oauth_tokens").select("*").eq("company_id", company_id).eq("is_active", True).execute()
+
+        if not result.data or len(result.data) == 0:
+            return json({
+                "connected": False,
+                "shop": None
+            })
+
+        token_data = result.data[0]
+        shop_domain = token_data["shop_domain"]
+
+        # Get shop info separately (since we don't have foreign keys)
+        shop_result = await supabase_client.client.table("shopify_shops").select("*").eq("shop_domain", shop_domain).execute()
+        shop_data = shop_result.data[0] if shop_result.data else None
+
+        return json({
+            "connected": True,
+            "shop": {
+                "domain": shop_domain,
+                "name": shop_data["shop_name"] if shop_data else None,
+                "email": shop_data["email"] if shop_data else None,
+                "currency": shop_data["currency"] if shop_data else None,
+            },
+            "scopes": token_data["scope"],
+            "connected_at": token_data["created_at"]
+        })
+
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+@post("/shopify/disconnect")
+async def shopify_disconnect(request: Request):
+    """
+    Disconnect Shopify store (deactivate token)
+
+    Request body:
+        - company_id: The company ID
+    """
+    try:
+        assert supabase_client
+
+        data = await request.json()
+        company_id = data.get("company_id")
+
+        if not company_id:
+            return json({"error": "Missing company_id"}, status=400)
+
+        # Deactivate token
+        await supabase_client.client.table("shopify_oauth_tokens").update({
+            "is_active": False
+        }).eq("company_id", company_id).execute()
+
+        return json({"message": "Shopify store disconnected successfully"})
 
     except Exception as e:
         return json({"error": str(e)}, status=500)
