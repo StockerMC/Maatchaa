@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import asyncio
 from utils import shopify, vectordb, yt_search
 from blacksheep import Request, Application, delete, get, post, json, redirect
 from blacksheep.server.cors import CORSPolicy
@@ -165,8 +166,12 @@ async def search_by_text(request: Request):
         return json({"error": str(e)}, status=500)
 
 # Get all products (with pagination)
-@get("/products")
-async def get_products(request: Request):
+@get("/products/vector-search")
+async def get_products_vector(request: Request):
+    """
+    Legacy endpoint: Query products from Pinecone vector database
+    Note: Use GET /products instead for company products from Supabase
+    """
     try:
         # Get query parameters
         limit = int(request.query.get("limit", "20"))
@@ -603,6 +608,61 @@ async def shopify_install(request: Request):
         traceback.print_exc()
         return json({"error": str(e)}, status=500)
 
+async def sync_products_background(shop: str, access_token: str, company_id: str):
+    """
+    Background task to sync products after OAuth (doesn't block redirect)
+    """
+    try:
+        from utils.shopify import get_products
+        from utils.vectordb import embed_products, upsert_embeddings
+
+        print(f"🔄 [Background] Syncing products for {shop}...")
+        products = get_products(shop, access_token=access_token)
+        print(f"✅ [Background] Found {len(products)} products")
+
+        # Create embeddings
+        product_embeddings = embed_products(products)
+
+        # Store in Pinecone
+        upsert_embeddings(product_embeddings)
+        print(f"✅ [Background] Stored {len(product_embeddings)} embeddings in Pinecone")
+
+        # Store in Supabase
+        for i, product in enumerate(products):
+            await supabase_client.client.table("company_products").insert({
+                "company_id": company_id,
+                "shop_domain": shop,
+                "title": product["name"],
+                "description": product.get("body_html", ""),
+                "image": product.get("image", ""),
+                "price": product.get("price", 0),
+                "pinecone_id": str(i),
+                "synced_at": "now()"
+            }).execute()
+
+        # Update sync status
+        await supabase_client.client.table("shopify_oauth_tokens").update({
+            "products_synced": True,
+            "last_product_sync": "now()",
+            "product_count": len(products)
+        }).eq("company_id", company_id).eq("shop_domain", shop).execute()
+
+        print(f"✅ [Background] Product sync complete for {shop}")
+
+        # Trigger immediate creator discovery
+        try:
+            from background_worker import trigger_immediate_discovery
+            asyncio.create_task(trigger_immediate_discovery(company_id, shop))
+            print(f"🚀 [Background] Triggered immediate creator discovery for {shop}")
+        except Exception as discovery_error:
+            print(f"⚠️  [Background] Failed to trigger discovery: {discovery_error}")
+
+    except Exception as sync_error:
+        print(f"❌ [Background] Product sync failed: {sync_error}")
+        import traceback
+        traceback.print_exc()
+
+
 @get("/shopify/callback")
 async def shopify_callback(request: Request):
     """
@@ -724,8 +784,13 @@ async def shopify_callback(request: Request):
             print(f"Warning: Failed to create uninstall webhook: {webhook_error}")
             # Don't fail the OAuth flow if webhook creation fails
 
-        # Redirect to success page in frontend
-        success_url = f"{APP_URL}/dashboard/settings?shopify=connected&shop={shop}"
+        # Trigger product sync in background (don't block redirect)
+        print(f"🚀 Starting background product sync for {shop}...")
+        asyncio.create_task(sync_products_background(shop, access_token, company_id))
+
+        # Redirect immediately (don't wait for product sync)
+        print(f"[Redirect] Redirecting user to dashboard immediately")
+        success_url = f"{APP_URL}/dashboard/products?shopify=connected&shop={shop}"
         return redirect(success_url)
 
     except ShopifyOAuthError as e:
@@ -845,4 +910,255 @@ async def shopify_disconnect(request: Request):
         return json({"message": "Shopify store disconnected successfully"})
 
     except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+@get("/shopify/shop-info")
+async def get_shop_info_endpoint(request: Request):
+    """
+    Get shop information (name, owner, domain, logo)
+
+    Query params:
+        - company_id: The company ID (optional, returns first shop if not provided)
+    """
+    try:
+        assert supabase_client
+
+        company_id = request.query.get("company_id")
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        # Query shopify_shops table
+        query = supabase_client.client.table("shopify_shops").select("*")
+
+        if company_id:
+            query = query.eq("company_id", company_id)
+
+        result = await query.limit(1).execute()
+
+        if not result.data:
+            return json({"error": "No shop found"}, status=404)
+
+        shop = result.data[0]
+
+        # Return relevant shop info
+        return json({
+            "shop_name": shop.get("shop_name"),
+            "shop_owner": shop.get("shop_owner"),
+            "shop_domain": shop.get("shop_domain"),
+            "email": shop.get("email"),
+            "logo_url": shop.get("logo_url"),  # Will be None if not set
+            "myshopify_domain": shop.get("myshopify_domain"),
+            "plan_display_name": shop.get("plan_display_name"),
+        })
+
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+# ============================================================================
+# PRODUCT & CREATOR MATCHING ENDPOINTS
+# ============================================================================
+
+@get("/products")
+async def get_company_products(request: Request):
+    """
+    Get all synced products for a company
+
+    Query params:
+        - company_id: The company ID
+    """
+    try:
+        assert supabase_client
+
+        company_id = request.query.get("company_id")
+
+        # Handle if company_id is returned as a list
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        if not company_id:
+            return json({"error": "Missing company_id parameter"}, status=400)
+
+        # Get products
+        result = await supabase_client.client.table("company_products")\
+            .select("*")\
+            .eq("company_id", company_id)\
+            .order("synced_at", desc=True)\
+            .execute()
+
+        return json({
+            "products": result.data,
+            "count": len(result.data) if result.data else 0
+        })
+
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+@get("/products/{product_id}/creators")
+async def get_product_creators(product_id: str, request: Request):
+    """
+    Get matched creators for a specific product
+
+    Path params:
+        - product_id: The product ID
+
+    Query params:
+        - limit: Max number of results (default 50)
+    """
+    try:
+        assert supabase_client
+
+        limit_param = request.query.get("limit", "50")
+        if isinstance(limit_param, list):
+            limit_param = limit_param[0]
+        limit = int(limit_param)
+
+        # Get pre-matched creators from background worker
+        matches = await supabase_client.client.table("product_creator_matches")\
+            .select("*, creator_videos(*)")\
+            .eq("product_id", product_id)\
+            .order("created_at", desc=True)\
+            .limit(limit)\
+            .execute()
+
+        # Also do real-time vector search for fresh matches
+        product = await supabase_client.client.table("company_products")\
+            .select("title, description, pinecone_id")\
+            .eq("id", product_id)\
+            .single()\
+            .execute()
+
+        vector_matches = []
+        if product.data and product.data.get("pinecone_id"):
+            try:
+                from utils.vectordb import query_text
+
+                search_text = f"{product.data['title']} {product.data.get('description', '')}"
+                vector_results = query_text(search_text[:500], top_k=20)  # Limit text length
+
+                # Convert Pinecone results to our format
+                for match in vector_results.matches:
+                    if match.metadata.get("type") == "creator_video":
+                        vector_matches.append({
+                            "video_id": match.metadata.get("video_id"),
+                            "score": match.score
+                        })
+            except Exception as vector_error:
+                print(f"Vector search error: {vector_error}")
+
+        return json({
+            "matches": matches.data if matches.data else [],
+            "vector_matches": vector_matches,
+            "count": len(matches.data) if matches.data else 0
+        })
+
+    except Exception as e:
+        return json({"error": str(e)}, status=500)
+
+@post("/products/resync")
+async def resync_products(request: Request):
+    """
+    Manually trigger product resync for a company
+
+    Request body:
+        - company_id: The company ID
+    """
+    try:
+        assert supabase_client
+
+        data = await request.json()
+        company_id = data.get("company_id")
+
+        if not company_id:
+            return json({"error": "Missing company_id"}, status=400)
+
+        # Get shop domain and token
+        token_result = await supabase_client.client.table("shopify_oauth_tokens")\
+            .select("shop_domain, access_token")\
+            .eq("company_id", company_id)\
+            .eq("is_active", True)\
+            .single()\
+            .execute()
+
+        if not token_result.data:
+            return json({"error": "No active Shopify connection found"}, status=404)
+
+        shop = token_result.data["shop_domain"]
+
+        # Use existing utilities
+        from utils.shopify import get_products
+        from utils.vectordb import embed_products, upsert_embeddings
+
+        print(f"🔄 Resyncing products for {shop}...")
+        products = get_products(shop)
+
+        # Delete old products for this company
+        await supabase_client.client.table("company_products")\
+            .delete()\
+            .eq("company_id", company_id)\
+            .execute()
+
+        # Create new embeddings
+        product_embeddings = embed_products(products)
+        upsert_embeddings(product_embeddings)
+
+        # Store in Supabase
+        for i, product in enumerate(products):
+            await supabase_client.client.table("company_products").insert({
+                "company_id": company_id,
+                "shop_domain": shop,
+                "title": product["name"],
+                "description": product.get("body_html", ""),
+                "image": product.get("image", ""),
+                "price": product.get("price", 0),
+                "pinecone_id": str(i),
+                "synced_at": "now()"
+            }).execute()
+
+        # Update sync status
+        await supabase_client.client.table("shopify_oauth_tokens").update({
+            "products_synced": True,
+            "last_product_sync": "now()",
+            "product_count": len(products)
+        }).eq("company_id", company_id).execute()
+
+        return json({
+            "message": "Products resynced successfully",
+            "count": len(products)
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return json({"error": str(e)}, status=500)
+
+
+@post("/products/trigger-discovery")
+async def trigger_discovery(request: Request):
+    """
+    Trigger immediate creator discovery for a company.
+    Useful for testing or manually starting discovery without waiting for scheduled cycle.
+    """
+    try:
+        data = await request.json()
+        company_id = data.get("company_id")
+        shop_domain = data.get("shop_domain")
+
+        if not company_id:
+            return json({"error": "company_id is required"}, status=400)
+
+        # Import and trigger discovery in background
+        from background_worker import trigger_immediate_discovery
+
+        # Run discovery in background (don't wait for it to complete)
+        asyncio.create_task(trigger_immediate_discovery(company_id, shop_domain))
+
+        return json({
+            "message": "Discovery triggered successfully",
+            "company_id": company_id,
+            "status": "processing"
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return json({"error": str(e)}, status=500)

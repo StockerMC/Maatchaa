@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getCurrentUser, getApiUrl } from '@/lib/auth';
+import { Card, Flex, Text, Box, Button, Badge, Separator } from "@radix-ui/themes";
+import { sage, green, red, blue } from "@radix-ui/colors";
+import { Store, Link2, Package, AlertCircle, CheckCircle2, Settings } from "lucide-react";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -103,115 +107,228 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
-        <p>Loading...</p>
-      </div>
+      <DashboardLayout>
+        <Flex direction="column" gap="6">
+          <Box>
+            <Text size="8" weight="bold" as="h1">Settings</Text>
+            <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem" }}>
+              Loading...
+            </Text>
+          </Box>
+        </Flex>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <DashboardLayout>
+      <Flex direction="column" gap="6">
+        {/* Header */}
+        <Flex direction="column" gap="2">
+          <Text size="8" weight="bold" as="h1">Settings</Text>
+          <Text size="2" style={{ color: sage.sage11 }}>
+            Manage your integrations and account preferences
+          </Text>
+        </Flex>
 
-      {/* Success/Error Messages */}
-      {showMessage && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            showMessage.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}
-        >
-          <p className="font-medium">{showMessage.text}</p>
-          <button
-            onClick={() => setShowMessage(null)}
-            className="mt-2 text-sm underline"
+        {/* Success/Error Messages */}
+        {showMessage && (
+          <Card
+            style={{
+              background: showMessage.type === 'success' ? green.green3 : red.red3,
+              border: `1px solid ${showMessage.type === 'success' ? green.green6 : red.red6}`,
+            }}
           >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {/* Shopify Integration Section */}
-      <div className="bg-white border rounded-lg p-6 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Shopify Integration</h2>
-
-        {!shopifyConnected ? (
-          <div>
-            <p className="text-gray-600 mb-4">
-              Connect your Shopify store to automatically sync products and track creator sales.
-            </p>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="font-medium text-blue-900 mb-2">What you'll get:</h3>
-              <ul className="list-disc list-inside text-blue-800 space-y-1 text-sm">
-                <li>Automatic product syncing to our AI matching system</li>
-                <li>Track orders from creator affiliate links</li>
-                <li>Generate discount codes for creators</li>
-                <li>Revenue attribution and analytics</li>
-              </ul>
-            </div>
-
-            <button
-              onClick={handleConnectShopify}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-            >
-              Connect Shopify Store
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div className="mb-6">
-              <div className="flex items-center mb-4">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="font-medium text-green-700">Connected</span>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Store Name:</span>
-                  <span className="font-medium">{shopInfo?.name || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Domain:</span>
-                  <span className="font-medium">{shopInfo?.domain || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Email:</span>
-                  <span className="font-medium">{shopInfo?.email || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Currency:</span>
-                  <span className="font-medium">{shopInfo?.currency || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => window.location.href = '/dashboard/products'}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            <Flex direction="column" gap="2">
+              <Flex align="center" gap="2">
+                {showMessage.type === 'success' ? (
+                  <CheckCircle2 size={20} color={green.green9} />
+                ) : (
+                  <AlertCircle size={20} color={red.red9} />
+                )}
+                <Text weight="medium" style={{ color: showMessage.type === 'success' ? green.green11 : red.red11 }}>
+                  {showMessage.text}
+                </Text>
+              </Flex>
+              <Button
+                variant="ghost"
+                size="1"
+                onClick={() => setShowMessage(null)}
+                style={{ alignSelf: "flex-start", color: showMessage.type === 'success' ? green.green11 : red.red11 }}
               >
-                View Products
-              </button>
-
-              <button
-                onClick={handleDisconnect}
-                className="px-6 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition-colors"
-              >
-                Disconnect Store
-              </button>
-            </div>
-          </div>
+                Dismiss
+              </Button>
+            </Flex>
+          </Card>
         )}
-      </div>
 
-      {/* Other Settings Sections */}
-      <div className="mt-6 bg-white border rounded-lg p-6 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
-        <p className="text-gray-600">Additional settings coming soon...</p>
-      </div>
-    </div>
+        {/* Shopify Integration Section */}
+        <Card style={{ background: "white" }}>
+          <Flex direction="column" gap="4">
+            {/* Card Header */}
+            <Flex align="center" gap="3">
+              <Box style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "8px",
+                background: sage.sage3,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <Store size={20} color={sage.sage11} />
+              </Box>
+              <Flex direction="column" gap="1">
+                <Text size="5" weight="bold">Shopify Integration</Text>
+                <Text size="2" style={{ color: sage.sage11 }}>
+                  Connect your store to sync products and track sales
+                </Text>
+              </Flex>
+            </Flex>
+
+            <Separator size="4" style={{ background: sage.sage6 }} />
+
+            {!shopifyConnected ? (
+              <Flex direction="column" gap="4">
+                <Text size="2" style={{ color: sage.sage11 }}>
+                  Connect your Shopify store to automatically sync products and track creator sales.
+                </Text>
+
+                <Card style={{ background: blue.blue2, border: `1px solid ${blue.blue6}` }}>
+                  <Flex direction="column" gap="2">
+                    <Text size="2" weight="medium" style={{ color: blue.blue11 }}>
+                      What you'll get:
+                    </Text>
+                    <Flex direction="column" gap="1" style={{ paddingLeft: "1rem" }}>
+                      <Flex align="center" gap="2">
+                        <Box style={{ width: "4px", height: "4px", borderRadius: "50%", background: blue.blue9 }} />
+                        <Text size="2" style={{ color: blue.blue11 }}>Automatic product syncing to our AI matching system</Text>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Box style={{ width: "4px", height: "4px", borderRadius: "50%", background: blue.blue9 }} />
+                        <Text size="2" style={{ color: blue.blue11 }}>Track orders from creator affiliate links</Text>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Box style={{ width: "4px", height: "4px", borderRadius: "50%", background: blue.blue9 }} />
+                        <Text size="2" style={{ color: blue.blue11 }}>Generate discount codes for creators</Text>
+                      </Flex>
+                      <Flex align="center" gap="2">
+                        <Box style={{ width: "4px", height: "4px", borderRadius: "50%", background: blue.blue9 }} />
+                        <Text size="2" style={{ color: blue.blue11 }}>Revenue attribution and analytics</Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </Card>
+
+                <Button
+                  size="3"
+                  onClick={handleConnectShopify}
+                  style={{
+                    background: green.green9,
+                    color: "white",
+                    cursor: "pointer",
+                    alignSelf: "flex-start"
+                  }}
+                >
+                  <Link2 size={16} />
+                  Connect Shopify Store
+                </Button>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap="4">
+                {/* Connection Status */}
+                <Flex align="center" gap="2">
+                  <Box style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    background: green.green9
+                  }} />
+                  <Badge color="green" size="2">Connected</Badge>
+                </Flex>
+
+                {/* Shop Info */}
+                <Card style={{ background: sage.sage2 }}>
+                  <Flex direction="column" gap="3">
+                    <Flex justify="between" align="center">
+                      <Text size="2" style={{ color: sage.sage11 }}>Store Name:</Text>
+                      <Text size="2" weight="medium">{shopInfo?.name || 'N/A'}</Text>
+                    </Flex>
+                    <Separator size="4" style={{ background: sage.sage6 }} />
+                    <Flex justify="between" align="center">
+                      <Text size="2" style={{ color: sage.sage11 }}>Domain:</Text>
+                      <Text size="2" weight="medium">{shopInfo?.domain || 'N/A'}</Text>
+                    </Flex>
+                    <Separator size="4" style={{ background: sage.sage6 }} />
+                    <Flex justify="between" align="center">
+                      <Text size="2" style={{ color: sage.sage11 }}>Email:</Text>
+                      <Text size="2" weight="medium">{shopInfo?.email || 'N/A'}</Text>
+                    </Flex>
+                    <Separator size="4" style={{ background: sage.sage6 }} />
+                    <Flex justify="between" align="center">
+                      <Text size="2" style={{ color: sage.sage11 }}>Currency:</Text>
+                      <Text size="2" weight="medium">{shopInfo?.currency || 'N/A'}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
+
+                {/* Actions */}
+                <Flex gap="3">
+                  <Button
+                    size="2"
+                    onClick={() => window.location.href = '/dashboard/products'}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Package size={16} />
+                    View Products
+                  </Button>
+
+                  <Button
+                    size="2"
+                    variant="soft"
+                    color="red"
+                    onClick={handleDisconnect}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Disconnect Store
+                  </Button>
+                </Flex>
+              </Flex>
+            )}
+          </Flex>
+        </Card>
+
+        {/* Account Settings Section */}
+        <Card style={{ background: "white" }}>
+          <Flex direction="column" gap="4">
+            <Flex align="center" gap="3">
+              <Box style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "8px",
+                background: sage.sage3,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <Settings size={20} color={sage.sage11} />
+              </Box>
+              <Flex direction="column" gap="1">
+                <Text size="5" weight="bold">Account Settings</Text>
+                <Text size="2" style={{ color: sage.sage11 }}>
+                  Manage your account preferences
+                </Text>
+              </Flex>
+            </Flex>
+
+            <Separator size="4" style={{ background: sage.sage6 }} />
+
+            <Text size="2" style={{ color: sage.sage11 }}>
+              Additional settings coming soon...
+            </Text>
+          </Flex>
+        </Card>
+      </Flex>
+    </DashboardLayout>
   );
 }

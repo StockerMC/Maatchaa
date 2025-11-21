@@ -4,8 +4,12 @@ import YouTubeReels from "@/components/YoutubeReels";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { getCurrentUser, getApiUrl } from "@/lib/auth";
 
 export default function ReelsPage() {
+    const searchParams = useSearchParams();
+    const productId = searchParams.get("product_id"); // Optional: filter by product
     type Reel = {
         id: string;
         company: string;
@@ -23,67 +27,81 @@ export default function ReelsPage() {
 
     useEffect(() => {
         const fetchData = async () => {
-            // MOCK DATA FOR TESTING - just fake 5 reels
-            const mockReels: Reel[] = [
-                {
-                    id: "1",
-                    company: "matchamatcha.ca",
-                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    product_imgs: ["https://picsum.photos/200/300"],
-                    product_titles: ["Test Product 1"],
-                    short_id: "dQw4w9WgXcQ",
-                    email: "test@example.com",
-                    channel_id: "test_channel",
-                    company_id: "matchamatcha.ca"
-                },
-                {
-                    id: "2",
-                    company: "matchamatcha.ca",
-                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    product_imgs: ["https://picsum.photos/200/301"],
-                    product_titles: ["Test Product 2"],
-                    short_id: "dQw4w9WgXcQ",
-                    email: "test@example.com",
-                    channel_id: "test_channel",
-                    company_id: "matchamatcha.ca"
-                },
-                {
-                    id: "3",
-                    company: "matchamatcha.ca",
-                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    product_imgs: ["https://picsum.photos/200/302"],
-                    product_titles: ["Test Product 3"],
-                    short_id: "dQw4w9WgXcQ",
-                    email: "test@example.com",
-                    channel_id: "test_channel",
-                    company_id: "matchamatcha.ca"
-                },
-                {
-                    id: "4",
-                    company: "matchamatcha.ca",
-                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    product_imgs: ["https://picsum.photos/200/303"],
-                    product_titles: ["Test Product 4"],
-                    short_id: "dQw4w9WgXcQ",
-                    email: "test@example.com",
-                    channel_id: "test_channel",
-                    company_id: "matchamatcha.ca"
-                },
-                {
-                    id: "5",
-                    company: "matchamatcha.ca",
-                    yt_short_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    product_imgs: ["https://picsum.photos/200/304"],
-                    product_titles: ["Test Product 5"],
-                    short_id: "dQw4w9WgXcQ",
-                    email: "test@example.com",
-                    channel_id: "test_channel",
-                    company_id: "matchamatcha.ca"
-                }
-            ];
+            try {
+                const user = getCurrentUser();
 
-            console.log("Using MOCK data for testing:", mockReels);
-            setData(mockReels);
+                let url: string;
+                if (productId) {
+                    // Fetch creators for specific product
+                    url = getApiUrl(`/products/${productId}/creators`);
+                    console.log("Fetching creators for product:", productId);
+                } else {
+                    // Fetch all creator videos (TODO: add endpoint for this)
+                    // For now, fetch from Supabase directly
+                    const { data: videos, error } = await supabase
+                        .from("creator_videos")
+                        .select("*")
+                        .order("indexed_at", { ascending: false })
+                        .limit(50);
+
+                    if (error) {
+                        console.error("Error fetching creator videos:", error);
+                        setData([]);
+                        return;
+                    }
+
+                    // Transform to Reel format
+                    const reels: Reel[] = videos?.map((video: any) => ({
+                        id: video.id,
+                        company: video.shop_domain || user.companyId,
+                        yt_short_url: video.url,
+                        product_imgs: video.thumbnail ? [video.thumbnail] : [],
+                        product_titles: [video.title],
+                        short_id: video.video_id,
+                        email: video.email || "",
+                        channel_id: video.channel_id,
+                        company_id: user.companyId
+                    })) || [];
+
+                    console.log(`Loaded ${reels.length} creator videos from database`);
+                    setData(reels);
+                    return;
+                }
+
+                // Fetch from API for product-specific creators
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error("Failed to fetch creators");
+                    setData([]);
+                    return;
+                }
+
+                const result = await response.json();
+                const creators = result.matches || [];
+
+                // Transform API response to Reel format
+                const reels: Reel[] = creators.map((match: any) => {
+                    const video = match.creator_videos;
+                    return {
+                        id: video.id,
+                        company: video.shop_domain || user.companyId,
+                        yt_short_url: video.url,
+                        product_imgs: video.thumbnail ? [video.thumbnail] : [],
+                        product_titles: [video.title],
+                        short_id: video.video_id,
+                        email: video.email || "",
+                        channel_id: video.channel_id,
+                        company_id: user.companyId
+                    };
+                });
+
+                console.log(`Loaded ${reels.length} creators for product ${productId}`);
+                setData(reels);
+
+            } catch (error) {
+                console.error("Error fetching creator data:", error);
+                setData([]);
+            }
         };
 
         const checkAndTriggerIngestion = async (shop_name: string | null) => {
@@ -154,9 +172,9 @@ export default function ReelsPage() {
                 setIsIngesting(false);
             }
         };
-        
+
         fetchData();
-    }, [isIngesting]);
+    }, [productId]); // Refetch when product filter changes
 
     return (
         <DashboardLayout

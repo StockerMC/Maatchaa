@@ -80,16 +80,37 @@ def embed_products(products: List[Product]) -> List[EmbeddingItem]:
     items: List[EmbeddingItem] = []
 
     for i, product in enumerate(products):
+        # Always use text embeddings to save Pinecone storage
+        # Image embeddings are much larger and quickly fill up the 2GB free tier
+        image_url = product.get("image", "")
+
+        # Build rich text description from product data
+        text = f"{product['name']} {product.get('body_html', '')}"
+
+        try:
+            embedding = text_to_embedding(text).embeddings.float_[0]
+        except Exception as e:
+            print(f"⚠️  Failed to create embedding for '{product['name']}': {e}")
+            continue
+
+        # Build metadata, filtering out None/null values (Pinecone doesn't accept them)
+        metadata = {
+            "title": product["name"],
+            "price": product.get("price", 0)
+        }
+
+        # Only add fields if they have actual values
+        if product.get("body_html"):
+            metadata["body_html"] = product["body_html"]
+        if product.get("vendor"):
+            metadata["vendor"] = product["vendor"]
+        if image_url:
+            metadata["imageURL"] = image_url
+
         items.append({
             "id": str(i),
-            "values": imageurl_to_embedding(product["image"]).embeddings.float_[0],
-            "metadata": {
-                "body_html": product["body_html"],
-                "title": product["name"],
-                "vendor": product["vendor"],
-                "imageURL": product["image"],
-                "price": product["price"]
-            }
+            "values": embedding,
+            "metadata": metadata
         })
         time.sleep(0.2)
     return items

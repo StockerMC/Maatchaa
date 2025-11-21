@@ -3,187 +3,114 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, Select, Dialog } from "@radix-ui/themes";
 import { sage, lime } from "@radix-ui/colors";
-import { Search, ExternalLink, Eye, Loader2, X, Package } from "lucide-react";
+import { Search, ExternalLink, Eye, Loader2, X, Package, Sparkles, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-
-const POSITIVE_COLOR = "#5c9a31";
-const NEGATIVE_COLOR = "#f81f1f";
-
-interface ShopifyVariant {
-  id: number;
-  title: string;
-  option1: string;
-  option2: string | null;
-  option3: string | null;
-  sku: string;
-  requires_shipping: boolean;
-  taxable: boolean;
-  featured_image: {
-    id: number;
-    src: string;
-    alt: string | null;
-    width: number;
-    height: number;
-  } | null;
-  available: boolean;
-  price: string;
-  grams: number;
-  compare_at_price: string | null;
-  position: number;
-  product_id: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ShopifyImage {
-  id: number;
-  created_at: string;
-  position: number;
-  updated_at: string;
-  product_id: number;
-  variant_ids: number[];
-  src: string;
-  width: number;
-  height: number;
-  alt?: string | null;
-}
-
-interface ShopifyProduct {
-  id: number;
-  title: string;
-  handle: string;
-  body_html: string;
-  published_at: string;
-  created_at: string;
-  updated_at: string;
-  vendor: string;
-  product_type: string;
-  tags: string[];
-  variants: ShopifyVariant[];
-  images: ShopifyImage[];
-  options: Array<{
-    name: string;
-    position: number;
-    values: string[];
-  }>;
-}
+import { getCurrentUser, getApiUrl } from "@/lib/auth";
 
 interface Product {
   id: string;
-  shopifyId: number;
-  name: string;
+  company_id: string;
+  shop_domain: string;
+  title: string;
   description: string;
+  image: string;
   price: number;
-  compareAtPrice: number | null;
-  category: string;
-  vendor: string;
-  imageUrl: string;
-  images: ShopifyImage[];
-  shopifyUrl: string;
-  status: "Active" | "Inactive" | "Out of Stock";
-  matchCount: number;
-  lastMatched: string;
-  variants: ShopifyVariant[];
-  tags: string[];
-  options: Array<{
-    name: string;
-    position: number;
-    values: string[];
-  }>;
-  handle: string;
+  pinecone_id: string;
+  synced_at: string;
+  updated_at: string;
+  match_count?: number;
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [shopifyStoreUrl, setShopifyStoreUrl] = useState("https://matchamatcha.ca");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
-  const fetchShopifyProducts = useCallback(async () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Check for OAuth success on mount
+  useEffect(() => {
+    const shopifyConnected = searchParams.get("shopify");
+    if (shopifyConnected === "connected") {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 5000);
+    }
+  }, [searchParams]);
+
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${shopifyStoreUrl}/products.json`);
+
+      // Get company_id from auth
+      const user = getCurrentUser();
+      const companyId = user.companyId;
+
+      const response = await fetch(
+        getApiUrl(`/products?company_id=${companyId}`)
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
       const data = await response.json();
-
-      const transformedProducts: Product[] = data.products.map((product: ShopifyProduct) => {
-        // Determine product status based on variant availability
-        const hasAvailableVariants = product.variants.some((v) => v.available);
-        const status = hasAvailableVariants ? "Active" : "Out of Stock";
-
-        // Get pricing info
-        const minPrice = Math.min(...product.variants.map((v) => parseFloat(v.price)));
-        const compareAtPrice = product.variants[0]?.compare_at_price
-          ? parseFloat(product.variants[0].compare_at_price)
-          : null;
-
-        // Clean HTML from description
-        const cleanDescription = product.body_html
-          .replace(/<[^>]*>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .trim();
-
-        return {
-          id: product.id.toString(),
-          shopifyId: product.id,
-          name: product.title,
-          description: cleanDescription.substring(0, 150) + (cleanDescription.length > 150 ? "..." : ""),
-          price: minPrice,
-          compareAtPrice,
-          category: product.product_type || "Uncategorized",
-          vendor: product.vendor,
-          imageUrl: product.images[0]?.src || "/placeholder.svg",
-          images: product.images,
-          shopifyUrl: `${shopifyStoreUrl}/products/${product.handle}`,
-          status,
-          matchCount: Math.floor(Math.random() * 20), // TODO: Replace with actual match data from backend
-          lastMatched: `${Math.floor(Math.random() * 24)} hours ago`, // TODO: Replace with actual data
-          variants: product.variants,
-          tags: product.tags,
-          options: product.options,
-          handle: product.handle,
-        };
-      });
-
-      setProducts(transformedProducts);
-
-      // TODO: Optionally save to backend for persistence
-      // await saveProductsToBackend(transformedProducts);
+      setProducts(data.products || []);
     } catch (error) {
-      console.error("Error fetching Shopify products:", error);
+      console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
-  }, [shopifyStoreUrl]);
+  }, []);
 
-  useEffect(() => {
-    fetchShopifyProducts();
-  }, [fetchShopifyProducts]);
+  const handleResync = async () => {
+    try {
+      setSyncing(true);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+      // Get company_id from auth
+      const user = getCurrentUser();
+      const companyId = user.companyId;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "green";
-      case "Inactive":
-        return "gray";
-      case "Out of Stock":
-        return "red";
-      default:
-        return "gray";
+      // TODO: Get actual shop_domain from database or session
+      const shopDomain = "matchamatcha.ca";
+
+      const response = await fetch(
+        getApiUrl("/products/resync"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ company_id: companyId, shop_domain: shopDomain }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to resync products");
+      }
+
+      // Refetch products after successful resync
+      await fetchProducts();
+    } catch (error) {
+      console.error("Error resyncing products:", error);
+    } finally {
+      setSyncing(false);
     }
   };
 
-  const categories = ["all", ...Array.from(new Set(products.map((p) => p.category)))];
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -198,27 +125,54 @@ export default function ProductsPage() {
   return (
     <DashboardLayout>
       <Flex direction="column" gap="6">
+        {/* Success Banner */}
+        {showSuccess && (
+          <Card
+            style={{
+              padding: "1rem",
+              background: `linear-gradient(135deg, ${lime.lime3} 0%, ${lime.lime4} 100%)`,
+              border: `1px solid ${lime.lime7}`,
+            }}
+          >
+            <Flex align="center" gap="3">
+              <CheckCircle2 size={24} color={lime.lime11} />
+              <Box>
+                <Text size="3" weight="medium" style={{ color: lime.lime12 }}>
+                  Shopify Store Connected Successfully!
+                </Text>
+                <Text size="2" style={{ color: lime.lime11, marginTop: "0.25rem", display: "block" }}>
+                  Your products have been synced and the background worker is now discovering relevant creators.
+                </Text>
+              </Box>
+            </Flex>
+          </Card>
+        )}
+
         {/* Header */}
         <Flex align="center" justify="between">
           <Box>
             <Text size="8" weight="bold" style={{ color: sage.sage12 }}>
-              Product List
+              Product Catalog
             </Text>
             <Text size="3" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
-              Products from your Shopify store
+              Synced from your Shopify store • Auto-matching with creators
             </Text>
           </Box>
-          <Flex align="center" gap="2">
-            <TextField.Root
-              placeholder="Store URL"
-              value={shopifyStoreUrl}
-              onChange={(e) => setShopifyStoreUrl(e.target.value)}
-              style={{ width: "200px" }}
-            />
-            <Button variant="solid" onClick={fetchShopifyProducts} color="lime">
-              Sync Store
-            </Button>
-          </Flex>
+          <Button
+            variant="solid"
+            onClick={handleResync}
+            color="lime"
+            disabled={syncing}
+          >
+            {syncing ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Syncing...
+              </>
+            ) : (
+              "Resync Products"
+            )}
+          </Button>
         </Flex>
 
         {/* Product Stats */}
@@ -227,31 +181,28 @@ export default function ProductsPage() {
             {
               label: "Total Products",
               value: products.length,
-              changeNumber: `${products.filter((p) => p.status === "Active").length}`,
-              changeDesc: "active",
+              desc: "synced from Shopify",
             },
             {
               label: "Avg. Price",
               value:
                 products.length > 0
-                  ? `$${(products.reduce((sum, p) => sum + p.price, 0) / products.length).toFixed(2)}`
+                  ? `$${(products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length).toFixed(2)}`
                   : "$0.00",
-              changeNumber: "",
-              changeDesc: "across all products",
+              desc: "across all products",
             },
             {
-              label: "Unmatched Products",
-              value: products.filter((p) => p.matchCount === 0).length,
-              changeNumber: products.filter((p) => p.matchCount > 0 && p.matchCount < 5).length.toString(),
-              changeDesc: "matching",
+              label: "Products with Matches",
+              value: products.filter((p) => (p.match_count || 0) > 0).length,
+              desc: `${products.filter((p) => (p.match_count || 0) === 0).length} pending discovery`,
             },
             {
-              label: "Total Matches",
-              value: products.reduce((sum, p) => sum + p.matchCount, 0),
-              changeNumber: products.length > 0
-                ? (products.reduce((sum, p) => sum + p.matchCount, 0) / products.length).toFixed(1)
-                : "0",
-              changeDesc: "matches per product",
+              label: "Total Creator Matches",
+              value: products.reduce((sum, p) => sum + (p.match_count || 0), 0),
+              desc:
+                products.length > 0
+                  ? `${(products.reduce((sum, p) => sum + (p.match_count || 0), 0) / products.length).toFixed(1)} avg per product`
+                  : "0 avg per product",
             },
           ].map((stat) => (
             <Card
@@ -263,22 +214,15 @@ export default function ProductsPage() {
               }}
             >
               <Flex direction="column" gap="3">
-                <Text size="2" style={{ color: "sage.sage11", fontWeight: 500 }}>
+                <Text size="2" style={{ color: sage.sage11, fontWeight: 500 }}>
                   {stat.label}
                 </Text>
                 <Text size="7" weight="medium" style={{ color: "#000" }}>
                   {stat.value}
                 </Text>
-                <Flex align="center" gap="1">
-                  {stat.changeNumber && (
-                    <Text size="1" style={{ color: POSITIVE_COLOR, fontWeight: 600 }}>
-                      {stat.changeNumber}
-                    </Text>
-                  )}
-                  <Text size="1" style={{ color: "#000", fontWeight: 400 }}>
-                    {stat.changeDesc}
-                  </Text>
-                </Flex>
+                <Text size="1" style={{ color: sage.sage10, fontWeight: 400 }}>
+                  {stat.desc}
+                </Text>
               </Flex>
             </Card>
           ))}
@@ -290,7 +234,7 @@ export default function ProductsPage() {
             padding: "1.5rem",
           }}
         >
-          {/* Search and Filter */}
+          {/* Search */}
           <Flex align="center" gap="3" mb="4">
             <Box style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
               <Search
@@ -310,358 +254,150 @@ export default function ProductsPage() {
                 style={{ paddingLeft: "36px" }}
               />
             </Box>
-            <Select.Root value={selectedCategory} onValueChange={setSelectedCategory}>
-              <Select.Trigger style={{ width: "180px" }} />
-              <Select.Content>
-                {categories.map((category) => (
-                  <Select.Item key={category} value={category}>
-                    {category === "all" ? "All Categories" : category}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+            <Badge variant="soft" size="2">
+              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+            </Badge>
           </Flex>
 
           {/* Product Grid */}
-          <Flex direction="column" gap="3">
-            {filteredProducts.map((product, index) => (
-              <Flex
-                key={product.id}
-                align="center"
-                gap="4"
-                p="3"
-                style={{
-                  border: "1px solid {sage.sage6}",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  background: index % 2 === 0 ? "white" : "#FAFAF9",
-                }}
-                onClick={() => setSelectedProduct(product)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = `${lime.lime9}`;
-                  e.currentTarget.style.background = index % 2 === 0 ? "#F5F5F4" : "#F0F0EF";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = sage.sage6;
-                  e.currentTarget.style.background = index % 2 === 0 ? "white" : "#FAFAF9";
-                }}
-              >
-                <Box
+          {filteredProducts.length === 0 ? (
+            <Flex
+              direction="column"
+              align="center"
+              justify="center"
+              gap="3"
+              style={{ padding: "4rem 2rem", textAlign: "center" }}
+            >
+              <Package size={48} color={sage.sage9} />
+              <Text size="4" weight="medium" style={{ color: sage.sage11 }}>
+                {searchTerm ? "No products found" : "No products synced yet"}
+              </Text>
+              <Text size="2" style={{ color: sage.sage10 }}>
+                {searchTerm
+                  ? "Try adjusting your search"
+                  : "Connect your Shopify store to start discovering creators"}
+              </Text>
+            </Flex>
+          ) : (
+            <Flex direction="column" gap="3">
+              {filteredProducts.map((product, index) => (
+                <Flex
+                  key={product.id}
+                  align="center"
+                  gap="4"
+                  p="3"
                   style={{
-                    position: "relative",
-                    width: "60px",
-                    height: "60px",
+                    border: `1px solid ${sage.sage6}`,
                     borderRadius: "8px",
-                    overflow: "hidden",
-                    flexShrink: 0,
+                    transition: "all 0.2s",
+                    background: index % 2 === 0 ? "white" : "#FAFAF9",
                   }}
                 >
-                  <Image
-                    src={product.imageUrl || "/placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    style={{ objectFit: "cover" }}
-                  />
-                </Box>
-
-                {/* Product Info */}
-                <Flex direction="column" gap="1" style={{ flex: 1 }}>
-                  <Flex align="center" gap="2">
-                    <Text size="3" weight="medium">
-                      {product.name}
-                    </Text>
-                    {product.variants.length > 1 && (
-                      <Badge size="1" variant="soft" color="blue">
-                        {product.variants.length} variants
-                      </Badge>
-                    )}
-                  </Flex>
-                  <Text size="1" style={{ color: sage.sage11, lineHeight: 1.4, fontWeight: 400 }}>
-                    {product.vendor} • {product.description}
-                  </Text>
-                  {product.options.length > 0 && (
-                    <Text size="1" style={{ color: sage.sage10 }}>
-                      Options: {product.options.map((opt) => opt.name).join(", ")}
-                    </Text>
-                  )}
-                </Flex>
-
-                {/* Category */}
-                <Badge variant="soft" style={{ flexShrink: 0 }}>
-                  {product.category}
-                </Badge>
-
-                {/* Price */}
-                <Flex direction="column" align="end" style={{ width: "100px" }}>
-                  <Text size="3" weight="medium">
-                    ${product.price.toFixed(2)}
-                  </Text>
-                  {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <Text size="1" style={{ color: sage.sage10, textDecoration: "line-through" }}>
-                      ${product.compareAtPrice.toFixed(2)}
-                    </Text>
-                  )}
-                </Flex>
-
-                {/* Status */}
-                <Box style={{ width: "80px", display: "flex", justifyContent: "center" }}>
-                  <Badge color={product.status === "Active" ? "purple" : getStatusColor(product.status)}>
-                    {product.status}
-                  </Badge>
-                </Box>
-
-                {/* Matches */}
-                <Flex align="center" gap="1" style={{ width: "60px" }}>
-                  <Eye size={14} color={sage.sage11} />
-                  <Text size="2" weight="medium">
-                    {product.matchCount}
-                  </Text>
-                </Flex>
-
-                {/* Last Matched */}
-                <Text size="1" style={{ color: sage.sage11, width: "100px" }}>
-                  {product.lastMatched}
-                </Text>
-
-                {/* Actions */}
-                <Flex gap="2" align="center">
-                  <Button
-                    variant="soft"
-                    size="1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProduct(product);
-                    }}
-                  >
-                    <Package size={14} />
-                    View
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="1"
-                    asChild
-                    onClick={(e) => e.stopPropagation()}
+                  <Box
                     style={{
-                      width: "32px",
-                      height: "32px",
-                      padding: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      position: "relative",
+                      width: "60px",
+                      height: "60px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      flexShrink: 0,
+                      background: sage.sage3,
                     }}
                   >
-                    <a href={product.shopifyUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink size={14} />
-                    </a>
-                  </Button>
-                </Flex>
-              </Flex>
-            ))}
-          </Flex>
-        </Card>
-
-        {/* Product Details Modal */}
-        <Dialog.Root open={selectedProduct !== null} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-          <Dialog.Content style={{ maxWidth: 900, maxHeight: "90vh", overflow: "auto" }}>
-            {selectedProduct && (
-              <Flex direction="column" gap="4">
-                <Flex align="center" justify="between">
-                  <Dialog.Title size="6">{selectedProduct.name}</Dialog.Title>
-                  <Dialog.Close>
-                    <Button variant="ghost" size="1">
-                      <X size={20} />
-                    </Button>
-                  </Dialog.Close>
-                </Flex>
-
-                <Flex gap="6">
-                  {/* Images Section */}
-                  <Box style={{ flex: "0 0 400px" }}>
-                    <Box
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        height: "400px",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        marginBottom: "1rem",
-                      }}
-                    >
+                    {product.image ? (
                       <Image
-                        src={selectedProduct.imageUrl}
-                        alt={selectedProduct.name}
+                        src={product.image}
+                        alt={product.title}
                         fill
                         style={{ objectFit: "cover" }}
                       />
-                    </Box>
-                    {selectedProduct.images.length > 1 && (
-                      <Flex gap="2" wrap="wrap">
-                        {selectedProduct.images.slice(0, 4).map((img) => (
-                          <Box
-                            key={img.id}
-                            style={{
-                              position: "relative",
-                              width: "90px",
-                              height: "90px",
-                              borderRadius: "8px",
-                              overflow: "hidden",
-                              border: "1px solid {sage.sage6}",
-                            }}
-                          >
-                            <Image
-                              src={img.src}
-                              alt={img.alt || selectedProduct.name}
-                              fill
-                              style={{ objectFit: "cover" }}
-                            />
-                          </Box>
-                        ))}
+                    ) : (
+                      <Flex align="center" justify="center" style={{ width: "100%", height: "100%" }}>
+                        <Package size={24} color={sage.sage9} />
                       </Flex>
                     )}
                   </Box>
 
-                  {/* Product Details */}
-                  <Flex direction="column" gap="4" style={{ flex: 1 }}>
-                    <Box>
-                      <Flex align="center" gap="2" mb="2">
-                        <Badge color={getStatusColor(selectedProduct.status)}>
-                          {selectedProduct.status}
-                        </Badge>
-                        <Badge variant="soft">{selectedProduct.category}</Badge>
-                      </Flex>
-                      <Text size="2" style={{ color: sage.sage11 }}>
-                        by {selectedProduct.vendor}
+                  {/* Product Info */}
+                  <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
+                    <Text size="3" weight="medium" style={{ color: sage.sage12 }}>
+                      {product.title}
+                    </Text>
+                    {product.description && (
+                      <Text
+                        size="2"
+                        style={{
+                          color: sage.sage11,
+                          lineHeight: 1.4,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {product.description.substring(0, 100)}
+                        {product.description.length > 100 ? "..." : ""}
                       </Text>
-                    </Box>
-
-                    {/* Pricing */}
-                    <Box>
-                      <Flex align="baseline" gap="2">
-                        <Text size="7" weight="medium">
-                          ${selectedProduct.price.toFixed(2)}
-                        </Text>
-                        {selectedProduct.compareAtPrice && selectedProduct.compareAtPrice > selectedProduct.price && (
-                          <Text size="4" style={{ color: sage.sage10, textDecoration: "line-through" }}>
-                            ${selectedProduct.compareAtPrice.toFixed(2)}
-                          </Text>
-                        )}
-                      </Flex>
-                      {selectedProduct.variants.length > 1 && (
-                        <Text size="1" style={{ color: sage.sage11 }}>
-                          Starting price
-                        </Text>
-                      )}
-                    </Box>
-
-                    {/* Description */}
-                    <Box>
-                      <Text size="2" weight="medium" mb="2" style={{ display: "block" }}>
-                        Description
-                      </Text>
-                      <Text size="2" style={{ color: sage.sage11, lineHeight: 1.6 }}>
-                        {selectedProduct.description}
-                      </Text>
-                    </Box>
-
-                    {/* Options */}
-                    {selectedProduct.options.length > 0 && (
-                      <Box>
-                        <Text size="2" weight="medium" mb="2" style={{ display: "block" }}>
-                          Available Options
-                        </Text>
-                        <Flex direction="column" gap="2">
-                          {selectedProduct.options.map((option) => (
-                            <Box key={option.name}>
-                              <Text size="1" weight="medium" style={{ color: sage.sage11 }}>
-                                {option.name}:
-                              </Text>
-                              <Flex gap="1" wrap="wrap" mt="1">
-                                {option.values.map((value) => (
-                                  <Badge key={value} variant="soft" size="1">
-                                    {value}
-                                  </Badge>
-                                ))}
-                              </Flex>
-                            </Box>
-                          ))}
-                        </Flex>
-                      </Box>
                     )}
+                    <Text size="1" style={{ color: sage.sage10 }}>
+                      {product.shop_domain}
+                    </Text>
+                  </Flex>
 
-                    {/* Variants */}
-                    <Box>
-                      <Text size="2" weight="medium" mb="2" style={{ display: "block" }}>
-                        Variants ({selectedProduct.variants.length})
+                  {/* Price */}
+                  <Flex direction="column" align="end" style={{ width: "100px" }}>
+                    <Text size="3" weight="medium" style={{ color: sage.sage12 }}>
+                      ${product.price ? product.price.toFixed(2) : "0.00"}
+                    </Text>
+                  </Flex>
+
+                  {/* Match Count */}
+                  <Flex direction="column" align="center" style={{ width: "80px" }}>
+                    <Flex align="center" gap="1">
+                      <Sparkles size={14} color={product.match_count && product.match_count > 0 ? lime.lime10 : sage.sage9} />
+                      <Text size="3" weight="medium">
+                        {product.match_count || 0}
                       </Text>
-                      <Flex direction="column" gap="2" style={{ maxHeight: "200px", overflowY: "auto" }}>
-                        {selectedProduct.variants.map((variant) => (
-                          <Flex
-                            key={variant.id}
-                            align="center"
-                            justify="between"
-                            p="2"
-                            style={{
-                              border: "1px solid {sage.sage6}",
-                              borderRadius: "6px",
-                              background: variant.available ? "white" : sage.sage2,
-                            }}
-                          >
-                            <Flex direction="column" gap="1">
-                              <Text size="2">{variant.title}</Text>
-                              <Text size="1" style={{ color: sage.sage11 }}>
-                                SKU: {variant.sku}
-                              </Text>
-                            </Flex>
-                            <Flex align="center" gap="2">
-                              <Text size="2" weight="medium">
-                                ${parseFloat(variant.price).toFixed(2)}
-                              </Text>
-                              <Badge color={variant.available ? "green" : "red"} size="1">
-                                {variant.available ? "In Stock" : "Out of Stock"}
-                              </Badge>
-                            </Flex>
-                          </Flex>
-                        ))}
-                      </Flex>
-                    </Box>
-
-                    {/* Tags */}
-                    {selectedProduct.tags.length > 0 && (
-                      <Box>
-                        <Text size="2" weight="medium" mb="2" style={{ display: "block" }}>
-                          Tags
-                        </Text>
-                        <Flex gap="1" wrap="wrap">
-                          {selectedProduct.tags.slice(0, 10).map((tag) => (
-                            <Badge key={tag} variant="soft" size="1">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {selectedProduct.tags.length > 10 && (
-                            <Badge variant="soft" size="1">
-                              +{selectedProduct.tags.length - 10} more
-                            </Badge>
-                          )}
-                        </Flex>
-                      </Box>
-                    )}
-
-                    {/* Actions */}
-                    <Flex gap="2" mt="2">
-                      <Button asChild style={{ flex: 1 }}>
-                        <a href={selectedProduct.shopifyUrl} target="_blank" rel="noopener noreferrer">
-                          View in Shopify
-                          <ExternalLink size={16} style={{ marginLeft: "0.5rem" }} />
-                        </a>
-                      </Button>
                     </Flex>
+                    <Text size="1" style={{ color: sage.sage10 }}>
+                      {product.match_count === 1 ? "match" : "matches"}
+                    </Text>
+                  </Flex>
+
+                  {/* Actions */}
+                  <Flex gap="2" align="center">
+                    <Button
+                      variant="solid"
+                      size="2"
+                      color="lime"
+                      onClick={() => router.push(`/dashboard/reels?product_id=${product.id}`)}
+                    >
+                      <Sparkles size={14} />
+                      Find Creators
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="2"
+                      asChild
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        padding: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <a href={`https://${product.shop_domain}/products/${product.id}`} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={14} />
+                      </a>
+                    </Button>
                   </Flex>
                 </Flex>
-              </Flex>
-            )}
-          </Dialog.Content>
-        </Dialog.Root>
+              ))}
+            </Flex>
+          )}
+        </Card>
+
       </Flex>
     </DashboardLayout>
   );

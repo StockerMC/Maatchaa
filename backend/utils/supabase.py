@@ -136,8 +136,9 @@ class SupabaseClient:
         
     async def close(self):
         """Close the async Supabase client"""
-        if hasattr(self, 'client') and self.client:
-            await self.client.aclose()
+        # Supabase AsyncClient doesn't have explicit close method
+        # Resources are cleaned up automatically
+        pass
 
     async def delete_pending_short(self, id: str):
         try:
