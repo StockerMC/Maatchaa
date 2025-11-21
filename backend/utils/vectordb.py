@@ -79,16 +79,22 @@ def text_to_embedding(text: str) -> Any:
 def embed_products(products: List[Product]) -> List[EmbeddingItem]:
     items: List[EmbeddingItem] = []
 
+    # Flag to enable image embeddings (disabled by default to save Pinecone storage)
+    use_image_embeddings = os.getenv("USE_IMAGE_EMBEDDINGS", "true").lower() == "true"
+
     for i, product in enumerate(products):
-        # Always use text embeddings to save Pinecone storage
-        # Image embeddings are much larger and quickly fill up the 2GB free tier
         image_url = product.get("image", "")
 
         # Build rich text description from product data
         text = f"{product['name']} {product.get('body_html', '')}"
 
         try:
-            embedding = text_to_embedding(text).embeddings.float_[0]
+            # Use image embeddings if enabled and image URL exists
+            if use_image_embeddings and image_url:
+                print(f"🖼️  Using image embedding for '{product['name']}'")
+                embedding = imageurl_to_embedding(image_url).embeddings.float_[0]
+            else:
+                embedding = text_to_embedding(text).embeddings.float_[0]
         except Exception as e:
             print(f"⚠️  Failed to create embedding for '{product['name']}': {e}")
             continue
