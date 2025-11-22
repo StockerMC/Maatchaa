@@ -6,7 +6,7 @@ application_url = "https://maatchaa.vercel.app"
 embedded = true
 
 [build]
-automatically_update_urls_on_dev = true
+automatically_update_urls_on_dev = false
 include_config_on_deploy = true
 
 [webhooks]
@@ -26,6 +26,6 @@ scopes = "read_analytics,read_companies,read_discounts,write_discounts,read_inve
 
 [auth]
 redirect_urls = [
-  "https://unconvulsive-hyo-fascinatedly.ngrok-free.dev",
-  "https://unconvulsive-hyo-fascinatedly.ngrok-free.dev/shopify/callback"
+  "https://unconvulsive-hyo-fascinatedly.ngrok-free.dev/shopify/callback",
+  "https://unconvulsive-hyo-fascinatedly.ngrok-free.dev"
 ]

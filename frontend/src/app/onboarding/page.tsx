@@ -283,42 +283,29 @@ export default function OnboardingPage() {
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", zIndex: 50, overflow: "hidden" }}>
-      {/* Background Gradient */}
-      <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: -1 }}>
-        <MeshGradient
-          className="w-full h-full opacity-80"
-          options={{
-            colors: ['#d2d3ff', '#7ff1c5', '#24fbfb', '#60a5fa'],
-            isStatic: true,
-            seed: 456,
-            appearance: 'default'
-          }}
-        />
-      </div>
-
-      <Box style={{ width: "100%", maxWidth: "650px", maxHeight: "90vh", padding: "2rem", background: "white", borderRadius: "16px", overflowY: "auto" }}>
+    <div style={{ minHeight: "100vh", width: "100%", background: sage.sage2, padding: "2rem 1rem" }}>
+      <Box style={{ width: "100%", maxWidth: "850px", margin: "0 auto", padding: "2.5rem", background: "white", borderRadius: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
         <Flex direction="column" gap="4">
           {/* Header */}
-          <Flex direction="column" gap="4">
-            <Flex align="center" justify="between">
+          <Flex direction="column" gap="5">
+            <Flex align="center" justify="between" wrap="wrap" gap="3">
               <Box>
-                <Text size="8" weight="bold" as="h1">
+                <Text size="8" weight="bold" as="h1" style={{ color: sage.sage12 }}>
                   Welcome to Maatchaa
                 </Text>
                 <Text size="3" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
                   Let&apos;s get your business set up for creator partnerships
                 </Text>
               </Box>
-              <Badge size="2" color="gray">
+              <Badge size="2" variant="soft" color="lime">
                 Step {currentStep + 1} of {steps.length}
               </Badge>
             </Flex>
 
-            <Progress value={progress} color="lime" style={{ border: "none" }} />
+            <Progress value={progress} color="lime" style={{ border: "none" }} size="2" />
 
             {/* Step Navigation */}
-            <Flex align="center" gap="2" style={{ overflowX: "auto" }}>
+            <Flex align="center" gap="3" style={{ overflowX: "auto", paddingBottom: "0.5rem" }}>
               {steps.map((step, index) => {
                 const isActive = index === currentStep;
                 const isCompleted = completedSteps.has(index);
@@ -346,11 +333,14 @@ export default function OnboardingPage() {
           </Flex>
 
           {/* Step Content */}
-          <Card style={{ minHeight: "420px" }}>
-            <Flex direction="column" gap="4">
-              <Box mb="2">
-                <Text size="5" weight="bold" as="h2">
+          <Card style={{ minHeight: "420px", background: sage.sage1, border: `1px solid ${sage.sage6}`, padding: "2rem" }}>
+            <Flex direction="column" gap="5">
+              <Box>
+                <Text size="6" weight="bold" as="h2" style={{ color: sage.sage12 }}>
                   {steps[currentStep].title}
+                </Text>
+                <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
+                  {steps[currentStep].description}
                 </Text>
               </Box>
 
@@ -364,15 +354,15 @@ export default function OnboardingPage() {
           </Card>
 
           {/* Navigation Buttons */}
-          <Flex align="center" justify="between">
-            <Button variant="soft" color="gray" onClick={handlePrevious} disabled={currentStep === 0} size="3">
-              <ArrowLeft size={16} />
+          <Flex align="center" justify="between" style={{ paddingTop: "1rem" }}>
+            <Button variant="soft" color="gray" onClick={handlePrevious} disabled={currentStep === 0} size="3" style={{ cursor: "pointer" }}>
+              <ArrowLeft size={18} />
               Previous
             </Button>
 
-            <Button onClick={handleNext} variant="solid" color="lime" size="3">
+            <Button onClick={handleNext} variant="solid" color="lime" size="3" style={{ cursor: "pointer", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
               {currentStep === steps.length - 1 ? "Complete Setup" : "Next"}
-              {currentStep < steps.length - 1 && <ArrowRight size={16} />}
+              {currentStep < steps.length - 1 && <ArrowRight size={18} />}
             </Button>
           </Flex>
         </Flex>

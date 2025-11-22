@@ -49,6 +49,14 @@ async def after_start(application: Application):
     """Called after the application has started"""
     print("🚀 BlackSheep application started successfully")
 
+@get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return json({
+        "status": "healthy",
+        "service": "maatchaa-api"
+    })
+
 @app.on_stop
 async def on_stop(application: Application):
     """Clean up global resources when the application shuts down"""
@@ -599,8 +607,11 @@ async def shopify_install(request: Request):
         # Build OAuth authorization URL
         auth_url = build_install_url(shop, state)
 
-        # Redirect merchant to Shopify
-        return redirect(auth_url)
+        # Use JavaScript redirect to avoid ampersand escaping issues
+        # (BlackSheep's redirect() might HTML-escape & to &amp;)
+        return json({
+            "redirect_url": auth_url
+        })
 
     except ShopifyOAuthError as e:
         return json({"error": str(e)}, status=400)

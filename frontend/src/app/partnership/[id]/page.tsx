@@ -244,10 +244,19 @@ export default function CreatorPartnershipPage() {
   };
 
   return (
-    <Flex direction="column" style={{ minHeight: "100vh", background: sage.sage2 }}>
+    <Flex direction="column" style={{ minHeight: "100vh", background: sage.sage2, width: "100%", overflowX: "hidden" }}>
       {/* Header */}
-      <Box style={{ background: "white", borderBottom: `1px solid ${sage.sage6}`, padding: "1.5rem 2rem" }}>
-        <Flex justify="between" align="center">
+      <Box style={{ 
+        background: "white", 
+        borderBottom: `1px solid ${sage.sage6}`, 
+        padding: "1rem 1.5rem",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+        width: "100%"
+      }}>
+        <Flex justify="between" align="center" wrap="wrap" gap="3" style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <Flex align="center" gap="3">
             {shopInfo?.logo_url ? (
               <Avatar size="3" src={shopInfo.logo_url} fallback={shopInfo.shop_name.charAt(0)} />
@@ -260,12 +269,13 @@ export default function CreatorPartnershipPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0
               }}>
                 <Text size="5" weight="bold">{shopInfo?.shop_name.charAt(0) || "S"}</Text>
               </Box>
             )}
-            <Flex direction="column">
-              <Text size="5" weight="bold">{shopInfo?.shop_name || "Brand"}</Text>
+            <Flex direction="column" style={{ minWidth: 0 }}>
+              <Text size="5" weight="bold" style={{ wordBreak: "break-word" }}>{shopInfo?.shop_name || "Brand"}</Text>
               <Text size="2" style={{ color: sage.sage11 }}>Partnership Portal</Text>
             </Flex>
           </Flex>
@@ -274,19 +284,19 @@ export default function CreatorPartnershipPage() {
       </Box>
 
       {/* Main Content */}
-      <Box style={{ maxWidth: "1200px", width: "100%", margin: "0 auto", padding: "2rem" }}>
-        <Flex direction="column" gap="6">
+      <Box style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", padding: "2rem 1.5rem", boxSizing: "border-box" }}>
+        <Flex direction="column" gap="5" style={{ width: "100%" }}>
           {/* Partnership Offer Header */}
-          <Card>
-            <Flex direction="column" gap="4">
-              <Flex justify="between" align="start">
-                <Flex direction="column" gap="2">
-                  <Text size="7" weight="bold">Partnership Opportunity</Text>
-                  <Text size="3" style={{ color: sage.sage11 }}>
+          <Card style={{ padding: "1.5rem", width: "100%", boxSizing: "border-box" }}>
+            <Flex direction="column" gap="4" style={{ width: "100%" }}>
+              <Flex justify="between" align="start" wrap="wrap" gap="3">
+                <Flex direction="column" gap="2" style={{ flex: "1 1 300px" }}>
+                  <Text size="8" weight="bold">Partnership Opportunity</Text>
+                  <Text size="4" style={{ color: sage.sage11 }}>
                     {shopInfo?.shop_name} wants to partner with you!
                   </Text>
                 </Flex>
-                <Flex direction="column" gap="1" align="end">
+                <Flex direction="column" gap="1" align="end" style={{ minWidth: "fit-content" }}>
                   <Text size="2" style={{ color: sage.sage11 }}>
                     <Calendar size={14} style={{ display: "inline", marginRight: "4px" }} />
                     Received {new Date(partnership.created_at).toLocaleDateString()}
@@ -297,16 +307,16 @@ export default function CreatorPartnershipPage() {
               <Separator size="4" />
 
               {/* Video & Products */}
-              <Flex gap="6" wrap="wrap">
+              <Flex gap="4" wrap="wrap" style={{ marginTop: "1rem", width: "100%" }}>
                 {/* Video Thumbnail */}
-                <Box style={{ flex: "1 1 450px", minWidth: "320px", maxWidth: "600px" }}>
+                <Box style={{ flex: "1 1 400px", minWidth: "280px", maxWidth: "100%" }}>
                   <Box style={{
                     width: "100%",
                     aspectRatio: "16/9",
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     overflow: "hidden",
                     background: sage.sage3,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                   }}>
                     {partnership.video_thumbnail && (
                       <Image
@@ -318,38 +328,40 @@ export default function CreatorPartnershipPage() {
                       />
                     )}
                   </Box>
-                  <Text size="3" weight="medium" style={{ marginTop: "0.75rem", display: "block" }}>
+                  <Text size="4" weight="medium" style={{ marginTop: "1rem", display: "block", lineHeight: "1.5" }}>
                     {decodeHtmlEntities(partnership.video_title)}
                   </Text>
-                  <Flex gap="3" style={{ marginTop: "0.5rem" }}>
-                    <Text size="2" style={{ color: sage.sage11 }}>
-                      <Eye size={14} style={{ display: "inline" }} /> {partnership.views?.toLocaleString() || 0} views
+                  <Flex gap="3" style={{ marginTop: "0.75rem" }}>
+                    <Text size="3" style={{ color: sage.sage11 }}>
+                      <Eye size={16} style={{ display: "inline", marginRight: "4px" }} /> {partnership.views?.toLocaleString() || 0} views
                     </Text>
                   </Flex>
                 </Box>
 
                 {/* Matched Products */}
-                <Box style={{ flex: "1 1 450px", minWidth: "320px" }}>
-                  <Text size="3" weight="bold" style={{ marginBottom: "1rem", display: "block" }}>
-                    <Package size={16} style={{ display: "inline", marginRight: "4px" }} />
+                <Box style={{ flex: "1 1 350px", minWidth: "280px", maxWidth: "100%" }}>
+                  <Text size="4" weight="bold" style={{ marginBottom: "1.25rem", display: "block" }}>
+                    <Package size={18} style={{ display: "inline", marginRight: "6px", verticalAlign: "middle" }} />
                     Featured Products
                   </Text>
-                  <Flex direction="column" gap="3">
+                  <Flex direction="column" gap="3" style={{ width: "100%" }}>
                     {partnership.matched_products?.slice(0, 3).map((product, idx) => (
-                      <Card key={idx} style={{ padding: "1rem", background: sage.sage2, boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                        <Flex gap="3" align="center">
+                      <Card key={idx} style={{ padding: "1rem", background: sage.sage2, boxShadow: "0 2px 6px rgba(0,0,0,0.06)", width: "100%", boxSizing: "border-box" }}>
+                        <Flex gap="3" align="center" style={{ width: "100%" }}>
                           {product.image && (
                             <Image
                               src={product.image}
                               alt={product.title || product.name}
                               width={64}
                               height={64}
-                              style={{ borderRadius: "6px", objectFit: "cover" }}
+                              style={{ borderRadius: "8px", objectFit: "cover", flexShrink: 0 }}
                             />
                           )}
-                          <Flex direction="column" style={{ flex: 1 }}>
-                            <Text size="3" weight="medium">{product.title || product.name}</Text>
-                            <Text size="2" weight="bold" style={{ color: green.green11, marginTop: "0.25rem" }}>
+                          <Flex direction="column" style={{ flex: 1, minWidth: 0 }}>
+                            <Text size="3" weight="medium" style={{ wordBreak: "break-word", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {product.title || product.name}
+                            </Text>
+                            <Text size="3" weight="bold" style={{ color: green.green11, marginTop: "0.5rem" }}>
                               ${product.price?.toFixed(2) || "0.00"}
                             </Text>
                           </Flex>
@@ -357,7 +369,7 @@ export default function CreatorPartnershipPage() {
                       </Card>
                     ))}
                     {partnership.matched_products?.length > 3 && (
-                      <Text size="1" style={{ color: sage.sage11 }}>
+                      <Text size="2" style={{ color: sage.sage11 }}>
                         +{partnership.matched_products.length - 3} more products
                       </Text>
                     )}
@@ -368,35 +380,43 @@ export default function CreatorPartnershipPage() {
           </Card>
 
           {/* Partnership Terms */}
-          <Card>
-            <Flex direction="column" gap="4">
-              <Text size="5" weight="bold">Partnership Terms</Text>
+          <Card style={{ padding: "1.5rem", width: "100%", boxSizing: "border-box" }}>
+            <Flex direction="column" gap="4" style={{ width: "100%" }}>
+              <Text size="6" weight="bold">Partnership Terms</Text>
               <Separator size="4" />
 
-              <Flex gap="8" wrap="wrap" style={{ justifyContent: "space-between" }}>
+              <Flex gap="4" wrap="wrap" style={{ width: "100%" }}>
                 <Box style={{
-                  flex: "1 1 200px",
+                  flex: "1 1 250px",
                   padding: "1.5rem",
                   background: green.green2,
-                  borderRadius: "8px",
-                  border: `2px solid ${green.green6}`
+                  borderRadius: "12px",
+                  border: `2px solid ${green.green6}`,
+                  boxSizing: "border-box"
                 }}>
-                  <Text size="2" style={{ color: sage.sage11, display: "block", marginBottom: "0.5rem" }}>Commission Rate</Text>
-                  <Text size="8" weight="bold" style={{ color: green.green11 }}>
+                  <Text size="2" style={{ color: sage.sage11, display: "block", marginBottom: "0.75rem" }}>Commission Rate</Text>
+                  <Text size="9" weight="bold" style={{ color: green.green11 }}>
                     {partnership.commission_rate || 10}%
+                  </Text>
+                  <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
+                    On every sale you generate
                   </Text>
                 </Box>
 
                 <Box style={{
-                  flex: "1 1 200px",
+                  flex: "1 1 250px",
                   padding: "1.5rem",
                   background: blue.blue2,
-                  borderRadius: "8px",
-                  border: `2px solid ${blue.blue6}`
+                  borderRadius: "12px",
+                  border: `2px solid ${blue.blue6}`,
+                  boxSizing: "border-box"
                 }}>
-                  <Text size="2" style={{ color: sage.sage11, display: "block", marginBottom: "0.5rem" }}>Payment Terms</Text>
-                  <Text size="5" weight="bold" style={{ color: blue.blue11 }}>
+                  <Text size="2" style={{ color: sage.sage11, display: "block", marginBottom: "0.75rem" }}>Payment Terms</Text>
+                  <Text size="6" weight="bold" style={{ color: blue.blue11 }}>
                     {partnership.payment_terms || "Net 30 days"}
+                  </Text>
+                  <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
+                    Monthly payouts
                   </Text>
                 </Box>
               </Flex>
@@ -404,13 +424,15 @@ export default function CreatorPartnershipPage() {
               <Box style={{
                 padding: "1.5rem",
                 background: sage.sage2,
-                borderRadius: "8px",
-                border: `1px solid ${sage.sage6}`
+                borderRadius: "12px",
+                border: `1px solid ${sage.sage6}`,
+                width: "100%",
+                boxSizing: "border-box"
               }}>
-                <Text size="3" weight="bold" style={{ color: sage.sage12, marginBottom: "1rem", display: "block" }}>
+                <Text size="4" weight="bold" style={{ color: sage.sage12, marginBottom: "1.25rem", display: "block" }}>
                   What You Get
                 </Text>
-                <Flex direction="column" gap="2">
+                <Flex direction="column" gap="3">
                   <Text size="3">✓ Unique affiliate tracking link</Text>
                   <Text size="3">✓ Exclusive discount code for your audience</Text>
                   <Text size="3">✓ Free product samples</Text>
@@ -422,11 +444,11 @@ export default function CreatorPartnershipPage() {
 
           {/* Action Based on Status */}
           {partnership.status === "contacted" && (
-            <Card style={{ background: blue.blue2, border: `1px solid ${blue.blue6}` }}>
+            <Card style={{ background: blue.blue2, border: `2px solid ${blue.blue6}`, padding: "2rem" }}>
               <Flex direction="column" gap="4">
                 <Flex direction="column" gap="2">
-                  <Text size="5" weight="bold">Accept This Partnership?</Text>
-                  <Text size="2" style={{ color: sage.sage11 }}>
+                  <Text size="6" weight="bold">Accept This Partnership?</Text>
+                  <Text size="3" style={{ color: sage.sage11 }}>
                     Review the terms above. If you&apos;re interested, enter your name below to proceed.
                   </Text>
                 </Flex>
@@ -436,12 +458,13 @@ export default function CreatorPartnershipPage() {
                   value={creatorName}
                   onChange={(e) => setCreatorName(e.target.value)}
                   size="3"
+                  style={{ padding: "0.75rem" }}
                 />
 
-                <Flex gap="3">
+                <Flex gap="3" wrap="wrap">
                   <Button
                     size="3"
-                    style={{ background: green.green9, color: "white", flex: 1, cursor: "pointer" }}
+                    style={{ background: green.green9, color: "white", flex: "1 1 200px", cursor: "pointer", padding: "0.75rem 1.5rem" }}
                     onClick={handleAccept}
                   >
                     <CheckCircle size={20} />
@@ -451,7 +474,7 @@ export default function CreatorPartnershipPage() {
                     size="3"
                     variant="outline"
                     color="red"
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", padding: "0.75rem 1.5rem" }}
                     onClick={handleDecline}
                   >
                     <XCircle size={20} />
@@ -518,17 +541,17 @@ export default function CreatorPartnershipPage() {
 
           {/* Contract Signing */}
           {partnership.status === "in_discussion" && !partnership.contract_signed && (
-            <Card>
+            <Card style={{ padding: "2rem" }}>
               <Flex direction="column" gap="4">
-                <Flex align="center" gap="2">
-                  <FileText size={24} color={amber.amber9} />
-                  <Text size="5" weight="bold">Partnership Agreement</Text>
+                <Flex align="center" gap="3">
+                  <FileText size={28} color={amber.amber9} />
+                  <Text size="6" weight="bold">Partnership Agreement</Text>
                 </Flex>
 
                 <Card style={{
-                  padding: "2rem",
+                  padding: "2.5rem",
                   background: "white",
-                  maxHeight: "500px",
+                  maxHeight: "600px",
                   overflowY: "auto",
                   border: `2px solid ${sage.sage6}`,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
@@ -679,8 +702,8 @@ export default function CreatorPartnershipPage() {
                   </Flex>
                 </Card>
 
-                <Flex direction="column" gap="3">
-                  <Text size="2" style={{ color: sage.sage11 }}>
+                <Flex direction="column" gap="4">
+                  <Text size="3" style={{ color: sage.sage11 }}>
                     By signing below, you agree to the terms of this partnership agreement.
                   </Text>
 
@@ -689,11 +712,12 @@ export default function CreatorPartnershipPage() {
                     value={signatureText}
                     onChange={(e) => setSignatureText(e.target.value)}
                     size="3"
+                    style={{ padding: "0.75rem" }}
                   />
 
                   <Button
                     size="3"
-                    style={{ background: green.green9, color: "white", cursor: "pointer" }}
+                    style={{ background: green.green9, color: "white", cursor: "pointer", padding: "0.75rem 1.5rem" }}
                     onClick={handleSignContract}
                   >
                     <FileText size={20} />
@@ -707,19 +731,19 @@ export default function CreatorPartnershipPage() {
           {/* Active Partnership - Affiliate Link & Stats */}
           {partnership.status === "active" && (
             <>
-              <Card style={{ background: green.green2, border: `2px solid ${green.green6}` }}>
+              <Card style={{ background: green.green2, border: `2px solid ${green.green6}`, padding: "2rem" }}>
                 <Flex direction="column" gap="4">
-                  <Flex align="center" gap="2">
-                    <CheckCircle size={24} color={green.green9} />
-                    <Text size="5" weight="bold" style={{ color: green.green11 }}>
+                  <Flex align="center" gap="3">
+                    <CheckCircle size={28} color={green.green9} />
+                    <Text size="6" weight="bold" style={{ color: green.green11 }}>
                       Partnership Active!
                     </Text>
                   </Flex>
 
-                  <Flex direction="column" gap="3">
+                  <Flex direction="column" gap="4">
                     {/* Affiliate Link */}
                     <Box>
-                      <Text size="2" weight="medium" style={{ marginBottom: "0.5rem", display: "block" }}>
+                      <Text size="3" weight="medium" style={{ marginBottom: "0.75rem", display: "block" }}>
                         Your Affiliate Link:
                       </Text>
                       <Flex gap="2">
@@ -727,14 +751,15 @@ export default function CreatorPartnershipPage() {
                           value={partnership.affiliate_link || "Generating..."}
                           readOnly
                           size="3"
-                          style={{ flex: 1 }}
+                          style={{ flex: 1, fontFamily: "monospace" }}
                         />
                         <Button
                           variant="outline"
+                          size="3"
                           style={{ cursor: "pointer" }}
                           onClick={() => copyToClipboard(partnership.affiliate_link, "Affiliate link")}
                         >
-                          <Copy size={16} />
+                          <Copy size={18} />
                         </Button>
                       </Flex>
                     </Box>
@@ -742,7 +767,7 @@ export default function CreatorPartnershipPage() {
                     {/* Discount Code */}
                     {partnership.discount_code && (
                       <Box>
-                        <Text size="2" weight="medium" style={{ marginBottom: "0.5rem", display: "block" }}>
+                        <Text size="3" weight="medium" style={{ marginBottom: "0.75rem", display: "block" }}>
                           Exclusive Discount Code:
                         </Text>
                         <Flex gap="2">
@@ -750,14 +775,15 @@ export default function CreatorPartnershipPage() {
                             value={partnership.discount_code}
                             readOnly
                             size="3"
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, fontFamily: "monospace", fontWeight: "bold" }}
                           />
                           <Button
                             variant="outline"
+                            size="3"
                             style={{ cursor: "pointer" }}
                             onClick={() => copyToClipboard(partnership.discount_code, "Discount code")}
                           >
-                            <Copy size={16} />
+                            <Copy size={18} />
                           </Button>
                         </Flex>
                       </Box>
@@ -767,63 +793,63 @@ export default function CreatorPartnershipPage() {
               </Card>
 
               {/* Performance Dashboard */}
-              <Card>
-                <Flex direction="column" gap="4">
-                  <Text size="5" weight="bold">
-                    <TrendingUp size={20} style={{ display: "inline", marginRight: "8px" }} />
+              <Card style={{ padding: "2rem" }}>
+                <Flex direction="column" gap="5">
+                  <Text size="6" weight="bold">
+                    <TrendingUp size={24} style={{ display: "inline", marginRight: "8px", verticalAlign: "middle" }} />
                     Performance Dashboard
                   </Text>
 
                   <Flex gap="4" wrap="wrap">
-                    <Card style={{ flex: "1 1 200px", padding: "1.5rem", background: blue.blue2 }}>
+                    <Card style={{ flex: "1 1 240px", padding: "1.75rem", background: blue.blue2, border: `1px solid ${blue.blue6}` }}>
                       <Flex direction="column" gap="2">
                         <Flex align="center" gap="2" style={{ color: blue.blue11 }}>
-                          <MousePointer size={16} />
-                          <Text size="2">Clicks</Text>
+                          <MousePointer size={18} />
+                          <Text size="3">Clicks</Text>
                         </Flex>
-                        <Text size="7" weight="bold">{partnership.clicks || 0}</Text>
+                        <Text size="8" weight="bold">{partnership.clicks || 0}</Text>
                       </Flex>
                     </Card>
 
-                    <Card style={{ flex: "1 1 200px", padding: "1.5rem", background: green.green2 }}>
+                    <Card style={{ flex: "1 1 240px", padding: "1.75rem", background: green.green2, border: `1px solid ${green.green6}` }}>
                       <Flex direction="column" gap="2">
                         <Flex align="center" gap="2" style={{ color: green.green11 }}>
-                          <ShoppingCart size={16} />
-                          <Text size="2">Sales</Text>
+                          <ShoppingCart size={18} />
+                          <Text size="3">Sales</Text>
                         </Flex>
-                        <Text size="7" weight="bold">{partnership.sales || 0}</Text>
+                        <Text size="8" weight="bold">{partnership.sales || 0}</Text>
                       </Flex>
                     </Card>
 
-                    <Card style={{ flex: "1 1 200px", padding: "1.5rem", background: amber.amber2 }}>
+                    <Card style={{ flex: "1 1 240px", padding: "1.75rem", background: amber.amber2, border: `1px solid ${amber.amber6}` }}>
                       <Flex direction="column" gap="2">
                         <Flex align="center" gap="2" style={{ color: amber.amber11 }}>
-                          <DollarSign size={16} />
-                          <Text size="2">Revenue</Text>
+                          <DollarSign size={18} />
+                          <Text size="3">Revenue</Text>
                         </Flex>
-                        <Text size="7" weight="bold">
+                        <Text size="8" weight="bold">
                           ${(partnership.revenue || 0).toFixed(2)}
                         </Text>
                       </Flex>
                     </Card>
 
-                    <Card style={{ flex: "1 1 200px", padding: "1.5rem", background: sage.sage3 }}>
+                    <Card style={{ flex: "1 1 240px", padding: "1.75rem", background: sage.sage3, border: `1px solid ${sage.sage6}` }}>
                       <Flex direction="column" gap="2">
                         <Flex align="center" gap="2" style={{ color: sage.sage11 }}>
-                          <DollarSign size={16} />
-                          <Text size="2">Your Earnings</Text>
+                          <DollarSign size={18} />
+                          <Text size="3">Your Earnings</Text>
                         </Flex>
-                        <Text size="7" weight="bold" style={{ color: green.green11 }}>
+                        <Text size="8" weight="bold" style={{ color: green.green11 }}>
                           ${((partnership.revenue || 0) * (partnership.commission_rate || 10) / 100).toFixed(2)}
                         </Text>
-                        <Text size="1" style={{ color: sage.sage11 }}>
+                        <Text size="2" style={{ color: sage.sage11 }}>
                           {partnership.commission_rate}% commission
                         </Text>
                       </Flex>
                     </Card>
                   </Flex>
 
-                  <Text size="2" style={{ color: sage.sage11 }}>
+                  <Text size="3" style={{ color: sage.sage11 }}>
                     Stats update in real-time as your audience uses your affiliate link and discount code.
                   </Text>
                 </Flex>
@@ -845,14 +871,14 @@ export default function CreatorPartnershipPage() {
           )}
 
           {/* Contact Support */}
-          <Card style={{ background: sage.sage2 }}>
+          <Card style={{ background: sage.sage2, padding: "1.5rem" }}>
             <Flex align="center" gap="3">
-              <Mail size={20} color={sage.sage11} />
+              <Mail size={22} color={sage.sage11} />
               <Flex direction="column" gap="1">
-                <Text size="2" weight="medium">Questions?</Text>
-                <Text size="2" style={{ color: sage.sage11 }}>
+                <Text size="3" weight="medium">Questions?</Text>
+                <Text size="3" style={{ color: sage.sage11 }}>
                   Contact {shopInfo?.shop_name} at{" "}
-                  <a href={`mailto:${shopInfo?.shop_owner}`} style={{ color: blue.blue11 }}>
+                  <a href={`mailto:${shopInfo?.shop_owner}`} style={{ color: blue.blue11, textDecoration: "none", fontWeight: 500 }}>
                     {shopInfo?.shop_owner || "support"}
                   </a>
                 </Text>
@@ -861,6 +887,9 @@ export default function CreatorPartnershipPage() {
           </Card>
         </Flex>
       </Box>
+
+      {/* Bottom Spacing */}
+      <Box style={{ height: "3rem" }} />
     </Flex>
   );
 }

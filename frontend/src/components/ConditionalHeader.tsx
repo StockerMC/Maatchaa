@@ -6,8 +6,8 @@ import Header from "./Header"
 export default function ConditionalHeader() {
     const pathname = usePathname()
 
-    // Don't show header on dashboard routes or onboarding
-    if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/onboarding')) {
+    // Don't show header on dashboard routes, onboarding, or partnership pages
+    if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/onboarding') || pathname?.startsWith('/partnership')) {
         return null
     }
 
