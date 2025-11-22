@@ -10,7 +10,7 @@ import random
 
 load_dotenv()
 
-async def fetch_top_shorts(keyword: str, max_results: int = 10, relevance_language: Optional[list[str]] = None, region_code: str | None = None, order: str = "viewCount", published_after_days: int = 7):
+async def fetch_top_shorts(keyword: str, max_results: int = 10, relevance_language: Optional[list[str]] = None, region_code: str | None = None, order: str = "viewCount", published_after_days: int = 365):
     # Check if mock mode is enabled
     use_mock = os.getenv("USE_MOCK_YOUTUBE", "false").lower() == "true"
 
@@ -30,7 +30,7 @@ async def fetch_top_shorts(keyword: str, max_results: int = 10, relevance_langua
     # videoDuration and location filters use extra quota units
     request_params = {
         "part": "snippet",
-        "q": f"{keyword} #shorts",  # Use #shorts hashtag instead of videoDuration filter
+        "q": keyword,  # Search without forcing #shorts hashtag
         "type": "video",
         "maxResults": max_results,
         "order": order,
@@ -82,7 +82,7 @@ async def fetch_top_shorts(keyword: str, max_results: int = 10, relevance_langua
         stats = stats_map.get(video_id, {})
 
         # Skip videos with very low engagement (likely private/unlisted/deleted)
-        if stats.get("views", 0) < 1000:
+        if stats.get("views", 0) < 100:
             continue
 
         # Get channel email for this video (optional - skip if quota exceeded)

@@ -30,6 +30,16 @@ export default function ReelsPage() {
             try {
                 const user = getCurrentUser();
 
+                // Fetch reel interactions (dismissed/partnered) for this company
+                const interactionsUrl = getApiUrl(`/reels/interactions?company_id=${user.companyId}`);
+                const interactionsResponse = await fetch(interactionsUrl);
+                const interactionsData = await interactionsResponse.json();
+                const interactedVideoIds = new Set(
+                    (interactionsData.interactions || []).map((i: any) => i.video_id)
+                );
+
+                console.log(`Found ${interactedVideoIds.size} interacted videos to filter out`);
+
                 let url: string;
                 if (productId) {
                     // Fetch creators for specific product
@@ -50,8 +60,13 @@ export default function ReelsPage() {
                         return;
                     }
 
+                    // Filter out videos that have been interacted with
+                    const filteredVideos = videos?.filter((video: any) =>
+                        !interactedVideoIds.has(video.video_id)
+                    ) || [];
+
                     // Transform to Reel format
-                    const reels: Reel[] = videos?.map((video: any) => ({
+                    const reels: Reel[] = filteredVideos.map((video: any) => ({
                         id: video.id,
                         company: video.shop_domain || user.companyId,
                         yt_short_url: video.url,
@@ -61,9 +76,9 @@ export default function ReelsPage() {
                         email: video.email || "",
                         channel_id: video.channel_id,
                         company_id: user.companyId
-                    })) || [];
+                    }));
 
-                    console.log(`Loaded ${reels.length} creator videos from database`);
+                    console.log(`Loaded ${reels.length} creator videos (${videos.length - reels.length} filtered out)`);
                     setData(reels);
                     return;
                 }
@@ -79,8 +94,14 @@ export default function ReelsPage() {
                 const result = await response.json();
                 const creators = result.matches || [];
 
+                // Filter out creators that have been interacted with
+                const filteredCreators = creators.filter((match: any) => {
+                    const video = match.creator_videos;
+                    return !interactedVideoIds.has(video.video_id);
+                });
+
                 // Transform API response to Reel format
-                const reels: Reel[] = creators.map((match: any) => {
+                const reels: Reel[] = filteredCreators.map((match: any) => {
                     const video = match.creator_videos;
                     return {
                         id: video.id,
@@ -95,7 +116,7 @@ export default function ReelsPage() {
                     };
                 });
 
-                console.log(`Loaded ${reels.length} creators for product ${productId}`);
+                console.log(`Loaded ${reels.length} creators for product ${productId} (${creators.length - reels.length} filtered out)`);
                 setData(reels);
 
             } catch (error) {
@@ -188,6 +209,20 @@ export default function ReelsPage() {
                         Generating new content...
                     </div>
                 )}
+
+                {/* Archive button */}
+                <a
+                    href="/dashboard/reels/archive"
+                    className="fixed top-6 left-[320px] bg-white text-gray-700 px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect width="20" height="5" x="2" y="3" rx="1"/>
+                        <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/>
+                        <path d="M10 12h4"/>
+                    </svg>
+                    Archive
+                </a>
+
                 <YouTubeReels reelsData={data || []} />
             </div>
         </DashboardLayout>

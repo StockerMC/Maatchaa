@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
- import { Card, Flex, Text, Box, Tabs, Badge, Button, Dialog, TextField, TextArea, Avatar, AlertDialog } from "@radix-ui/themes";
+import { useState, useEffect } from "react";
+import { Card, Flex, Text, Box, Tabs, Badge, Button, Dialog, TextField, TextArea, Avatar, AlertDialog } from "@radix-ui/themes";
+import { getCurrentUser, getApiUrl } from "@/lib/auth";
+import toast from "react-hot-toast";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -280,7 +282,8 @@ const mockPartnerships: Partnership[] = [
 ];
 
 export default function PartnershipsPage() {
-  const [partnerships, setPartnerships] = useState(mockPartnerships);
+  const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showContractDialog, setShowContractDialog] = useState(false);
   const [showAffiliateDialog, setShowAffiliateDialog] = useState(false);
@@ -290,8 +293,102 @@ export default function PartnershipsPage() {
   const [validationMessage, setValidationMessage] = useState("");
   const [selectedPartnership, setSelectedPartnership] = useState<Partnership | null>(null);
   const [generatedEmail, setGeneratedEmail] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [toEmail, setToEmail] = useState("");
   const [contractLatex, setContractLatex] = useState("");
   const [affiliateLink, setAffiliateLink] = useState("");
+  const [emailPreviewMode, setEmailPreviewMode] = useState<"preview" | "edit">("preview");
+  const [shopName, setShopName] = useState("Our Company");
+
+  // Fetch shop info on mount
+  useEffect(() => {
+    const fetchShopInfo = async () => {
+      try {
+        const user = getCurrentUser();
+        const response = await fetch(getApiUrl(`/shopify/shop-info?company_id=${user.companyId}`));
+        if (response.ok) {
+          const data = await response.json();
+          setShopName(data.shop_name || "Our Company");
+        }
+      } catch (error) {
+        console.error("Failed to fetch shop info:", error);
+      }
+    };
+
+    fetchShopInfo();
+  }, []);
+
+  // Fetch partnerships from API
+  useEffect(() => {
+    const fetchPartnerships = async () => {
+      try {
+        const user = getCurrentUser();
+        const apiUrl = getApiUrl(`/partnerships?company_id=${user.companyId}`);
+
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error("Failed to fetch partnerships");
+        }
+
+        const data = await response.json();
+
+        // Transform API response to match Partnership interface
+        const transformedPartnerships: Partnership[] = data.partnerships.map((p: any) => ({
+          id: p.id,
+          creatorName: p.creator_name || "Unknown Creator",
+          creatorHandle: p.creator_handle || "",
+          creatorAvatar: p.creator_avatar || "",
+          videoTitle: p.video_title || "",
+          videoThumbnail: p.video_thumbnail || "",
+          videoUrl: p.video_url || "",
+          status: p.status || "to_contact",
+          matchedProducts: p.matched_products?.map((prod: any) => prod.title || prod.name) || [],
+          views: p.views || 0,
+          likes: p.likes || 0,
+          comments: p.comments || 0,
+          initiatedDate: formatDate(p.created_at),
+          responseDate: p.contacted_at ? formatDate(p.contacted_at) : undefined,
+          contractDrafted: p.contract_drafted || false,
+          contractSent: p.contract_sent || false,
+          contractSigned: p.contract_signed || false,
+          affiliateLinkGenerated: p.affiliate_link_generated || false,
+          affiliateLink: p.affiliate_link || "",
+          commissionRate: p.commission_rate || 10,
+          paymentTerms: p.payment_terms || "Net 30 days",
+          contractDuration: "90 days",
+          performanceMetrics: p.performance_data || {
+            clicks: p.clicks || 0,
+            sales: p.sales || 0,
+            revenue: p.revenue || 0,
+            postsCompleted: 0,
+            postsRequired: 5,
+          },
+        }));
+
+        setPartnerships(transformedPartnerships);
+      } catch (error) {
+        console.error("Error fetching partnerships:", error);
+        toast.error("Failed to load partnerships");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartnerships();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays < 30) return `${diffInDays} days ago`;
+    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
+    return `${Math.floor(diffInDays / 365)} years ago`;
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -339,7 +436,7 @@ export default function PartnershipsPage() {
     return true;
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) return;
@@ -358,10 +455,35 @@ export default function PartnershipsPage() {
       return;
     }
 
-    // Update the partnership status
+    // Optimistically update UI
     setPartnerships(partnerships.map(p =>
       p.id === partnershipId ? { ...p, status: newStatus } : p
     ));
+
+    // Update via API
+    try {
+      const apiUrl = getApiUrl(`/partnerships/${partnershipId}`);
+      const response = await fetch(apiUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update partnership status");
+      }
+
+      toast.success("Partnership status updated");
+    } catch (error) {
+      console.error("Error updating partnership:", error);
+      toast.error("Failed to update partnership status");
+      // Revert optimistic update
+      setPartnerships(partnerships.map(p =>
+        p.id === partnershipId ? { ...p, status: partnership.status } : p
+      ));
+    }
   };
 
   const formatNumber = (num: number) => {
@@ -512,34 +634,70 @@ export default function PartnershipsPage() {
     }
   };
 
-  const handleDraftEmail = (partnership: Partnership) => {
+  const handleDraftEmail = async (partnership: Partnership) => {
     setSelectedPartnership(partnership);
 
-    const email = `Hi ${partnership.creatorName},
+    // Try to fetch creator's email from API
+    try {
+      const contactInfoUrl = getApiUrl(`/partnerships/${partnership.id}/contact-info`);
+      const contactResponse = await fetch(contactInfoUrl);
+      if (contactResponse.ok) {
+        const contactData = await contactResponse.json();
+        setToEmail(contactData.email || "");
+      } else {
+        setToEmail("");
+      }
+    } catch (error) {
+      console.error("Failed to fetch contact info:", error);
+      setToEmail("");
+    }
 
-We loved your video "${partnership.videoTitle}" and think it would be a perfect fit for our products!
+    const products = partnership.matchedProducts.length > 0
+      ? partnership.matchedProducts.join(", ")
+      : "our products";
 
-We'd love to partner with you to feature our ${partnership.matchedProducts.join(", ")} in your content.
+    const commissionRate = partnership.commissionRate || 10;
 
-What we offer:
-• 15% commission on all sales through your affiliate link
-• Free product samples
-• Flexible content requirements
+    // Generate partnership management URL
+    const partnershipUrl = `${window.location.origin}/partnership/${partnership.id}`;
 
-Interested? Let's discuss the details!
+    // Helper function to decode HTML entities
+    const decodeHtmlEntities = (text: string) => {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = text;
+      return textarea.value;
+    };
 
-Best,
-The Maatchaa Team`;
+    // Decode video title to prevent &amp; issues
+    const decodedVideoTitle = decodeHtmlEntities(partnership.videoTitle);
+
+    // Create email with video preview
+    const email = `We loved your video and think it would be a perfect fit for our products!<br><br>
+
+<div style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+  <a href="${partnership.videoUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+    ${partnership.videoThumbnail ? `<img src="${partnership.videoThumbnail}" alt="Video thumbnail" style="width: 100%; max-width: 400px; border-radius: 8px; margin-bottom: 10px;" />` : ''}
+    <div style="font-weight: 600; font-size: 14px; color: #333; margin-top: 8px;">${decodedVideoTitle}</div>
+    <div style="font-size: 12px; color: #666; margin-top: 4px;">👉 Click to watch on YouTube</div>
+  </a>
+</div>
+
+We'd love to partner with you to feature ${products} in your content.<br><br><strong>What we offer:</strong><br>• ${commissionRate}% commission on all sales through your affiliate link<br>• Free product samples<br>• Flexible content requirements<br><br><strong>👉 <a href="${partnershipUrl}" style="color: #5c9a31; text-decoration: underline;">Click here to review and accept this partnership</a></strong><br><br>This link will take you to a secure page where you can view all partnership details, sign the agreement, and get your unique affiliate link.`;
 
     setGeneratedEmail(email);
+    setEmailSubject(`Partnership Opportunity with ${shopName}`);
     setShowEmailDialog(true);
   };
 
-  const handleDraftContract = (partnership: Partnership) => {
+  const handleDraftContract = async (partnership: Partnership) => {
     setSelectedPartnership(partnership);
 
-    // LaTeX contract template
+    // LaTeX contract template with dynamic values (using shopName from state)
     const productsLatex = partnership.matchedProducts.map(p => `  \\item ${p}`).join('\n');
+    const commissionRate = partnership.commissionRate || 10;
+    const paymentTerms = partnership.paymentTerms || "Net 30 days";
+    const contractDuration = partnership.contractDuration || "90 days";
+
     const latex = `\\documentclass[11pt]{article}
 \\usepackage[margin=1in]{geometry}
 \\usepackage{helvet}
@@ -557,7 +715,7 @@ This Partnership Agreement is entered into as of ${new Date().toLocaleDateString
 
 \\vspace{0.5em}
 
-\\textbf{MATCHAA} (Business) \\\\
+\\textbf{${shopName.toUpperCase()}} (Business) \\\\
 and \\\\
 \\textbf{${partnership.creatorName}} (Creator)
 
@@ -574,8 +732,8 @@ ${productsLatex}
 \\section*{2. COMPENSATION}
 
 \\begin{itemize}
-  \\item Commission: 15\\% of sales generated through affiliate link
-  \\item Payment Terms: Net 30 days
+  \\item Commission: ${commissionRate}\\% of sales generated through affiliate link
+  \\item Payment Terms: ${paymentTerms}
   \\item Minimum threshold: \\$50
 \\end{itemize}
 
@@ -598,7 +756,7 @@ ${productsLatex}
 
 \\section*{5. TERM}
 
-This agreement is effective for 90 days from the date of signing and may be renewed by mutual agreement.
+This agreement is effective for ${contractDuration} from the date of signing and may be renewed by mutual agreement.
 
 \\section*{6. TERMINATION}
 
@@ -623,12 +781,96 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
     setShowContractDialog(true);
   };
 
-  const handleGenerateAffiliateLink = (partnership: Partnership) => {
+  const handleGenerateAffiliateLink = async (partnership: Partnership) => {
     setSelectedPartnership(partnership);
-    const link = `https://matchamatcha.ca/ref/${partnership.creatorHandle.replace("@", "")}?pid=${partnership.id}`;
-    setAffiliateLink(link);
-    setShowAffiliateDialog(true);
+
+    try {
+      const apiUrl = getApiUrl(`/partnerships/${partnership.id}/generate-affiliate`);
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          commission_rate: partnership.commissionRate || 10,
+          create_discount: false, // Can be made configurable later
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate affiliate link");
+      }
+
+      const data = await response.json();
+      setAffiliateLink(data.affiliate_link);
+
+      // Update partnership in state
+      setPartnerships(partnerships.map(p =>
+        p.id === partnership.id
+          ? { ...p, affiliateLink: data.affiliate_link, affiliateLinkGenerated: true }
+          : p
+      ));
+
+      setShowAffiliateDialog(true);
+      toast.success("Affiliate link generated!");
+    } catch (error) {
+      console.error("Error generating affiliate link:", error);
+      toast.error("Failed to generate affiliate link");
+    }
   };
+
+  const handleSendEmail = async () => {
+    if (!selectedPartnership) return;
+
+    // Validate email field is not empty
+    if (!toEmail || toEmail.trim() === "") {
+      toast.error("Please enter the creator's email address");
+      return;
+    }
+
+    try {
+      // Send email via API
+      const sendEmailUrl = getApiUrl(`/partnerships/${selectedPartnership.id}/send-email`);
+      const response = await fetch(sendEmailUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to_email: toEmail,
+          custom_message: generatedEmail,
+          save_email: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
+      // Update partnership status in state
+      setPartnerships(partnerships.map(p =>
+        p.id === selectedPartnership.id
+          ? { ...p, status: "contacted" }
+          : p
+      ));
+
+      setShowEmailDialog(false);
+      toast.success(`Email sent to ${toEmail}!`);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email");
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <Flex direction="column" align="center" justify="center" style={{ minHeight: "400px" }}>
+          <Text size="4" style={{ color: "#737373" }}>Loading partnerships...</Text>
+        </Flex>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -646,10 +888,10 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
         {/* Stats Cards */}
         <Flex gap="4" wrap="wrap">
           {[
-            { title: "Total Matches", value: stats.total, changeNumber: "+3", changeDesc: "this week" },
+            { title: "Total Matches", value: stats.total, changeNumber: "", changeDesc: "All partnerships" },
             { title: "To Contact", value: stats.toContact, changeNumber: "", changeDesc: "Need outreach" },
             { title: "In Discussion", value: stats.inDiscussion, changeNumber: "", changeDesc: "Negotiating terms" },
-            { title: "Active Partnerships", value: stats.active, changeNumber: "+1", changeDesc: "this week" },
+            { title: "Active Partnerships", value: stats.active, changeNumber: "", changeDesc: "Currently active" },
           ].map((stat) => {
             return (
               <Card
@@ -844,16 +1086,30 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
             <Flex direction="column" gap="4">
               {/* Video Embed */}
               <Box style={{ width: "100%", aspectRatio: "16/9", borderRadius: "8px", overflow: "hidden" }}>
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/i6U5ksYrd0M"
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  style={{ display: "block" }}
-                />
+                {selectedPartnership?.videoUrl && (
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={(() => {
+                      const url = selectedPartnership.videoUrl;
+                      // Convert YouTube URL to embed format
+                      // Handles: youtube.com/watch?v=ID, youtube.com/shorts/ID, youtu.be/ID
+                      let videoId = '';
+                      if (url.includes('youtube.com/shorts/')) {
+                        videoId = url.split('youtube.com/shorts/')[1]?.split(/[?&#]/)[0];
+                      } else if (url.includes('youtube.com/watch?v=')) {
+                        videoId = url.split('v=')[1]?.split(/[&#]/)[0];
+                      } else if (url.includes('youtu.be/')) {
+                        videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0];
+                      }
+                      return `https://www.youtube.com/embed/${videoId}`;
+                    })()}
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ display: "block", border: "0" }}
+                  />
+                )}
               </Box>
 
               {/* Partnership Info */}
@@ -910,12 +1166,10 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Button
                       variant="solid"
                       color="lime"
-                      asChild
                       style={{ width: "220px" }}
+                      onClick={() => handleDraftEmail(selectedPartnership)}
                     >
-                      <Link href="/dashboard/communications">
-                        Draft Outreach Email
-                      </Link>
+                      Draft Outreach Email
                     </Button>
                     <Button
                       variant="soft"
@@ -1211,11 +1465,9 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                             View Video
                           </a>
                         </Button>
-                        <Button size="2" variant="outline" asChild>
-                          <Link href="/dashboard/communications">
-                            <MessageSquare size={16} />
-                            View Conversation
-                          </Link>
+                        <Button size="2" variant="outline" onClick={() => handleDraftEmail(partnership)}>
+                          <MessageSquare size={16} />
+                          Send Follow-up
                         </Button>
                       </>
                     )}
@@ -1238,11 +1490,9 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                           <LinkIcon size={16} />
                           Generate Link
                         </Button>
-                        <Button size="2" variant="outline" asChild>
-                          <Link href="/dashboard/communications">
-                            <Mail size={16} />
-                            Send Email
-                          </Link>
+                        <Button size="2" variant="outline" onClick={() => handleDraftEmail(partnership)}>
+                          <Mail size={16} />
+                          Send Email
                         </Button>
                       </>
                     )}
@@ -1265,11 +1515,9 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                           <FileText size={16} />
                           View Contract
                         </Button>
-                        <Button size="2" variant="outline" asChild>
-                          <Link href="/dashboard/communications">
-                            <MessageSquare size={16} />
-                            Message Creator
-                          </Link>
+                        <Button size="2" variant="outline" onClick={() => handleDraftEmail(partnership)}>
+                          <MessageSquare size={16} />
+                          Message Creator
                         </Button>
                       </>
                     )}
@@ -1294,9 +1542,9 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                 To:
               </Text>
               <TextField.Root
-                value={selectedPartnership?.creatorHandle || ""}
-                readOnly
-                style={{ background: "#F5F5F5" }}
+                value={toEmail}
+                onChange={(e) => setToEmail(e.target.value)}
+                placeholder="Enter creator's email address"
               />
             </Box>
 
@@ -1305,35 +1553,73 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                 Subject:
               </Text>
               <TextField.Root
-                defaultValue="Partnership Opportunity with Maatchaa"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
                 style={{ background: "#F5F5F5" }}
               />
             </Box>
 
             <Box>
-              <Text size="2" weight="medium" mb="1" style={{ display: "block" }}>
-                Message:
-              </Text>
-              <TextArea
-                value={generatedEmail}
-                onChange={(e) => setGeneratedEmail(e.target.value)}
-                rows={12}
-                style={{ fontFamily: "monospace", fontSize: "13px" }}
-              />
+              <Flex justify="between" align="center" mb="2">
+                <Text size="2" weight="medium">
+                  Message:
+                </Text>
+                <Flex gap="2">
+                  <Button
+                    size="1"
+                    variant={emailPreviewMode === "preview" ? "solid" : "soft"}
+                    onClick={() => setEmailPreviewMode("preview")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Preview
+                  </Button>
+                  <Button
+                    size="1"
+                    variant={emailPreviewMode === "edit" ? "solid" : "soft"}
+                    onClick={() => setEmailPreviewMode("edit")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Edit HTML
+                  </Button>
+                </Flex>
+              </Flex>
+
+              {emailPreviewMode === "preview" ? (
+                <Box
+                  style={{
+                    border: "1px solid #e5e5e5",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    minHeight: "300px",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                    background: "white"
+                  }}
+                  dangerouslySetInnerHTML={{ __html: generatedEmail }}
+                />
+              ) : (
+                <TextArea
+                  value={generatedEmail}
+                  onChange={(e) => setGeneratedEmail(e.target.value)}
+                  rows={12}
+                  style={{ fontFamily: "monospace", fontSize: "13px" }}
+                />
+              )}
             </Box>
 
             <Flex gap="3" mt="4" justify="end">
               <Dialog.Close>
-                <Button variant="soft" color="gray">
+                <Button variant="soft" color="gray" style={{ cursor: "pointer" }}>
                   Cancel
                 </Button>
               </Dialog.Close>
-              <Dialog.Close>
-                <Button style={{ background: "#DDEBB2", color: "#000" }}>
-                  <Send size={16} />
-                  Send Email
-                </Button>
-              </Dialog.Close>
+              <Button
+                style={{ background: "#DDEBB2", color: "#000", cursor: "pointer" }}
+                onClick={handleSendEmail}
+              >
+                <Send size={16} />
+                Send Email
+              </Button>
             </Flex>
           </Flex>
         </Dialog.Content>
@@ -1377,7 +1663,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                     <Text size="2" style={{ display: "block", marginBottom: "1rem" }}>
                       This Partnership Agreement is entered into as of {new Date().toLocaleDateString()} between:
                     </Text>
-                    <Text size="2" weight="bold" style={{ display: "block" }}>MATCHAA (&quot;Business&quot;)</Text>
+                    <Text size="2" weight="bold" style={{ display: "block" }}>{shopName.toUpperCase()} (&quot;Business&quot;)</Text>
                     <Text size="2" style={{ display: "block", marginBottom: "1rem" }}>and</Text>
                     <Text size="2" weight="bold" style={{ display: "block", marginBottom: "1rem" }}>
                       {selectedPartnership?.creatorName} (&quot;Creator&quot;)
@@ -1399,8 +1685,8 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
                       2. COMPENSATION
                     </Text>
                     <Text size="2" style={{ display: "block", marginLeft: "1rem" }}>
-                      • Commission: 15% of sales<br />
-                      • Payment Terms: Net 30 days<br />
+                      • Commission: {selectedPartnership?.commissionRate || 10}% of sales<br />
+                      • Payment Terms: {selectedPartnership?.paymentTerms || "Net 30 days"}<br />
                       • Minimum threshold: $50
                     </Text>
 
