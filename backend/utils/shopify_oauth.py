@@ -109,6 +109,8 @@ def build_install_url(shop: str, state: str) -> str:
         "grant_options[]": "per-user"  # Optional: for online access mode
     }
 
+    print(f"🔗 Built redirect_uri: {SHOPIFY_REDIRECT_URI}")
+
     base_url = f"https://{shop}/admin/oauth/authorize"
     return f"{base_url}?{urlencode(params)}"
 
