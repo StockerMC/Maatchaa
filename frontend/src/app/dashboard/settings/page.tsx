@@ -109,12 +109,12 @@ export default function SettingsPage() {
     return (
       <DashboardLayout>
         <Flex direction="column" gap="6">
-          <Box>
+          <Flex direction="column" gap="2">
             <Text size="8" weight="bold" as="h1">Settings</Text>
-            <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem" }}>
+            <Text size="2" style={{ color: sage.sage11, display: "block" }}>
               Loading...
             </Text>
-          </Box>
+          </Flex>
         </Flex>
       </DashboardLayout>
     );

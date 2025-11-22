@@ -62,7 +62,7 @@ async def creator_discovery_worker():
         try:
             # 1. Get all products that need creator matching
             products_result = await supabase.client.table("company_products")\
-                .select("id, title, description, shop_domain")\
+                .select("id, title, description, shop_domain, search_keywords")\
                 .execute()
 
             if not products_result.data:
@@ -76,50 +76,70 @@ async def creator_discovery_worker():
             # Process limited products per cycle to avoid overwhelming APIs
             products_to_process = products_result.data[:PRODUCTS_PER_CYCLE]
 
-            for product in products_to_process:
-                print(f"🎯 Processing: {product['title']}")
+            # NEW: Round-robin approach - alternate between products
+            # Build a queue of (product, keyword) tuples with proper interleaving
+            print("🔄 Building round-robin search queue...\n")
+            search_queue = []
 
-                # 2. Generate search keywords (simple version - can enhance with AI)
-                keywords = generate_keywords_for_product(product)
-                print(f"   🔑 Keywords: {', '.join(keywords[:3])}...")
+            # Interleave by iterating keywords first, then products
+            # This gives: P1_KW1, P2_KW1, P3_KW1, ..., P1_KW2, P2_KW2, P3_KW2, ...
+            for keyword_idx in range(KEYWORDS_PER_PRODUCT):
+                for product in products_to_process:
+                    # Use pre-generated keywords from database
+                    keywords = product.get('search_keywords', [])
 
-                # 3. Search YouTube for each keyword
-                for keyword in keywords[:KEYWORDS_PER_PRODUCT]:
-                    try:
-                        print(f"   🔎 Searching YouTube: '{keyword}'")
+                    # Fallback to old method if no keywords (shouldn't happen after migration)
+                    if not keywords:
+                        print(f"⚠️  No keywords for {product['title']}, using fallback...")
+                        keywords = generate_keywords_for_product(product)
 
-                        videos = await fetch_top_shorts(
-                            keyword=keyword,
-                            max_results=VIDEOS_PER_KEYWORD,
-                            published_after_days=30  # Only recent content
-                        )
+                    # Only add if this product has a keyword at this index
+                    if keyword_idx < len(keywords):
+                        search_queue.append({
+                            "product": product,
+                            "keyword": keywords[keyword_idx]
+                        })
 
-                        if not videos:
-                            print(f"      ❌ No videos found")
-                            continue
+            print(f"📋 Queue built: {len(search_queue)} searches across {len(products_to_process)} products\n")
 
-                        print(f"      ✅ Found {len(videos)} videos")
+            # Process searches in round-robin fashion
+            for idx, search_item in enumerate(search_queue):
+                product = search_item["product"]
+                keyword = search_item["keyword"]
 
-                        # 4. Process each video
-                        for video in videos:
-                            await process_creator_video(
-                                video=video,
-                                product=product,
-                                source_keyword=keyword,
-                                supabase=supabase
-                            )
-                            # Rate limit: 4s per video = 15 videos/min (Gemini free tier limit)
-                            await asyncio.sleep(4)
+                print(f"🎯 [{idx+1}/{len(search_queue)}] {product['title'][:40]}... | '{keyword}'")
 
-                        # Rate limiting between keywords
-                        await asyncio.sleep(2)
+                try:
+                    videos = await fetch_top_shorts(
+                        keyword=keyword,
+                        max_results=VIDEOS_PER_KEYWORD
+                        # Uses default: published_after_days=365 (1 year)
+                    )
 
-                    except Exception as keyword_error:
-                        print(f"      ❌ Error processing keyword '{keyword}': {keyword_error}")
+                    if not videos:
+                        print(f"   ❌ No videos found")
                         continue
 
-                # Small delay between products
-                await asyncio.sleep(1)
+                    print(f"   ✅ Found {len(videos)} videos")
+
+                    # Process videos for this product-keyword combo
+                    for video in videos:
+                        await process_creator_video(
+                            video=video,
+                            product=product,
+                            source_keyword=keyword,
+                            supabase=supabase
+                        )
+                        # Rate limit: 4s per video = 15 videos/min (Gemini free tier limit)
+                        await asyncio.sleep(4)
+
+                    # Delay between searches to avoid rate limiting
+                    print(f"   ⏸️  Sleeping 20s before next search...")
+                    await asyncio.sleep(20)
+
+                except Exception as search_error:
+                    print(f"   ❌ Error: {search_error}")
+                    continue
 
             print(f"\n✅ Cycle #{cycle_count} complete")
             print(f"💤 Sleeping for {CYCLE_INTERVAL_MINUTES} minutes...")
@@ -152,7 +172,7 @@ async def trigger_immediate_discovery(company_id: str, shop_domain: str | None =
     try:
         # Get products for this company
         query = supabase.client.table("company_products")\
-            .select("id, title, description, shop_domain")\
+            .select("id, title, description, shop_domain, search_keywords")\
             .eq("company_id", company_id)
 
         if shop_domain:
@@ -169,43 +189,65 @@ async def trigger_immediate_discovery(company_id: str, shop_domain: str | None =
         # Process all products (or limit to avoid timeout)
         products_to_process = products_result.data[:PRODUCTS_PER_CYCLE]
 
-        for product in products_to_process:
-            print(f"🎯 Processing: {product['title']}")
+        # Round-robin approach for immediate discovery too
+        print("🔄 Building round-robin search queue...\n")
+        search_queue = []
 
-            keywords = generate_keywords_for_product(product)
-            print(f"   🔑 Keywords: {', '.join(keywords[:3])}...")
+        # Interleave by iterating keywords first, then products
+        for keyword_idx in range(KEYWORDS_PER_PRODUCT):
+            for product in products_to_process:
+                # Use pre-generated keywords from database
+                keywords = product.get('search_keywords', [])
 
-            for keyword in keywords[:KEYWORDS_PER_PRODUCT]:
-                try:
-                    print(f"   🔎 Searching YouTube: '{keyword}'")
+                # Fallback to old method if no keywords
+                if not keywords:
+                    print(f"⚠️  No keywords for {product['title']}, using fallback...")
+                    keywords = generate_keywords_for_product(product)
 
-                    videos = await fetch_top_shorts(
-                        keyword=keyword,
-                        max_results=VIDEOS_PER_KEYWORD,
-                        published_after_days=30
-                    )
+                # Only add if this product has a keyword at this index
+                if keyword_idx < len(keywords):
+                    search_queue.append({
+                        "product": product,
+                        "keyword": keywords[keyword_idx]
+                    })
 
-                    if not videos:
-                        print(f"      ❌ No videos found")
-                        continue
+        print(f"📋 Queue built: {len(search_queue)} searches\n")
 
-                    print(f"      ✅ Found {len(videos)} videos")
+        # Process searches in round-robin fashion
+        for idx, search_item in enumerate(search_queue):
+            product = search_item["product"]
+            keyword = search_item["keyword"]
 
-                    for video in videos:
-                        await process_creator_video(
-                            video=video,
-                            product=product,
-                            source_keyword=keyword,
-                            supabase=supabase
-                        )
+            print(f"🎯 [{idx+1}/{len(search_queue)}] {product['title'][:40]}... | '{keyword}'")
 
-                    await asyncio.sleep(2)  # Rate limiting
+            try:
+                videos = await fetch_top_shorts(
+                    keyword=keyword,
+                    max_results=VIDEOS_PER_KEYWORD
+                    # Uses default: published_after_days=365 (1 year)
+                )
 
-                except Exception as keyword_error:
-                    print(f"      ❌ Error: {keyword_error}")
+                if not videos:
+                    print(f"   ❌ No videos found")
                     continue
 
-            await asyncio.sleep(1)
+                print(f"   ✅ Found {len(videos)} videos")
+
+                for video in videos:
+                    await process_creator_video(
+                        video=video,
+                        product=product,
+                        source_keyword=keyword,
+                        supabase=supabase
+                    )
+
+                # Delay between searches to avoid rate limiting
+                print(f"   ⏸️  Sleeping 20s before next search...")
+                await asyncio.sleep(20)
+
+            except Exception as search_error:
+                print(f"   ❌ Error: {search_error}")
+                continue
 
         print(f"\n✅ Immediate discovery complete for {len(products_to_process)} products")
 
@@ -247,46 +289,53 @@ async def process_creator_video(video: dict, product: dict, source_keyword: str,
     video_id = video["id"]
 
     try:
-        # Check if already indexed
+        # Check if already indexed - retrieve full record including analysis
         existing = await supabase.client.table("creator_videos")\
-            .select("id")\
+            .select("*")\
             .eq("video_id", video_id)\
             .execute()
 
         if existing.data:
-            # Video already indexed, recalculate relevance and link if not already linked
+            # Video already in DB - skip Gemini analysis entirely
+            existing_video = existing.data[0]
+
+            # Check if link already exists
             link_exists = await supabase.client.table("product_creator_matches")\
                 .select("id")\
                 .eq("product_id", product["id"])\
                 .eq("video_id", video_id)\
                 .execute()
 
-            if not link_exists.data:
-                # Calculate relevance for existing video
-                from utils.relevance import calculate_relevance_score
-                existing_video = existing.data[0]
-                analysis_data = existing_video.get("analysis", {})
+            if link_exists.data:
+                # Already linked - skip completely
+                print(f"         ⏭️  Already indexed and linked")
+                return
 
-                score, reasoning = calculate_relevance_score(
-                    product=product,
-                    video=video,
-                    analysis=analysis_data,
-                    source_keyword=source_keyword
-                )
+            # Video exists but not linked to this product
+            # Recalculate relevance using existing analysis (no Gemini call needed)
+            from utils.relevance import calculate_relevance_score
+            analysis_data = existing_video.get("analysis", {})
 
-                # Only link if relevance is high enough
-                if score >= 5.0:
-                    await supabase.client.table("product_creator_matches").insert({
-                        "product_id": product["id"],
-                        "video_id": video_id,
-                        "source_keyword": source_keyword,
-                        "relevance_score": score,
-                        "relevance_reasoning": reasoning,
-                        "created_at": "now()"
-                    }).execute()
-                    print(f"         🔗 Linked existing video (score: {score:.1f})")
-                else:
-                    print(f"         ⏭️  Skipped (low relevance: {score:.1f})")
+            score, reasoning = calculate_relevance_score(
+                product=product,
+                video=video,
+                analysis=analysis_data,
+                source_keyword=source_keyword
+            )
+
+            # Only link if relevance is high enough
+            if score >= 4.0:
+                await supabase.client.table("product_creator_matches").insert({
+                    "product_id": product["id"],
+                    "video_id": video_id,
+                    "source_keyword": source_keyword,
+                    "relevance_score": score,
+                    "relevance_reasoning": reasoning,
+                    "created_at": "now()"
+                }).execute()
+                print(f"         🔗 Linked existing video (score: {score:.1f})")
+            else:
+                print(f"         ⏭️  Skipped (low relevance: {score:.1f})")
 
             return
 
@@ -310,9 +359,32 @@ async def process_creator_video(video: dict, product: dict, source_keyword: str,
         # Parse analysis JSON
         try:
             output = analysis.get("output") if isinstance(analysis, dict) else "{}"
+
+            # Strip markdown code blocks if present (Gemini sometimes wraps JSON in ```json ... ```)
+            if output:
+                output = output.strip()
+
+                # Find JSON code block (handle text before the code block)
+                if "```json" in output:
+                    # Extract content between ```json and ```
+                    start = output.find("```json") + 7
+                    end = output.find("```", start)
+                    if end != -1:
+                        output = output[start:end].strip()
+                elif "```" in output and "{" in output:
+                    # Generic code block - find the JSON part
+                    start = output.find("```") + 3
+                    end = output.find("```", start)
+                    if end != -1:
+                        output = output[start:end].strip()
+
+                # Remove any remaining newlines at start/end
+                output = output.strip()
+
             analysis_data = json.loads(output if output else "{}")
-        except (json.JSONDecodeError, TypeError):
-            print(f"         ⚠️  Could not parse analysis JSON")
+        except (json.JSONDecodeError, TypeError) as e:
+            print(f"         ⚠️  Could not parse analysis JSON: {e}")
+            print(f"         Raw output: {output[:200] if output else 'None'}...")
             analysis_data = {}
 
         # 1.5 Calculate relevance score
@@ -328,8 +400,8 @@ async def process_creator_video(video: dict, product: dict, source_keyword: str,
         is_relevant, relevance_reason = is_video_relevant(
             score=score,
             views=video.get("views", 0),
-            min_score=5.0,  # Only keep videos with relevance >= 5/10
-            min_views=5000   # Only keep videos with >= 5k views
+            min_score=4.0,  # Lower threshold for more matches
+            min_views=1000  # Lower view threshold for smaller creators
         )
 
         if not is_relevant:

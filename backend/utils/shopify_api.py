@@ -353,3 +353,72 @@ def get_all_products_paginated(client: ShopifyAPIClient) -> List[Dict[str, Any]]
         break  # For now, just get first page
 
     return all_products
+
+
+# ==================== STANDALONE HELPER FUNCTIONS ====================
+
+async def get_access_token(company_id: str) -> Optional[str]:
+    """
+    Get active Shopify access token for a company
+
+    Args:
+        company_id: The company ID
+
+    Returns:
+        str: Access token if found, None otherwise
+    """
+    from utils.supabase import SupabaseClient
+    
+    supabase_client = SupabaseClient()
+    result = await supabase_client.client.table("shopify_oauth_tokens")\
+        .select("access_token")\
+        .eq("company_id", company_id)\
+        .eq("is_active", True)\
+        .execute()
+    
+    if result.data and len(result.data) > 0:
+        return result.data[0].get("access_token")
+    
+    return None
+
+
+async def create_discount_code(
+    shop: str,
+    access_token: str,
+    code: str,
+    value: float,
+    value_type: str = "percentage",
+    usage_limit: Optional[int] = None,
+    starts_at: Optional[str] = None,
+    ends_at: Optional[str] = None
+) -> bool:
+    """
+    Create a discount code in Shopify (async wrapper)
+
+    Args:
+        shop: Shop domain
+        access_token: OAuth access token
+        code: Discount code
+        value: Discount value
+        value_type: 'percentage' or 'fixed_amount'
+        usage_limit: Max number of uses
+        starts_at: When discount becomes active
+        ends_at: When discount expires
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        client = ShopifyAPIClient(shop_domain=shop, access_token=access_token)
+        client.create_discount_code(
+            code=code,
+            value=value,
+            value_type=value_type,
+            usage_limit=usage_limit,
+            starts_at=starts_at,
+            ends_at=ends_at
+        )
+        return True
+    except Exception as e:
+        print(f"Error creating discount code: {e}")
+        return False

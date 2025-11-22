@@ -27,10 +27,10 @@ def calculate_relevance_score(
     score = 0.0
     reasons = []
 
-    product_title = product.get("title", "").lower()
-    product_desc = product.get("description", "").lower()
-    video_title = video.get("title", "").lower()
-    video_desc = video.get("description", "").lower()
+    product_title = (product.get("title") or "").lower()
+    product_desc = (product.get("description") or "").lower()
+    video_title = (video.get("title") or "").lower()
+    video_desc = (video.get("description") or "").lower()
 
     # 1. Keyword match in video title/desc (0-3 points)
     keyword_lower = source_keyword.lower()
@@ -50,10 +50,11 @@ def calculate_relevance_score(
         reasons.append(f"{matches} product terms matched")
 
     # 3. Content type indicators (0-2 points)
-    review_terms = ["review", "unboxing", "haul", "try on", "test", "first impressions"]
+    review_terms = ["review", "unboxing", "haul", "try on", "test", "first impressions",
+                    "tutorial", "how to", "guide", "demonstration", "setup", "tips"]
     if any(term in video_title for term in review_terms):
         score += 2.0
-        reasons.append("review/unboxing content")
+        reasons.append("review/tutorial content")
 
     # 4. Category alignment (0-2 points)
     product_categories = set()
@@ -70,7 +71,19 @@ def calculate_relevance_score(
         score += min(2.0, category_overlap)
         reasons.append(f"category match: {category_overlap}")
 
-    # Normalize to 0-10 scale
+    # 5. Object/product match from Gemini analysis (0-3 points)
+    objects_actions = analysis.get("objects_actions", [])
+    if objects_actions and len(objects_actions) > 0:
+        objects = objects_actions[0] if len(objects_actions) > 0 else []
+        # Check if any product words appear in the objects list
+        product_core_words = set(product_title.split()) - {"the", "a", "an", "and", "or", "for", "selling", "plans", "3p", "fulfilled", "archived", "collection"}
+        objects_str = " ".join(str(obj).lower() for obj in objects)
+        object_matches = sum(1 for word in product_core_words if word in objects_str)
+        if object_matches > 0:
+            score += min(3.0, object_matches * 1.5)
+            reasons.append(f"{object_matches} objects matched")
+
+    # Normalize to 0-10 scale (no hardcoded category penalties - using quoted search instead)
     score = min(10.0, score)
 
     reasoning = "; ".join(reasons) if reasons else "low relevance"
@@ -81,8 +94,8 @@ def calculate_relevance_score(
 def is_video_relevant(
     score: float,
     views: int,
-    min_score: float = 5.0,
-    min_views: int = 5000
+    min_score: float = 4.0,
+    min_views: int = 1000
 ) -> tuple[bool, str]:
     """
     Determine if a video meets minimum relevance and quality thresholds.
