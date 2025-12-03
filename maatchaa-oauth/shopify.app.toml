@@ -2,6 +2,7 @@
 
 client_id = "ee29c60c321cc03bdee83df811af1b6d"
 name = "maatchaa-oauth"
+# TODO: This URL depends on the result of `shopify app dev`
 application_url = "https://maatchaa.vercel.app"
 embedded = true
 
