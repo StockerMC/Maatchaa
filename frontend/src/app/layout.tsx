@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     title: "Maatchaa",
     description: "",
     generator: "",
+    icons: {
+        icon: '/icon.png',
+    },
 }
 
 export default function RootLayout({
