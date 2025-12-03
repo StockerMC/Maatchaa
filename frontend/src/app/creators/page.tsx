@@ -3,9 +3,8 @@
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ArrowRight, Youtube } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import SquigglyUnderlineText from "@/components/SquigglyUnderlineText";
-import Gradient from "@/components/Gradient";
 
 export default function CreatorsPage() {
     const { data: session, status } = useSession();
@@ -26,7 +25,6 @@ export default function CreatorsPage() {
             <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
                 <div className="max-w-4xl w-full mx-auto text-center bg-black/5 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12">
                     <div className="flex items-center justify-center mb-6">
-                        <Youtube className="w-16 h-16 text-red-600" />
                     </div>
                     <h1 className="text-5xl md:text-7xl font-bold text-gray-100 mb-4">
                         Join the <SquigglyUnderlineText>Creator</SquigglyUnderlineText> Economy

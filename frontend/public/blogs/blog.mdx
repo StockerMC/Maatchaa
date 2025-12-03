@@ -1,0 +1,91 @@
+## Intro
+
+In the world of digital marketing, content sponsorships have become a powerful way for businesses to reach new audiences. But the process of finding the right content creators can be time-consuming, inconsistent, and prone to human bias. With the rise of short-form video content across platforms like YouTube, TikTok, and Instagram, the need for a more efficient, scalable solution to automate business-to-video sponsorships has never been more critical.
+
+This is where Maatchaa comes in, a tool that automatically connects businesses with the perfect content creators for their products using an AI-powered matching algorithm. In this blog, I’ll take you through how we built Maatchaa, how it works, and the challenges we faced along the way.
+
+## Solution
+
+Here's how Maatchaa works:
+- **Automated Matching:** Every day, Maatchaa matches Shopify products to videos based on engagement, niche, and brand safety. Our algorithm ensures that only relevant products are shown to creators whose content aligns with the business’s goals.
+
+- **Businesses Browse Creators:** Businesses can scroll through their matches. They choose to accept or reject videos.
+
+- **Product Sets:** For each accepted video, we generate a unique set of products based on the aesthetics of the video that can be bought together at a discounted price.
+
+- **Creator Confirmation:** Creators get an email about the partnership. Once creators confirm their partnership with a business, Maatchaa automatically adds sponsored links into the video description and makes a pinned comment.
+
+## How We Built Maatchaa
+Building Maatchaa required combining multiple technologies and tools to make the entire system work seamlessly. Here's a breakdown of the tech stack:
+### Backend
+- **Python:** Our backend is powered by Python, a language that provides flexibility and efficiency for handling data and integrating APIs.
+
+
+- **Shopify API:** We leveraged the Shopify API to access product information from businesses.
+
+
+- **YouTube API:** The YouTube API allows us to pull data on YouTube Shorts, including video descriptions, thumbnails, and engagement metrics.
+
+
+- **Vector Database (Pinecone):** To power our matching algorithm, we used a vector database for embeddings, both for text (video descriptions) and images (thumbnails).
+
+
+### Frontend
+- **Next.js:** We built the frontend with Next.js to create a fast, interactive dashboard that allows businesses to browse potential creator partnerships easily.
+
+
+- **Scrollable “Tinder-style” UI:** The dashboard has a sleek, scrollable interface where businesses can browse reels and creators, swiping right to indicate interest in a partnership.
+
+
+### AI & Embeddings
+- **Cohere:** We use multi-modal embeddings powered by Cohere to analyze both video text and images, enabling us to match products and videos based on semantic meaning.
+
+
+- **Pinecone:** The vector database stores embeddings of both products and videos, allowing us to quickly retrieve the top matching products for any given video.
+
+
+- **Gemini:** We incorporated Gemini to automatically analyze video content and suggest products based on what’s shown in the video.
+
+
+- **Nano Banana:** For AI-generated visuals like product sets, thumbnails, and social-ready imagery, we integrated Nano Banana, a newly released tool that helps us generate images that align with both the content style and brand identity.
+
+
+## The Maatching Pipeline
+The real power of Maatchaa lies in its AI-powered matching algorithm.
+
+Here’s how it works:
+- **Video Analysis:** Maatchaa begins by analyzing YouTube Shorts using both the video’s audio and visual elements. Using Gemini video analysis, it generates a transcription (video to text) and extracts key visual features from the thumbnail and video itself.
+
+
+- **Query Vector DB:** Using these transcriptions and visual features, Maatchaa queries the vector database (Pinecone) to return the top matching products based on semantic similarity, ensuring that the product aligns with the video content.
+
+
+- **Product Set Generation:** Once a business uploads its product catalog to Maatchaa, we push the product data to our vector database. The system automatically generates a set of products that best match the video’s theme and style.
+
+
+- **Creator Confirmation:** Once a creator selects a business for partnership, Maatchaa automatically updates the YouTube video description with the relevant products, ensuring that the sponsorship is seamlessly integrated into the video.
+
+## Managing State
+
+A major technical hurdle in Maatchaa came from managing state for each creator and business. Since all actions are asynchronous, we store pending tasks, cached content, and account information within a Supabase database. The frontend would then reflect the database using Postgres Changes to update in realtime. This caused major headaches since each background worker instance needed an asynchronous context to the Supabase client. This in turn meant we needed to tread carefully with regards to race conditions if a user and background worker ever clashed.
+
+## What’s Next for Maatchaa
+
+The future of Maatchaa is bright, and we’re already planning our next steps:
+- **Expanding to Other Platforms:** Right now, Maatchaa is focused on YouTube Shorts, but we plan to expand to other platforms like Instagram, TikTok, and more.
+
+
+- **Improving Matching AI:** We aim to improve our matching algorithm by adding more sophisticated stylistic and aesthetic considerations, ensuring even better brand-to-creator matches.
+
+
+- **Automated Reporting & Analytics:** We plan to introduce automated reporting and performance analytics for both creators and businesses, helping them measure the success of their partnerships.
+
+
+- **Monetization:** We're exploring monetization options for both creators and businesses, allowing them to track ROI on their sponsored content and create more meaningful collaborations.
+
+
+
+## Conclusion
+Maatchaa is pushing the boundaries of what’s possible in the world of business-to-video sponsorships. By using AI, vector databases, and powerful APIs, we’ve automated the process of matching businesses with the right content creators, creating a seamless, scalable, and more effective way to handle content sponsorships.
+If you're interested in trying Maatchaa, contributing to its development, or learning more about how AI is transforming digital marketing, feel free to reach out or check out the project’s GitHub!
+

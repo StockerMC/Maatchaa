@@ -1,10 +1,15 @@
 "use client";
 
 import YouTubeReels from "@/components/YoutubeReels";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { getCurrentUser, getApiUrl } from "@/lib/auth";
 
-export default function ReelsPage() {
+function ReelsPageContent() {
+    const searchParams = useSearchParams();
+    const productId = searchParams.get("product_id"); // Optional: filter by product
     type Reel = {
         id: string;
         company: string;
@@ -17,53 +22,153 @@ export default function ReelsPage() {
         channel_id: string;
         company_id: string; // This will be set from company field
     };
+
+    type VideoInteraction = {
+        video_id: string;
+        interaction_type: string;
+        created_at: string;
+    };
+
+    type CreatorVideo = {
+        id: string;
+        video_id: string;
+        url: string;
+        thumbnail: string;
+        title: string;
+        email: string;
+        channel_id: string;
+        shop_domain: string;
+        indexed_at: string;
+    };
+
+    type CreatorMatch = {
+        creator_videos: CreatorVideo;
+    };
+
     const [data, setData] = useState<Reel[] | null>(null);
     const [isIngesting, setIsIngesting] = useState(false);
-    
+
     useEffect(() => {
         const fetchData = async () => {
-            const shop_name = localStorage.getItem("shop_name");
-            const { data: yt_shorts_pending, error } = await supabase
-                .from("yt_shorts_pending")
-                .select("*")
-                .eq("company", shop_name);
-            
-            if (error) {
-                console.error("Error fetching reels:", error);
-                return;
-            }
+            try {
+                const user = getCurrentUser();
 
-            console.log("Fetched data:", yt_shorts_pending);
-            console.log("Data length:", yt_shorts_pending?.length);
-            
-            // Transform the data to match ReelData interface
-            const transformedData = (yt_shorts_pending || []).map((reel: Reel) => ({
-                ...reel,
-                company_id: reel.company // Map company to company_id
-            }));
-            
-            console.log("Setting data:", transformedData);
-            setData(transformedData);
-            
-            // If no shorts were found, check if we should trigger ingestion
-            if (!transformedData || transformedData.length === 0) {
-                await checkAndTriggerIngestion(shop_name);
+                // Fetch reel interactions (dismissed/partnered) for this company
+                const interactionsUrl = getApiUrl(`/reels/interactions?company_id=${user.companyId}`);
+                const interactionsResponse = await fetch(interactionsUrl);
+                const interactionsData = await interactionsResponse.json();
+                const interactedVideoIds = new Set(
+                    (interactionsData.interactions || []).map((i: VideoInteraction) => i.video_id)
+                );
+
+                console.log(`Found ${interactedVideoIds.size} interacted videos to filter out`);
+
+                let url: string;
+                if (productId) {
+                    // Fetch creators for specific product
+                    url = getApiUrl(`/products/${productId}/creators`);
+                    console.log("Fetching creators for product:", productId);
+                } else {
+                    // Fetch all creator videos (TODO: add endpoint for this)
+                    // For now, fetch from Supabase directly
+                    const { data: videos, error } = await supabase
+                        .from("creator_videos")
+                        .select("*")
+                        .order("indexed_at", { ascending: false })
+                        .limit(50);
+
+                    if (error) {
+                        console.error("Error fetching creator videos:", error);
+                        setData([]);
+                        return;
+                    }
+
+                    // Filter out videos that have been interacted with
+                    const filteredVideos = videos?.filter((video: CreatorVideo) =>
+                        !interactedVideoIds.has(video.video_id)
+                    ) || [];
+
+                    // Transform to Reel format
+                    const reels: Reel[] = filteredVideos.map((video: CreatorVideo) => ({
+                        id: video.id,
+                        company: video.shop_domain || user.companyId,
+                        yt_short_url: video.url,
+                        product_imgs: video.thumbnail ? [video.thumbnail] : [],
+                        product_titles: [video.title],
+                        short_id: video.video_id,
+                        email: video.email || "",
+                        channel_id: video.channel_id,
+                        company_id: user.companyId
+                    }));
+
+                    console.log(`Loaded ${reels.length} creator videos (${videos.length - reels.length} filtered out)`);
+                    setData(reels);
+                    return;
+                }
+
+                // Fetch from API for product-specific creators
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error("Failed to fetch creators");
+                    setData([]);
+                    return;
+                }
+
+                const result = await response.json();
+                const creators = result.matches || [];
+
+                // Filter out creators that have been interacted with
+                const filteredCreators = creators.filter((match: CreatorMatch) => {
+                    const video = match.creator_videos;
+                    return !interactedVideoIds.has(video.video_id);
+                });
+
+                // Transform API response to Reel format
+                const reels: Reel[] = filteredCreators.map((match: CreatorMatch) => {
+                    const video = match.creator_videos;
+                    return {
+                        id: video.id,
+                        company: video.shop_domain || user.companyId,
+                        yt_short_url: video.url,
+                        product_imgs: video.thumbnail ? [video.thumbnail] : [],
+                        product_titles: [video.title],
+                        short_id: video.video_id,
+                        email: video.email || "",
+                        channel_id: video.channel_id,
+                        company_id: user.companyId
+                    };
+                });
+
+                console.log(`Loaded ${reels.length} creators for product ${productId} (${creators.length - reels.length} filtered out)`);
+                setData(reels);
+
+            } catch (error) {
+                console.error("Error fetching creator data:", error);
+                setData([]);
             }
         };
-        
+
         const checkAndTriggerIngestion = async (shop_name: string | null) => {
             if (!shop_name || isIngesting) return;
-            
+
             try {
+                console.log("Checking ingestion for shop:", shop_name);
+
                 // Get company data to check last ingestion attempt
                 const { data: company, error: companyError } = await supabase
                     .from("companies")
                     .select("last_ingest_attempt, access_token")
                     .eq("shop_name", shop_name)
                     .single();
-                
+
                 if (companyError) {
                     console.error("Error fetching company data:", companyError);
+                    console.log("Company lookup failed - this might mean the shop isn't registered yet");
+                    return;
+                }
+
+                if (!company) {
+                    console.log("No company found with shop_name:", shop_name);
                     return;
                 }
                 
@@ -111,18 +216,53 @@ export default function ReelsPage() {
                 setIsIngesting(false);
             }
         };
-        
+
         fetchData();
-    }, [isIngesting]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [productId]); // Refetch when product filter changes
 
     return (
-        <div className="relative">
-            {isIngesting && (
-                <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-                    Generating new content...
+        <DashboardLayout
+            initialSidebarOpen={true}
+            allowSidebarToggle={false}
+            hideHeader={true}
+        >
+            <div className="fixed inset-0">
+                {isIngesting && (
+                    <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+                        Generating new content...
+                    </div>
+                )}
+
+                {/* Archive button */}
+                <a
+                    href="/dashboard/reels/archive"
+                    className="fixed top-6 left-[320px] bg-white text-gray-700 px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect width="20" height="5" x="2" y="3" rx="1"/>
+                        <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/>
+                        <path d="M10 12h4"/>
+                    </svg>
+                    Archive
+                </a>
+
+                <YouTubeReels reelsData={data || []} />
+            </div>
+        </DashboardLayout>
+    );
+}
+
+export default function ReelsPage() {
+    return (
+        <Suspense fallback={
+            <DashboardLayout initialSidebarOpen={true} allowSidebarToggle={false} hideHeader={true}>
+                <div className="fixed inset-0 flex items-center justify-center">
+                    <p className="text-gray-500">Loading...</p>
                 </div>
-            )}
-            <YouTubeReels reelsData={data || []} />
-        </div>
+            </DashboardLayout>
+        }>
+            <ReelsPageContent />
+        </Suspense>
     );
 }
