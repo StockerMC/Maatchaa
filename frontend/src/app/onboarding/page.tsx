@@ -290,7 +290,7 @@ export default function OnboardingPage() {
           <Flex direction="column" gap="5">
             <Flex align="center" justify="between" wrap="wrap" gap="3">
               <Box>
-                <Text size="8" weight="bold" as="h1" style={{ color: sage.sage12 }}>
+                <Text size="8" weight="bold" style={{ color: sage.sage12 }}>
                   Welcome to Maatchaa
                 </Text>
                 <Text size="3" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>
@@ -336,7 +336,7 @@ export default function OnboardingPage() {
           <Card style={{ minHeight: "420px", background: sage.sage1, border: `1px solid ${sage.sage6}`, padding: "2rem" }}>
             <Flex direction="column" gap="5">
               <Box>
-                <Text size="6" weight="bold" as="h2" style={{ color: sage.sage12 }}>
+                <Text size="6" weight="bold" style={{ color: sage.sage12 }}>
                   {steps[currentStep].title}
                 </Text>
                 <Text size="2" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>

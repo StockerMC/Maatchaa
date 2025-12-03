@@ -3,11 +3,11 @@
 import YouTubeReels from "@/components/YoutubeReels";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { getCurrentUser, getApiUrl } from "@/lib/auth";
 
-export default function ReelsPage() {
+function ReelsPageContent() {
     const searchParams = useSearchParams();
     const productId = searchParams.get("product_id"); // Optional: filter by product
     type Reel = {
@@ -22,6 +22,29 @@ export default function ReelsPage() {
         channel_id: string;
         company_id: string; // This will be set from company field
     };
+
+    type VideoInteraction = {
+        video_id: string;
+        interaction_type: string;
+        created_at: string;
+    };
+
+    type CreatorVideo = {
+        id: string;
+        video_id: string;
+        url: string;
+        thumbnail: string;
+        title: string;
+        email: string;
+        channel_id: string;
+        shop_domain: string;
+        indexed_at: string;
+    };
+
+    type CreatorMatch = {
+        creator_videos: CreatorVideo;
+    };
+
     const [data, setData] = useState<Reel[] | null>(null);
     const [isIngesting, setIsIngesting] = useState(false);
 
@@ -35,7 +58,7 @@ export default function ReelsPage() {
                 const interactionsResponse = await fetch(interactionsUrl);
                 const interactionsData = await interactionsResponse.json();
                 const interactedVideoIds = new Set(
-                    (interactionsData.interactions || []).map((i: any) => i.video_id)
+                    (interactionsData.interactions || []).map((i: VideoInteraction) => i.video_id)
                 );
 
                 console.log(`Found ${interactedVideoIds.size} interacted videos to filter out`);
@@ -61,12 +84,12 @@ export default function ReelsPage() {
                     }
 
                     // Filter out videos that have been interacted with
-                    const filteredVideos = videos?.filter((video: any) =>
+                    const filteredVideos = videos?.filter((video: CreatorVideo) =>
                         !interactedVideoIds.has(video.video_id)
                     ) || [];
 
                     // Transform to Reel format
-                    const reels: Reel[] = filteredVideos.map((video: any) => ({
+                    const reels: Reel[] = filteredVideos.map((video: CreatorVideo) => ({
                         id: video.id,
                         company: video.shop_domain || user.companyId,
                         yt_short_url: video.url,
@@ -95,13 +118,13 @@ export default function ReelsPage() {
                 const creators = result.matches || [];
 
                 // Filter out creators that have been interacted with
-                const filteredCreators = creators.filter((match: any) => {
+                const filteredCreators = creators.filter((match: CreatorMatch) => {
                     const video = match.creator_videos;
                     return !interactedVideoIds.has(video.video_id);
                 });
 
                 // Transform API response to Reel format
-                const reels: Reel[] = filteredCreators.map((match: any) => {
+                const reels: Reel[] = filteredCreators.map((match: CreatorMatch) => {
                     const video = match.creator_videos;
                     return {
                         id: video.id,
@@ -195,6 +218,7 @@ export default function ReelsPage() {
         };
 
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productId]); // Refetch when product filter changes
 
     return (
@@ -226,5 +250,19 @@ export default function ReelsPage() {
                 <YouTubeReels reelsData={data || []} />
             </div>
         </DashboardLayout>
+    );
+}
+
+export default function ReelsPage() {
+    return (
+        <Suspense fallback={
+            <DashboardLayout initialSidebarOpen={true} allowSidebarToggle={false} hideHeader={true}>
+                <div className="fixed inset-0 flex items-center justify-center">
+                    <p className="text-gray-500">Loading...</p>
+                </div>
+            </DashboardLayout>
+        }>
+            <ReelsPageContent />
+        </Suspense>
     );
 }

@@ -17,6 +17,7 @@ interface ReelData {
     channel_id: string;
     email: string;
     company_id: string;
+    short_id?: string;
 }
 
 interface YouTubeReelsProps {
@@ -29,6 +30,15 @@ interface MatchedProduct {
     title: string;
     image: string;
     price: number;
+}
+
+interface ProductMatchData {
+    company_products: {
+        id: string;
+        title: string;
+        image: string;
+        price: number;
+    };
 }
 
 export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps) {
@@ -143,7 +153,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 return;
             }
 
-            const products = matchData?.map((match: any) => ({
+            const products = matchData?.map((match: ProductMatchData) => ({
                 id: match.company_products?.id || '',
                 title: match.company_products?.title || 'Unknown Product',
                 image: match.company_products?.image || '',
@@ -239,7 +249,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 .eq("video_id", videoData.video_id)
                 .limit(5);
 
-            const matchedProducts = matchData?.map((match: any) => ({
+            const matchedProducts = matchData?.map((match: ProductMatchData) => ({
                 id: match.company_products?.id,
                 title: match.company_products?.title,
                 name: match.company_products?.title,

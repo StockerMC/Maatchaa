@@ -148,7 +148,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             >
               <Flex direction="column" gap="2">
                 <Text size="2" weight="bold" style={{ color: sage.sage11 }}>
-                  Search results for "{searchQuery}"
+                  Search results for &quot;{searchQuery}&quot;
                 </Text>
                 <Text size="2" style={{ color: sage.sage11 }}>
                   Type to search across products, creators, and partnerships

@@ -96,7 +96,7 @@ export default function DashboardOverviewPage() {
       <Flex direction="column" gap="6">
         {/* Header */}
         <Box>
-          <Text size="8" weight="bold" as="h1">
+          <Text size="8" weight="bold">
             Dashboard Overview
           </Text>
           <Text size="3" style={{ color: sage.sage11, marginTop: "0.5rem", display: "block" }}>

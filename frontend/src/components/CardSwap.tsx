@@ -249,21 +249,24 @@ const CardSwap = ({
       clearTimeout(initialTimeout);
       tlRef.current?.kill();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, config]);
 
-  const rendered = childArr.map((child, i) =>
-    isValidElement(child)
-      ? cloneElement(child as React.ReactElement<any>, {
-          key: i,
-          ref: refs[i],
-          style: { width, height, ...(child.props.style ?? {}) },
-          onClick: (e: React.MouseEvent) => {
-            child.props.onClick?.(e);
-            onCardClick?.(i);
-          }
-        })
-      : child
-  );
+  const rendered = childArr.map((child, i) => {
+    if (!isValidElement(child)) return child;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const element = child as React.ReactElement<any>;
+    return cloneElement(element, {
+      key: i,
+      ref: refs[i],
+      style: { width, height, ...(element.props.style ?? {}) },
+      onClick: (e: React.MouseEvent) => {
+        element.props.onClick?.(e);
+        onCardClick?.(i);
+      }
+    });
+  });
 
   const containerStyle: CSSProperties = {
     position: 'relative',
@@ -273,7 +276,9 @@ const CardSwap = ({
     overflow: 'visible'
   };
 
-  const mobileContainerStyle: CSSProperties = {
+  // Note: @media queries in inline styles don't actually work in React
+  // This object is kept for backwards compatibility but media queries are ignored
+  const mobileContainerStyle = {
     ...containerStyle,
     '@media (maxWidth: 768px)': {
       transform: 'scale(0.75) translate(25%, 25%)'
@@ -281,7 +286,7 @@ const CardSwap = ({
     '@media (maxWidth: 480px)': {
       transform: 'scale(0.55) translate(25%, 25%)'
     }
-  };
+  } as React.CSSProperties;
 
   return (
     <div ref={container} style={mobileContainerStyle}>

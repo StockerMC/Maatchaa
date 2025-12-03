@@ -63,7 +63,7 @@ export default async function BlogPage() {
               Building an Algorithm to Automate Business-to-Video Sponsorships
             </h1>
             <Text size="6" className="block font-medium" style={{ color: 'rgba(255, 255, 255, 0.85)', lineHeight: 1.6 }}>
-              How did a goofy matcha project end up winning Canada's biggest hackathon? Well, here's a technical blog for what this project is all about!
+              How did a goofy matcha project end up winning Canada&apos;s biggest hackathon? Well, here&apos;s a technical blog for what this project is all about!
             </Text>
           </div>
         </div>

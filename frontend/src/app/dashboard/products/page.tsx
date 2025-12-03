@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { Card, Flex, Text, Box, Badge, Button, TextField, Select, Dialog } from "@radix-ui/themes";
 import { sage, lime } from "@radix-ui/colors";
 import { Search, ExternalLink, Eye, Loader2, X, Package, Sparkles, CheckCircle2 } from "lucide-react";
@@ -23,7 +23,7 @@ interface Product {
   match_count?: number;
 }
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -400,5 +400,20 @@ export default function ProductsPage() {
 
       </Flex>
     </DashboardLayout>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <Flex direction="column" gap="6">
+          <Text size="8" weight="bold">Products</Text>
+          <Text size="2" style={{ color: sage.sage11 }}>Loading...</Text>
+        </Flex>
+      </DashboardLayout>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

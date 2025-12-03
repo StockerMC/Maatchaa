@@ -79,6 +79,7 @@ export default function CreatorPartnershipPage() {
 
   useEffect(() => {
     fetchPartnership();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partnershipId]);
 
   const fetchPartnership = async () => {
@@ -99,8 +100,8 @@ export default function CreatorPartnershipPage() {
         const shopData = await shopResponse.json();
         setShopInfo(shopData);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to load partnership");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load partnership");
     } finally {
       setLoading(false);
     }

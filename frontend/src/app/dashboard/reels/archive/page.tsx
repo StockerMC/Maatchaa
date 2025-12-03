@@ -23,6 +23,13 @@ interface ArchivedReel {
     };
 }
 
+interface ReelInteraction {
+    id: string;
+    video_id: string;
+    interaction_type: string;
+    created_at: string;
+}
+
 export default function ReelsArchivePage() {
     const [archivedReels, setArchivedReels] = useState<ArchivedReel[]>([]);
     const [loading, setLoading] = useState(true);
@@ -60,7 +67,7 @@ export default function ReelsArchivePage() {
 
             // Fetch video details for each interaction
             const reelsWithDetails = await Promise.all(
-                interactions.map(async (interaction: any) => {
+                interactions.map(async (interaction: ReelInteraction) => {
                     const { data: video, error } = await supabase
                         .from("creator_videos")
                         .select("*")

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getCurrentUser, getApiUrl } from '@/lib/auth';
 import { Card, Flex, Text, Box, Button, Badge, Separator } from "@radix-ui/themes";
@@ -8,10 +8,17 @@ import { sage, green, red, blue } from "@radix-ui/colors";
 import { Store, Link2, Package, AlertCircle, CheckCircle2, Settings } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
-export default function SettingsPage() {
+interface ShopInfo {
+  name: string;
+  domain: string;
+  email: string;
+  currency: string;
+}
+
+function SettingsContent() {
   const searchParams = useSearchParams();
   const [shopifyConnected, setShopifyConnected] = useState(false);
-  const [shopInfo, setShopInfo] = useState<any>(null);
+  const [shopInfo, setShopInfo] = useState<ShopInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [showMessage, setShowMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
@@ -42,6 +49,7 @@ export default function SettingsPage() {
     } else {
       checkShopifyStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const checkShopifyStatus = async () => {
@@ -110,7 +118,7 @@ export default function SettingsPage() {
       <DashboardLayout>
         <Flex direction="column" gap="6">
           <Flex direction="column" gap="2">
-            <Text size="8" weight="bold" as="h1">Settings</Text>
+            <Text size="8" weight="bold">Settings</Text>
             <Text size="2" style={{ color: sage.sage11, display: "block" }}>
               Loading...
             </Text>
@@ -125,7 +133,7 @@ export default function SettingsPage() {
       <Flex direction="column" gap="6">
         {/* Header */}
         <Flex direction="column" gap="2">
-          <Text size="8" weight="bold" as="h1">Settings</Text>
+          <Text size="8" weight="bold">Settings</Text>
           <Text size="2" style={{ color: sage.sage11 }}>
             Manage your integrations and account preferences
           </Text>
@@ -197,7 +205,7 @@ export default function SettingsPage() {
                 <Card style={{ background: blue.blue2, border: `1px solid ${blue.blue6}` }}>
                   <Flex direction="column" gap="2">
                     <Text size="2" weight="medium" style={{ color: blue.blue11 }}>
-                      What you'll get:
+                      What you&apos;ll get:
                     </Text>
                     <Flex direction="column" gap="1" style={{ paddingLeft: "1rem" }}>
                       <Flex align="center" gap="2">
@@ -330,5 +338,20 @@ export default function SettingsPage() {
         </Card>
       </Flex>
     </DashboardLayout>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <Flex direction="column" gap="6">
+          <Text size="8" weight="bold">Settings</Text>
+          <Text size="2" style={{ color: sage.sage11 }}>Loading...</Text>
+        </Flex>
+      </DashboardLayout>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }

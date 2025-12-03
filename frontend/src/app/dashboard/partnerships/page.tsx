@@ -60,6 +60,38 @@ interface Partnership {
   };
 }
 
+// API Response Types
+interface PartnershipApiResponse {
+  id: string;
+  creator_name: string;
+  creator_handle: string;
+  creator_avatar: string;
+  video_title: string;
+  video_thumbnail: string;
+  video_url: string;
+  status: string;
+  matched_products?: Array<{ title?: string; name?: string }>;
+  views: number;
+  likes: number;
+  comments: number;
+  created_at: string;
+  contacted_at?: string;
+  contract_drafted?: boolean;
+  contract_sent?: boolean;
+  contract_signed?: boolean;
+  affiliate_link_generated?: boolean;
+  affiliate_link?: string;
+  commission_rate?: number;
+  payment_terms?: string;
+  performance_data?: {
+    clicks?: number;
+    sales?: number;
+    revenue?: number;
+    postsCompleted?: number;
+    postsRequired?: number;
+  };
+}
+
 const mockPartnerships: Partnership[] = [
   {
     id: "1",
@@ -333,7 +365,7 @@ export default function PartnershipsPage() {
         const data = await response.json();
 
         // Transform API response to match Partnership interface
-        const transformedPartnerships: Partnership[] = data.partnerships.map((p: any) => ({
+        const transformedPartnerships: Partnership[] = data.partnerships.map((p: PartnershipApiResponse) => ({
           id: p.id,
           creatorName: p.creator_name || "Unknown Creator",
           creatorHandle: p.creator_handle || "",
@@ -342,7 +374,7 @@ export default function PartnershipsPage() {
           videoThumbnail: p.video_thumbnail || "",
           videoUrl: p.video_url || "",
           status: p.status || "to_contact",
-          matchedProducts: p.matched_products?.map((prod: any) => prod.title || prod.name) || [],
+          matchedProducts: p.matched_products?.map((prod) => prod.title || prod.name || '') || [],
           views: p.views || 0,
           likes: p.likes || 0,
           comments: p.comments || 0,
@@ -356,10 +388,16 @@ export default function PartnershipsPage() {
           commissionRate: p.commission_rate || 10,
           paymentTerms: p.payment_terms || "Net 30 days",
           contractDuration: "90 days",
-          performanceMetrics: p.performance_data || {
-            clicks: p.clicks || 0,
-            sales: p.sales || 0,
-            revenue: p.revenue || 0,
+          performanceMetrics: p.performance_data ? {
+            clicks: p.performance_data.clicks || 0,
+            sales: p.performance_data.sales || 0,
+            revenue: p.performance_data.revenue || 0,
+            postsCompleted: p.performance_data.postsCompleted || 0,
+            postsRequired: p.performance_data.postsRequired || 5,
+          } : {
+            clicks: 0,
+            sales: 0,
+            revenue: 0,
             postsCompleted: 0,
             postsRequired: 5,
           },
