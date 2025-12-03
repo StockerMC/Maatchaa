@@ -65,10 +65,83 @@ async def on_stop(application: Application):
         await supabase_client.close()
         print("✅ SupabaseClient closed")
 
-# Health check endpoint
+# Shopify App landing page
 @get("/")
-async def health_check():
-    return json({"status": "healthy", "message": "API is running"})
+async def app_home():
+    from blacksheep import html
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maatchaa - Connected</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        .status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #48bb78;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .api-info {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎯</div>
+        <h1>Maatchaa API</h1>
+        <div class="status">✓ Python Backend Connected</div>
+        <p>Your Shopify app is successfully connected to the Maatchaa API.</p>
+        <p>AI-powered creator discovery and partnership management platform.</p>
+        <div class="api-info">
+            <strong>API Status:</strong> Running<br>
+            <strong>Service:</strong> maatchaa-api<br>
+            <strong>Health:</strong> Healthy
+        </div>
+    </div>
+</body>
+</html>"""
+    return html(html_content)
 
 # Ingest products from Shopify store
 @post("/ingest")
