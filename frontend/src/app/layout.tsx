@@ -1,17 +1,42 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Figtree } from "next/font/google"
+import localFont from "next/font/local"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Theme } from '@radix-ui/themes'
-import Header from "@/components/Header"
+import ConditionalHeader from "@/components/ConditionalHeader"
 import "./globals.css"
 import { Providers } from "@/components/Providers"
 import { Toaster } from 'react-hot-toast'
 
-const figtree = Figtree({
-    subsets: ["latin"],
-    weight: ["400", "500", "600", "700"],
-    variable: "--font-figtree",
+const satoshi = localFont({
+    src: [
+        {
+            path: "../../public/fonts/satoshi/Satoshi-Light.otf",
+            weight: "300",
+            style: "normal",
+        },
+        {
+            path: "../../public/fonts/satoshi/Satoshi-Regular.otf",
+            weight: "400",
+            style: "normal",
+        },
+        {
+            path: "../../public/fonts/satoshi/Satoshi-Medium.otf",
+            weight: "500",
+            style: "normal",
+        },
+        {
+            path: "../../public/fonts/satoshi/Satoshi-Bold.otf",
+            weight: "700",
+            style: "normal",
+        },
+        {
+            path: "../../public/fonts/satoshi/Satoshi-Black.otf",
+            weight: "900",
+            style: "normal",
+        },
+    ],
+    variable: "--font-satoshi",
     display: "swap",
 })
 
@@ -28,11 +53,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body className={`${figtree.variable}`}>
-            <Theme appearance="light" accentColor="green" radius="full">
+        <body className={satoshi.variable}>
+            <Theme appearance="light" accentColor="lime" grayColor="sage" radius="medium">
                 <Providers>
                     <div className="flex flex-col min-h-screen overflow-x-hidden">
-                        <Header/>
+                        <ConditionalHeader/>
                         <main className="flex flex-grow w-full">
                             {children}
                         </main>

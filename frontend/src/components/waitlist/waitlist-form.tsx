@@ -71,7 +71,7 @@ export function WaitlistForm() {
             variant="classic"
             color="lime"
             disabled={isSubmitting}
-            className="whitespace-nowrap text-sm"
+            className="whitespace-nowrap text-sm rounded-full"
             style={{ borderRadius: '9999px', height: '36px', paddingLeft: '16px', paddingRight: '16px' }}
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}

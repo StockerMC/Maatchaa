@@ -1,6 +1,10 @@
 from google import genai
 import traceback
 import os
+import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_KEY"))
 
@@ -11,6 +15,20 @@ async def parse_video(video_url: str):
     try:
         if not video_url:
             return {"error": "video_url is required"}, 400
+
+        # Check if mock mode is enabled
+        use_mock = os.getenv("USE_MOCK_YOUTUBE", "false").lower() == "true"
+
+        if use_mock:
+            # Return mock analysis for testing
+            mock_analysis = {
+                "title_summary": "Product review and unboxing video",
+                "objects_actions": ["product showcase", "unboxing", "hands-on review"],
+                "aesthetic": "bright, clean, professional, modern",
+                "tone_vibe": "enthusiastic, informative, friendly",
+                "potential_categories": ["tech", "lifestyle", "reviews", "unboxing"]
+            }
+            return {"output": json.dumps(mock_analysis)}, 200
 
         response = client.models.generate_content(
             # model='models/gemini-2.5-flash',

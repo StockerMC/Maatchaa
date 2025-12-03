@@ -152,7 +152,7 @@ export default function PartnershipPrompt({ partnershipId }: PartnershipPromptPr
           <div className="text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-red-600 mb-2">Error</h1>
           <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={() => router.push('/dashboard')} variant="outline">
+          <Button onClick={() => router.push('/dashboard')} variant="soft">
             Go to Dashboard
           </Button>
         </div>
@@ -167,7 +167,7 @@ export default function PartnershipPrompt({ partnershipId }: PartnershipPromptPr
           <div className="text-6xl mb-4">🤷‍♂️</div>
           <h1 className="text-2xl font-bold text-gray-600 mb-2">Partnership Not Found</h1>
           <p className="text-gray-600 mb-4">The partnership you&apos;re looking for doesn&apos;t exist.</p>
-          <Button onClick={() => router.push('/dashboard')} variant="outline">
+          <Button onClick={() => router.push('/dashboard')} variant="soft">
             Go to Dashboard
           </Button>
         </div>
@@ -274,7 +274,7 @@ export default function PartnershipPrompt({ partnershipId }: PartnershipPromptPr
                   <Button
                     onClick={handleDeny}
                     disabled={processing}
-                    variant="outline"
+                    variant="soft"
                     className="flex-1 border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold py-4 text-lg rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {processing ? (
