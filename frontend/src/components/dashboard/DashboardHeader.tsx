@@ -5,30 +5,14 @@ import { Flex, Box, Text, Avatar, IconButton, Card, Badge } from "@radix-ui/them
 import { sage, red, blue } from "@radix-ui/colors";
 import { Bell, Search, Menu } from "lucide-react";
 
-// Sample notifications
-const sampleNotifications = [
-  {
-    id: 1,
-    title: "New Creator Match",
-    message: "@teawithsarah matched with MATCHA MATCHA Can",
-    time: "2 hours ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Partnership Accepted",
-    message: "@mindfulmixology accepted your Horii Shichimeien Matcha offer",
-    time: "5 hours ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Product Sync Complete",
-    message: "16 products successfully synced from Shopify",
-    time: "1 day ago",
-    unread: false,
-  },
-];
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  unread: boolean;
+  type: string;
+}
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -43,9 +27,10 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     shop_owner: string;
     logo_url?: string;
   } | null>(null);
-  const unreadCount = sampleNotifications.filter(n => n.unread).length;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Fetch shop info on mount
+  // Fetch shop info and notifications on mount
   useEffect(() => {
     const fetchShopInfo = async () => {
       try {
@@ -59,7 +44,36 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       }
     };
 
+    const fetchNotifications = async () => {
+      try {
+        // Use demo company ID (matches backend DEV_COMPANY_ID)
+        let companyId = localStorage.getItem("access_token");
+        if (!companyId) {
+          companyId = process.env.NEXT_PUBLIC_DEMO_COMPANY_ID || "";
+        }
+
+        if (!companyId) return;
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/notifications?company_id=${companyId}&limit=10`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data.notifications || []);
+          setUnreadCount(data.unread_count || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    };
+
     fetchShopInfo();
+    fetchNotifications();
+
+    // Refresh notifications every 60 seconds
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Generate initials from shop name
@@ -223,7 +237,14 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               </Box>
 
               <Flex direction="column" style={{ overflowY: "auto", flex: 1 }}>
-                {sampleNotifications.map((notification) => (
+                {notifications.length === 0 ? (
+                  <Box style={{ padding: "2rem", textAlign: "center" }}>
+                    <Text size="2" style={{ color: sage.sage11 }}>
+                      No notifications yet
+                    </Text>
+                  </Box>
+                ) : (
+                  notifications.map((notification) => (
                   <Box
                     key={notification.id}
                     style={{
@@ -264,7 +285,8 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                       </Text>
                     </Flex>
                   </Box>
-                ))}
+                ))
+                )}
               </Flex>
 
               <Box

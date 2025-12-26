@@ -2111,3 +2111,137 @@ def format_time_ago(timestamp):
             return f"{weeks} week{'s' if weeks != 1 else ''} ago"
     except Exception:
         return "Recently"
+
+
+@get("/notifications")
+async def get_notifications(request: Request):
+    """
+    Get notifications for a company based on recent activity
+
+    Query params:
+        - company_id: The company ID (required)
+        - limit: Number of notifications to return (default: 10)
+
+    Returns notifications for:
+        - New partnerships created
+        - Partnership status changes
+        - Product syncs completed
+    """
+    try:
+        assert supabase_client
+
+        company_id = request.query.get("company_id")
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        if not company_id:
+            return json({"error": "Missing company_id parameter"}, status=400)
+
+        limit_param = request.query.get("limit")
+        limit = int(limit_param[0] if isinstance(limit_param, list) else limit_param) if limit_param else 10
+
+        notifications = []
+
+        # Get recent partnerships (last 7 days)
+        from datetime import datetime, timezone, timedelta
+        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+
+        partnerships_result = await supabase_client.client.table("partnerships")\
+            .select("*")\
+            .eq("company_id", company_id)\
+            .gte("created_at", week_ago)\
+            .order("created_at", desc=True)\
+            .limit(limit)\
+            .execute()
+
+        # Create notifications for partnerships
+        for partnership in (partnerships_result.data or []):
+            # New partnership notification
+            if partnership.get("created_at"):
+                import html
+                creator = html.unescape(partnership.get("creator_handle") or partnership.get("creator_name", "Unknown"))
+                product_names = []
+                if partnership.get("matched_products"):
+                    products = partnership["matched_products"]
+                    if isinstance(products, list) and len(products) > 0:
+                        # Get first product name
+                        first_product = products[0]
+                        if isinstance(first_product, dict):
+                            product_names.append(first_product.get("title") or first_product.get("name", ""))
+                        elif isinstance(first_product, str):
+                            product_names.append(first_product)
+
+                product_text = product_names[0] if product_names else "your products"
+
+                # Determine notification type and message based on status
+                status = partnership.get("status", "to_contact")
+                if status == "active":
+                    notifications.append({
+                        "id": f"partnership-active-{partnership['id']}",
+                        "title": "Partnership Activated",
+                        "message": f"{creator} partnership is now active",
+                        "time": format_time_ago(partnership.get("activated_at") or partnership.get("updated_at")),
+                        "unread": True,
+                        "type": "partnership_active"
+                    })
+                elif status == "in_discussion":
+                    notifications.append({
+                        "id": f"partnership-discussion-{partnership['id']}",
+                        "title": "Partnership In Discussion",
+                        "message": f"{creator} is discussing partnership for {product_text}",
+                        "time": format_time_ago(partnership.get("discussion_started_at") or partnership.get("updated_at")),
+                        "unread": True,
+                        "type": "partnership_discussion"
+                    })
+                else:
+                    notifications.append({
+                        "id": f"partnership-new-{partnership['id']}",
+                        "title": "New Creator Match",
+                        "message": f"{creator} matched with {product_text}",
+                        "time": format_time_ago(partnership.get("created_at")),
+                        "unread": True,
+                        "type": "partnership_new"
+                    })
+
+        # Get product sync notifications
+        shop_result = await supabase_client.client.table("shopify_shops")\
+            .select("last_synced_at")\
+            .eq("company_id", company_id)\
+            .execute()
+
+        if shop_result.data and len(shop_result.data) > 0:
+            last_sync = shop_result.data[0].get("last_synced_at")
+            if last_sync:
+                # Get product count
+                products_result = await supabase_client.client.table("company_products")\
+                    .select("id", count="exact")\
+                    .eq("company_id", company_id)\
+                    .execute()
+
+                product_count = products_result.count or 0
+
+                notifications.append({
+                    "id": f"sync-{company_id}",
+                    "title": "Product Sync Complete",
+                    "message": f"{product_count} products successfully synced from Shopify",
+                    "time": format_time_ago(last_sync),
+                    "unread": False,
+                    "type": "product_sync"
+                })
+
+        # Sort by time (most recent first) and limit
+        notifications = sorted(
+            notifications,
+            key=lambda n: n.get("time", ""),
+            reverse=False  # "Just now" comes before "2 hours ago"
+        )[:limit]
+
+        return json({
+            "notifications": notifications,
+            "unread_count": len([n for n in notifications if n.get("unread")])
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return json({"error": str(e)}, status=500)
