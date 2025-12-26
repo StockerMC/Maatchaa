@@ -8,88 +8,146 @@ const NEGATIVE_COLOR = "#f81f1f";
 import { Users, Eye, Package, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+
+interface DashboardStats {
+  pending_matches: number;
+  active_partnerships: number;
+  total_reach: number;
+  products_count: number;
+}
+
+interface RecentMatch {
+  id: string;
+  creator: string;
+  action: string;
+  time: string;
+  status: string;
+}
+
+interface RecentActivity {
+  id: string;
+  action: string;
+  detail: string;
+  time: string;
+}
 
 export default function DashboardOverviewPage() {
-  // Mock data - replace with real data later
-  const stats = [
-    {
-      title: "Pending Matches",
-      value: "12",
-      changeNumber: "+3",
-      changeDesc: "this week",
-      icon: Clock,
-      color: amber.amber9,
-    },
-    {
-      title: "Active Partnerships",
-      value: "8",
-      changeNumber: "+2",
-      changeDesc: "this month",
-      icon: CheckCircle,
-      color: sage.sage9,
-    },
-    {
-      title: "Total Reach",
-      value: "2.4M",
-      changeNumber: "+18%",
-      changeDesc: "this month",
-      icon: Eye,
-      color: blue.blue9,
-    },
-    {
-      title: "Products Listed",
-      value: "47",
-      changeNumber: "",
-      changeDesc: "All synced",
-      icon: Package,
-      color: sage.sage10,
-    },
-  ];
+  const { data: session } = useSession();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentMatches, setRecentMatches] = useState<RecentMatch[]>([]);
+  const [recentActions, setRecentActions] = useState<RecentActivity[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentMatches = [
-    {
-      id: 1,
-      creator: "@cookingwithsarah",
-      action: "New creator match found",
-      time: "2 hours ago",
-      status: "pending",
-    },
-    {
-      id: 2,
-      creator: "@fitlifemike",
-      action: "Partnership confirmed",
-      time: "5 hours ago",
-      status: "confirmed",
-    },
-    {
-      id: 3,
-      creator: "@techreviewalex",
-      action: "Creator viewed your products",
-      time: "1 day ago",
-      status: "viewed",
-    },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Use demo company ID for now (matches DEV_COMPANY_ID in backend)
+        let companyId = localStorage.getItem("access_token");
 
-  const recentActions = [
-    {
-      id: 1,
-      action: "Product sync completed",
-      detail: "47 products updated",
-      time: "1 hour ago",
-    },
-    {
-      id: 2,
-      action: "New reel discovered",
-      detail: "Matcha morning routine by @teawithsarah",
-      time: "3 hours ago",
-    },
-    {
-      id: 3,
-      action: "Partnership request sent",
-      detail: "To @fitlifemike",
-      time: "Yesterday",
-    },
-  ];
+        // Fallback to demo company ID from env if not found
+        if (!companyId) {
+          companyId = process.env.NEXT_PUBLIC_DEMO_COMPANY_ID || "";
+          console.log("Using demo company ID from env");
+        }
+
+        console.log("Company ID:", companyId);
+        console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/dashboard/stats?company_id=${companyId}`;
+        console.log("Fetching from:", url);
+
+        const response = await fetch(url);
+        console.log("Response status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("API error:", errorText);
+          throw new Error(`Failed to fetch dashboard stats: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Dashboard data:", data);
+
+        setStats(data.stats);
+        setRecentMatches(data.recent_matches || []);
+        setRecentActions(data.recent_activity || []);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        // Set default empty data on error
+        setStats({
+          pending_matches: 0,
+          active_partnerships: 0,
+          total_reach: 0,
+          products_count: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Format numbers with commas
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M";
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + "K";
+    }
+    return num.toString();
+  };
+
+  const statsConfig = stats
+    ? [
+        {
+          title: "Pending Matches",
+          value: stats.pending_matches.toString(),
+          changeNumber: "",
+          changeDesc: "awaiting contact",
+          icon: Clock,
+          color: amber.amber9,
+        },
+        {
+          title: "Active Partnerships",
+          value: stats.active_partnerships.toString(),
+          changeNumber: "",
+          changeDesc: "currently active",
+          icon: CheckCircle,
+          color: sage.sage9,
+        },
+        {
+          title: "Total Reach",
+          value: formatNumber(stats.total_reach),
+          changeNumber: "",
+          changeDesc: "total views",
+          icon: Eye,
+          color: blue.blue9,
+        },
+        {
+          title: "Products Listed",
+          value: stats.products_count.toString(),
+          changeNumber: "",
+          changeDesc: "synced from Shopify",
+          icon: Package,
+          color: sage.sage10,
+        },
+      ]
+    : [];
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <Flex direction="column" gap="6" align="center" justify="center" style={{ minHeight: "400px" }}>
+          <Text size="4" style={{ color: sage.sage11 }}>
+            Loading dashboard...
+          </Text>
+        </Flex>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -106,7 +164,7 @@ export default function DashboardOverviewPage() {
 
         {/* Stats Cards */}
         <Flex gap="4" wrap="wrap">
-          {stats.map((stat) => {
+          {statsConfig.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card
