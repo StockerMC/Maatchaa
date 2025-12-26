@@ -357,6 +357,24 @@ def get_all_products_paginated(client: ShopifyAPIClient) -> List[Dict[str, Any]]
 
 # ==================== STANDALONE HELPER FUNCTIONS ====================
 
+async def get_dev_shop_info() -> Optional[Dict[str, Any]]:
+    """
+    Get dev shop credentials when in dev mode
+
+    Returns:
+        dict: Shop info with domain, access_token, and company_id
+    """
+    import os
+
+    if os.getenv("DEV_MODE") == "true":
+        return {
+            "shop_domain": os.getenv("DEV_SHOP_DOMAIN"),
+            "access_token": os.getenv("DEV_SHOPIFY_ACCESS_TOKEN"),
+            "company_id": os.getenv("DEV_COMPANY_ID")
+        }
+    return None
+
+
 async def get_access_token(company_id: str) -> Optional[str]:
     """
     Get active Shopify access token for a company
@@ -367,18 +385,27 @@ async def get_access_token(company_id: str) -> Optional[str]:
     Returns:
         str: Access token if found, None otherwise
     """
+    import os
+
+    # Development mode: bypass OAuth and use hardcoded token
+    if os.getenv("DEV_MODE") == "true":
+        dev_token = os.getenv("DEV_SHOPIFY_ACCESS_TOKEN")
+        if dev_token:
+            print(f"[DEV MODE] Using dev access token for company {company_id}")
+            return dev_token
+
     from utils.supabase import SupabaseClient
-    
+
     supabase_client = SupabaseClient()
     result = await supabase_client.client.table("shopify_oauth_tokens")\
         .select("access_token")\
         .eq("company_id", company_id)\
         .eq("is_active", True)\
         .execute()
-    
+
     if result.data and len(result.data) > 0:
         return result.data[0].get("access_token")
-    
+
     return None
 
 
