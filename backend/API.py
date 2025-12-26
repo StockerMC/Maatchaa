@@ -1286,9 +1286,18 @@ async def get_partnerships(request: Request):
 
         result = await query.execute()
 
+        # Decode HTML entities in video titles and creator names
+        import html
+        partnerships = result.data or []
+        for partnership in partnerships:
+            if partnership.get("video_title"):
+                partnership["video_title"] = html.unescape(partnership["video_title"])
+            if partnership.get("creator_name"):
+                partnership["creator_name"] = html.unescape(partnership["creator_name"])
+
         return json({
-            "partnerships": result.data or [],
-            "count": len(result.data) if result.data else 0
+            "partnerships": partnerships,
+            "count": len(partnerships)
         })
 
     except Exception as e:
@@ -1314,7 +1323,15 @@ async def get_partnership(partnership_id: str):
         if not result.data:
             return json({"error": "Partnership not found"}, status=404)
 
-        return json(result.data)
+        # Decode HTML entities in video title and creator name
+        import html
+        partnership = result.data
+        if partnership.get("video_title"):
+            partnership["video_title"] = html.unescape(partnership["video_title"])
+        if partnership.get("creator_name"):
+            partnership["creator_name"] = html.unescape(partnership["creator_name"])
+
+        return json(partnership)
 
     except Exception as e:
         import traceback
@@ -1385,15 +1402,18 @@ async def create_partnership(request: Request):
             )
 
         # Create partnership
+        import html
+        from datetime import datetime, timezone
+
         partnership_data = {
             "company_id": data["company_id"],
             "video_id": data.get("video_id"),
-            "creator_name": data["creator_name"],
+            "creator_name": html.unescape(data["creator_name"]),
             "creator_handle": data.get("creator_handle"),
             "creator_email": data.get("creator_email") or (contact_info.get("email") if contact_info else None),
             "creator_avatar": data.get("creator_avatar"),
             "creator_channel_url": data.get("creator_channel_url") or (contact_info.get("channel_url") if contact_info else None),
-            "video_title": data["video_title"],
+            "video_title": html.unescape(data["video_title"]),
             "video_url": data["video_url"],
             "video_thumbnail": data.get("video_thumbnail"),
             "matched_products": data.get("matched_products", []),
@@ -1401,7 +1421,7 @@ async def create_partnership(request: Request):
             "likes": data.get("likes", 0),
             "comments": data.get("comments", 0),
             "status": "to_contact",
-            "created_at": "now()"
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
 
         result = await supabase_client.client.table("partnerships")\
@@ -1460,15 +1480,19 @@ async def update_partnership(partnership_id: str, request: Request):
 
         # Status updates with timestamp tracking
         if "status" in data:
+            from datetime import datetime, timezone
+
             update_data["status"] = data["status"]
+            now = datetime.now(timezone.utc).isoformat()
+
             if data["status"] == "contacted":
-                update_data["contacted_at"] = "now()"
+                update_data["contacted_at"] = now
             elif data["status"] == "in_discussion":
-                update_data["discussion_started_at"] = "now()"
+                update_data["discussion_started_at"] = now
             elif data["status"] == "active":
-                update_data["activated_at"] = "now()"
+                update_data["activated_at"] = now
             elif data["status"] == "closed":
-                update_data["closed_at"] = "now()"
+                update_data["closed_at"] = now
 
         # Email fields
         if "creator_email" in data:
@@ -1476,7 +1500,8 @@ async def update_partnership(partnership_id: str, request: Request):
         if "email_sent" in data:
             update_data["email_sent"] = data["email_sent"]
             if data["email_sent"]:
-                update_data["last_contact_date"] = "now()"
+                from datetime import datetime, timezone
+                update_data["last_contact_date"] = datetime.now(timezone.utc).isoformat()
         if "email_draft" in data:
             update_data["email_draft"] = data["email_draft"]
 

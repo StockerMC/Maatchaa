@@ -513,6 +513,24 @@ export default function PartnershipsPage() {
         throw new Error("Failed to update partnership status");
       }
 
+      const result = await response.json();
+      console.log("Partnership updated:", result);
+
+      // Update with the actual data from backend
+      if (result.partnership) {
+        const updated = result.partnership;
+        setPartnerships(partnerships.map(p =>
+          p.id === partnershipId ? {
+            ...p,
+            status: updated.status,
+            contactedAt: updated.contacted_at,
+            discussionStartedAt: updated.discussion_started_at,
+            activatedAt: updated.activated_at,
+            closedAt: updated.closed_at,
+          } : p
+        ));
+      }
+
       toast.success("Partnership status updated");
     } catch (error) {
       console.error("Error updating partnership:", error);
