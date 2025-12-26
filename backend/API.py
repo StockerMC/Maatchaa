@@ -1917,3 +1917,172 @@ async def get_reel_interactions(request: Request):
         import traceback
         traceback.print_exc()
         return json({"error": str(e)}, status=500)
+
+
+@get("/dashboard/stats")
+async def get_dashboard_stats(request: Request):
+    """
+    Get comprehensive dashboard statistics for a company
+
+    Query params:
+        - company_id: The company ID (required)
+
+    Returns:
+        - pending_matches: Count of partnerships in 'to_contact' or 'contacted' status
+        - active_partnerships: Count of partnerships in 'active' status
+        - total_reach: Sum of views from all partnerships
+        - products_count: Total number of products synced
+        - recent_matches: Last 3 partnerships created
+        - recent_activity: Recent activity log entries
+    """
+    try:
+        assert supabase_client
+
+        company_id = request.query.get("company_id")
+        if isinstance(company_id, list):
+            company_id = company_id[0] if company_id else None
+
+        if not company_id:
+            return json({"error": "Missing company_id parameter"}, status=400)
+
+        # Get all partnerships for this company
+        partnerships_result = await supabase_client.client.table("partnerships")\
+            .select("*")\
+            .eq("company_id", company_id)\
+            .execute()
+
+        partnerships = partnerships_result.data or []
+
+        # Calculate stats
+        pending_matches = len([p for p in partnerships if p.get("status") in ["to_contact", "contacted"]])
+        active_partnerships = len([p for p in partnerships if p.get("status") == "active"])
+        total_reach = sum(p.get("views", 0) for p in partnerships)
+
+        # Get products count
+        products_result = await supabase_client.client.table("company_products")\
+            .select("id", count="exact")\
+            .eq("company_id", company_id)\
+            .execute()
+
+        products_count = products_result.count or 0
+
+        # Get recent matches (last 3 partnerships)
+        recent_partnerships = sorted(
+            partnerships,
+            key=lambda p: p.get("created_at", ""),
+            reverse=True
+        )[:3]
+
+        recent_matches = [
+            {
+                "id": p.get("id"),
+                "creator": p.get("creator_handle") or p.get("creator_name", "Unknown Creator"),
+                "action": get_partnership_action(p),
+                "time": format_time_ago(p.get("created_at")),
+                "status": p.get("status", "pending")
+            }
+            for p in recent_partnerships
+        ]
+
+        # Get recent activity from partnership updates
+        recent_activity = []
+
+        # Add product sync activity if available
+        shop_result = await supabase_client.client.table("shopify_shops")\
+            .select("last_synced_at")\
+            .eq("company_id", company_id)\
+            .execute()
+
+        if shop_result.data and len(shop_result.data) > 0:
+            last_sync = shop_result.data[0].get("last_synced_at")
+            if last_sync:
+                recent_activity.append({
+                    "id": "sync-1",
+                    "action": "Product sync completed",
+                    "detail": f"{products_count} products updated",
+                    "time": format_time_ago(last_sync)
+                })
+
+        # Add recent partnership actions
+        for p in recent_partnerships[:2]:
+            if p.get("status") == "active":
+                recent_activity.append({
+                    "id": f"partnership-{p.get('id')}",
+                    "action": "Partnership activated",
+                    "detail": f"With {p.get('creator_handle') or p.get('creator_name', 'creator')}",
+                    "time": format_time_ago(p.get("activated_at") or p.get("updated_at"))
+                })
+            elif p.get("email_sent"):
+                recent_activity.append({
+                    "id": f"email-{p.get('id')}",
+                    "action": "Partnership request sent",
+                    "detail": f"To {p.get('creator_handle') or p.get('creator_name', 'creator')}",
+                    "time": format_time_ago(p.get("contacted_at") or p.get("created_at"))
+                })
+
+        return json({
+            "stats": {
+                "pending_matches": pending_matches,
+                "active_partnerships": active_partnerships,
+                "total_reach": total_reach,
+                "products_count": products_count
+            },
+            "recent_matches": recent_matches,
+            "recent_activity": recent_activity[:3]  # Limit to 3 most recent
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return json({"error": str(e)}, status=500)
+
+
+def get_partnership_action(partnership):
+    """Generate action text based on partnership status"""
+    status = partnership.get("status", "pending")
+
+    if status == "active":
+        return "Partnership confirmed"
+    elif status == "in_discussion":
+        return "In active discussion"
+    elif status == "contacted":
+        return "Creator contacted"
+    else:
+        return "New creator match found"
+
+
+def format_time_ago(timestamp):
+    """Format timestamp as relative time (e.g., '2 hours ago')"""
+    if not timestamp:
+        return "Recently"
+
+    from datetime import datetime, timezone
+
+    try:
+        if isinstance(timestamp, str):
+            # Parse ISO format timestamp
+            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+        else:
+            dt = timestamp
+
+        now = datetime.now(timezone.utc)
+        diff = now - dt
+
+        seconds = diff.total_seconds()
+
+        if seconds < 60:
+            return "Just now"
+        elif seconds < 3600:
+            minutes = int(seconds / 60)
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif seconds < 86400:
+            hours = int(seconds / 3600)
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif seconds < 604800:
+            days = int(seconds / 86400)
+            return f"{days} day{'s' if days != 1 else ''} ago"
+        else:
+            weeks = int(seconds / 604800)
+            return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+    except Exception:
+        return "Recently"
