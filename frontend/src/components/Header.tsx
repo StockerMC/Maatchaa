@@ -135,7 +135,7 @@ export default function Header() {
                     <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0, height: '100%' }}>
                         <NavigationMenu.Link asChild>
                             <Link
-                                href="/onboarding"
+                                href="/dashboard"
                                 className={cn(
                                     "transition-colors duration-500",
                                     scrolledState ? "text-black hover:text-gray-700" : "text-white hover:text-white/80"
