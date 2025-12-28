@@ -1,21 +1,48 @@
-import { NextRequest, NextResponse } from "next/server";
-
-const products = [
-  { id: 1, title: "The Classic Tee", price: "29.99", image_url: "/images/img1.png" },
-  { id: 2, title: "The Minimalist Hoodie", price: "79.99", image_url: "/images/img2.png" },
-  { id: 3, title: "The Everyday Crewneck", price: "49.99", image_url: "/images/img3.png" },
-  { id: 4, title: "The Adventure Backpack", price: "99.99", image_url: "/images/img4.png" },
-];
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const shop_name = searchParams.get("shop_name");
+  try {
+    const { searchParams } = new URL(req.url);
+    const companyId = searchParams.get('company_id');
+    const shopName = searchParams.get('shop_name'); // Legacy support
 
-  if (!shop_name) {
-    return NextResponse.json({ error: "Shop name is required" }, { status: 400 });
+    // Support both company_id and shop_name parameters
+    if (!companyId && !shopName) {
+      return NextResponse.json(
+        { error: 'Missing company_id or shop_name parameter' },
+        { status: 400 }
+      );
+    }
+
+    let query = supabaseAdmin
+      .from('company_products')
+      .select('*')
+      .order('synced_at', { ascending: false });
+
+    if (companyId) {
+      query = query.eq('company_id', companyId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching products:', error);
+      return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      products: data || [],
+      count: data?.length || 0,
+    });
+  } catch (error) {
+    console.error('Error in products endpoint:', error);
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
-
-  // In a real app, you'd fetch products for the given shop.
-  // For this demo, we'll return the same list for any shop.
-  return NextResponse.json({ products }, { status: 200 });
 }

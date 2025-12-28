@@ -54,8 +54,7 @@ function ReelsPageContent() {
                 const user = getCurrentUser();
 
                 // Fetch reel interactions (dismissed/partnered) for this company
-                const interactionsUrl = getApiUrl(`/reels/interactions?company_id=${user.companyId}`);
-                const interactionsResponse = await fetch(interactionsUrl);
+                const interactionsResponse = await fetch(`/api/reels/interactions?company_id=${user.companyId}`);
                 const interactionsData = await interactionsResponse.json();
                 const interactedVideoIds = new Set(
                     (interactionsData.interactions || []).map((i: VideoInteraction) => i.video_id)
@@ -66,7 +65,7 @@ function ReelsPageContent() {
                 let url: string;
                 if (productId) {
                     // Fetch creators for specific product
-                    url = getApiUrl(`/products/${productId}/creators`);
+                    url = `/api/products/${productId}/creators`;
                     console.log("Fetching creators for product:", productId);
                 } else {
                     // Fetch all creator videos (TODO: add endpoint for this)

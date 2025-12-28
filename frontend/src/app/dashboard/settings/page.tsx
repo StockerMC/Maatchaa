@@ -55,7 +55,7 @@ function SettingsContent() {
   const checkShopifyStatus = async () => {
     try {
       const response = await fetch(
-        getApiUrl(`/shopify/status?company_id=${companyId}`)
+        `/api/shopify/status?company_id=${companyId}`
       );
       const data = await response.json();
 
@@ -82,9 +82,8 @@ function SettingsContent() {
 
     if (!shopName) return;
 
-    // Redirect to Python backend OAuth endpoint
-    const oauthUrl = getApiUrl(`/shopify/install?shop=${encodeURIComponent(shopName)}&company_id=${companyId}`);
-    window.location.href = oauthUrl;
+    // Redirect to Next.js API OAuth endpoint
+    window.location.href = `/api/shopify/install?shop=${encodeURIComponent(shopName)}&company_id=${companyId}`;
   };
 
   const handleDisconnect = async () => {
@@ -93,7 +92,7 @@ function SettingsContent() {
     }
 
     try {
-      await fetch(getApiUrl('/shopify/disconnect'), {
+      await fetch('/api/shopify/disconnect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ company_id: companyId }),

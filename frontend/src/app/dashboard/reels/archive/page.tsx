@@ -42,8 +42,7 @@ export default function ReelsArchivePage() {
             console.log("Fetching interactions for company:", user.companyId);
 
             // Fetch interactions
-            const interactionsUrl = getApiUrl(`/reels/interactions?company_id=${user.companyId}`);
-            const response = await fetch(interactionsUrl);
+            const response = await fetch(`/api/reels/interactions?company_id=${user.companyId}`);
             const data = await response.json();
 
             console.log("Interactions response:", data);

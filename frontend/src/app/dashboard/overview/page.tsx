@@ -53,9 +53,8 @@ export default function DashboardOverviewPage() {
         }
 
         console.log("Company ID:", companyId);
-        console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/dashboard/stats?company_id=${companyId}`;
+        const url = `/api/dashboard/stats?company_id=${companyId}`;
         console.log("Fetching from:", url);
 
         const response = await fetch(url);

@@ -34,7 +34,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   useEffect(() => {
     const fetchShopInfo = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shopify/shop-info`);
+        const response = await fetch('/api/shopify/shop-info');
         if (response.ok) {
           const data = await response.json();
           setShopInfo(data);
@@ -55,7 +55,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         if (!companyId) return;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/notifications?company_id=${companyId}&limit=10`
+          `/api/notifications?company_id=${companyId}&limit=10`
         );
 
         if (response.ok) {

@@ -337,7 +337,7 @@ export default function PartnershipsPage() {
     const fetchShopInfo = async () => {
       try {
         const user = getCurrentUser();
-        const response = await fetch(getApiUrl(`/shopify/shop-info?company_id=${user.companyId}`));
+        const response = await fetch(`/api/shopify/shop-info?company_id=${user.companyId}`);
         if (response.ok) {
           const data = await response.json();
           setShopName(data.shop_name || "Our Company");
@@ -355,9 +355,8 @@ export default function PartnershipsPage() {
     const fetchPartnerships = async () => {
       try {
         const user = getCurrentUser();
-        const apiUrl = getApiUrl(`/partnerships?company_id=${user.companyId}`);
 
-        const response = await fetch(apiUrl);
+        const response = await fetch(`/api/partnerships?company_id=${user.companyId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch partnerships");
         }
@@ -500,8 +499,7 @@ export default function PartnershipsPage() {
 
     // Update via API
     try {
-      const apiUrl = getApiUrl(`/partnerships/${partnershipId}`);
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`/api/partnerships/${partnershipId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -841,8 +839,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
     setSelectedPartnership(partnership);
 
     try {
-      const apiUrl = getApiUrl(`/partnerships/${partnership.id}/generate-affiliate`);
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`/api/partnerships/${partnership.id}/generate-affiliate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -886,8 +883,7 @@ Creator: \\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_ Date: \
 
     try {
       // Send email via API
-      const sendEmailUrl = getApiUrl(`/partnerships/${selectedPartnership.id}/send-email`);
-      const response = await fetch(sendEmailUrl, {
+      const response = await fetch(`/api/partnerships/${selectedPartnership.id}/send-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
