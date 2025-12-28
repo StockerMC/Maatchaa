@@ -84,8 +84,7 @@ export default function CreatorPartnershipPage() {
 
   const fetchPartnership = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/partnerships/${partnershipId}`);
+      const response = await fetch(`/api/partnerships/${partnershipId}`);
 
       if (!response.ok) {
         throw new Error("Partnership not found");
@@ -95,7 +94,7 @@ export default function CreatorPartnershipPage() {
       setPartnership(data);
 
       // Fetch shop info
-      const shopResponse = await fetch(`${apiUrl}/shopify/shop-info?company_id=${data.company_id}`);
+      const shopResponse = await fetch(`/api/shopify/shop-info?company_id=${data.company_id}`);
       if (shopResponse.ok) {
         const shopData = await shopResponse.json();
         setShopInfo(shopData);
@@ -114,8 +113,7 @@ export default function CreatorPartnershipPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/partnerships/${partnershipId}`, {
+      const response = await fetch(`/api/partnerships/${partnershipId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -135,8 +133,7 @@ export default function CreatorPartnershipPage() {
 
   const handleDecline = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/partnerships/${partnershipId}`, {
+      const response = await fetch(`/api/partnerships/${partnershipId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "closed" }),
@@ -158,10 +155,8 @@ export default function CreatorPartnershipPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
       // Mark contract as signed
-      const contractResponse = await fetch(`${apiUrl}/partnerships/${partnershipId}`, {
+      const contractResponse = await fetch(`/api/partnerships/${partnershipId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +168,7 @@ export default function CreatorPartnershipPage() {
       if (!contractResponse.ok) throw new Error("Failed to sign contract");
 
       // Generate affiliate link
-      const affiliateResponse = await fetch(`${apiUrl}/partnerships/${partnershipId}/generate-affiliate`, {
+      const affiliateResponse = await fetch(`/api/partnerships/${partnershipId}/generate-affiliate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -187,7 +182,7 @@ export default function CreatorPartnershipPage() {
       if (!affiliateResponse.ok) throw new Error("Failed to generate affiliate link");
 
       // Activate partnership
-      await fetch(`${apiUrl}/partnerships/${partnershipId}`, {
+      await fetch(`/api/partnerships/${partnershipId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "active" }),
@@ -504,10 +499,8 @@ export default function CreatorPartnershipPage() {
                   style={{ background: green.green9, color: "white", cursor: "pointer" }}
                   onClick={async () => {
                     try {
-                      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
                       // Retry affiliate link generation
-                      const affiliateResponse = await fetch(`${apiUrl}/partnerships/${partnershipId}/generate-affiliate`, {
+                      const affiliateResponse = await fetch(`/api/partnerships/${partnershipId}/generate-affiliate`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -521,7 +514,7 @@ export default function CreatorPartnershipPage() {
                       if (!affiliateResponse.ok) throw new Error("Failed to generate affiliate link");
 
                       // Activate partnership
-                      await fetch(`${apiUrl}/partnerships/${partnershipId}`, {
+                      await fetch(`/api/partnerships/${partnershipId}`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ status: "active" }),

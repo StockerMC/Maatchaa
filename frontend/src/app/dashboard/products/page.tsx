@@ -52,7 +52,7 @@ function ProductsPageContent() {
       const companyId = user.companyId;
 
       const response = await fetch(
-        getApiUrl(`/products?company_id=${companyId}`)
+        `/api/products?company_id=${companyId}`
       );
 
       if (!response.ok) {
