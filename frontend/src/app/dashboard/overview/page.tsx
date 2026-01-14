@@ -151,6 +151,20 @@ export default function DashboardOverviewPage() {
   return (
     <DashboardLayout>
       <Flex direction="column" gap="6">
+        {/* Demo Note */}
+        <Box
+          style={{
+            backgroundColor: blue.blue3,
+            border: `1px solid ${blue.blue6}`,
+            borderRadius: "8px",
+            padding: "0.75rem 1rem",
+          }}
+        >
+          <Text size="2" style={{ color: blue.blue11 }}>
+            This is a demo dashboard showcasing Maatchaa&apos;s features and capabilities
+          </Text>
+        </Box>
+
         {/* Header */}
         <Box>
           <Text size="8" weight="bold">

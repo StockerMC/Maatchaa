@@ -43,7 +43,7 @@ export default function HomePage() {
                         </p>
                         <Button variant="classic" color="lime" size="4" asChild
                                 style={{ backgroundColor: 'var(--lime-10)', borderRadius:'30px'}}>
-                            <Link href="/get-started" className="flex items-center gap-2">
+                            <Link href="/dashboard/overview" className="flex items-center gap-2">
                                 Get Started
                                 <ArrowRightIcon width="18" height="18" />
                             </Link>
