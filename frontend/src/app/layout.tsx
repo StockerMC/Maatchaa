@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Theme } from '@radix-ui/themes'
 import ConditionalHeader from "@/components/ConditionalHeader"
 import "./globals.css"
@@ -68,6 +69,7 @@ export default function RootLayout({
             {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
                 <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
             )}
+            <SpeedInsights />
         </body>
         </html>
     )
