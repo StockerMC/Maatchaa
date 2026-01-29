@@ -160,9 +160,9 @@ export default function DashboardOverviewPage() {
             padding: "0.75rem 1rem",
           }}
         >
-          <Text size="2" style={{ color: blue.blue11 }}>
-            This is a demo dashboard showcasing Maatchaa&apos;s features and capabilities
-          </Text>
+            <Text size="2" style={{ color: blue.blue11 }}>
+            This is a dashboard for a demo store showcasing Maatchaa&apos;s features and capabilities
+            </Text>
         </Box>
 
         {/* Header */}
