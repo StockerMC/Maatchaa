@@ -1,5 +1,3 @@
-//FIXME: There's a weird bug that occurs on refresh where the Waitlist button briefly flashes the wrong style on initial scroll. Need to investigate further.
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -44,26 +42,23 @@ export default function Header() {
     // Use mounted state to prevent hydration mismatch
     const scrolledState = mounted && isScrolled
 
-    // Memoize button style to prevent recreating object on every render
+    // Static button styles - dynamic color/bg handled via CSS classes to avoid re-render glitch
     const buttonStyle = useMemo(() => ({
-        height: '34px', // Adjusted height for better vertical balance
-        padding: '0 14px', // Increased horizontal padding for more breathing room
-        margin: '0 1px', // Horizontal margin - adjust this value to change spacing around the button
+        height: '34px',
+        padding: '0 14px',
+        margin: '0 1px',
         fontSize: '14px',
         fontWeight: 600,
         letterSpacing: '0.3px',
-        borderRadius: '18px', // Adjusted to ensure perfect rounding
+        borderRadius: '18px',
         border: 'none',
         boxSizing: 'border-box' as const,
-        transition: 'all 500ms ease-in-out',
         cursor: 'pointer',
-        color: scrolledState ? '#000000' : '#ffffff',
-        backgroundColor: scrolledState ? 'var(--lime-10)' : 'transparent', // Made background fully transparent when not scrolled
         boxShadow: 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-    }), [scrolledState])
+    }), [])
 
     const linkStyle = useMemo(() => ({
         padding: '0 18px',
@@ -150,6 +145,12 @@ export default function Header() {
                     <NavigationMenu.Item style={{ display: 'flex', alignItems: 'center', margin: 0, padding: 0, height: '100%' }}>
                         <button
                             onClick={handleWaitlistClick}
+                            className={cn(
+                                "transition-all duration-500",
+                                scrolledState
+                                    ? "text-black bg-[var(--lime-10)]"
+                                    : "text-white bg-transparent"
+                            )}
                             style={buttonStyle}
                         >
                             Waitlist
