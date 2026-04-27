@@ -54,7 +54,7 @@ app = Application()
 # Configure CORS
 app.use_cors(
     allow_methods="GET POST PUT PATCH DELETE OPTIONS",
-    allow_origins="*",  # In production, specify exact origins
+    allow_origins="https://maatchaa.vercel.app http://localhost:3000",
     allow_headers="*",
     allow_credentials=True,
     max_age=86400  # Cache preflight for 24 hours
