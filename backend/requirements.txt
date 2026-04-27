@@ -8,3 +8,6 @@ google-api-python-client
 google-genai
 Pillow
 google-generativeai
+
+# Redis caching
+httpx>=0.25.0
