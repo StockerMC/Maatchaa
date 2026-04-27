@@ -22,6 +22,33 @@ from utils.shopify_oauth import (
 )
 from utils.shopify_api import ShopifyAPIClient
 
+# Redis caching and rate limiting
+from utils.redis_client import (
+    redis_client,
+    cache_response,
+    invalidate_cache,
+    youtube_limiter,
+    gemini_limiter,
+    cohere_limiter,
+    DistributedLock,
+)
+
+# Job queue for background tasks
+from jobs.worker import enqueue_job, close_pool as close_job_pool
+from jobs.tasks import (
+    discover_creators_job,
+    sync_shopify_products_job,
+    send_email_job,
+)
+
+# Prometheus metrics
+from utils.metrics import (
+    get_metrics,
+    get_metrics_content_type,
+    update_quota_metrics,
+    track_request,
+)
+
 app = Application()
 
 # Configure CORS
@@ -54,8 +81,42 @@ async def health_check():
     """Health check endpoint"""
     return json({
         "status": "healthy",
-        "service": "maatchaa-api"
+        "service": "maatchaa-api",
+        "redis": "connected" if redis_client.is_configured else "not_configured"
     })
+
+
+@get("/rate-limits")
+async def get_rate_limits():
+    """
+    Get current rate limit status for all external APIs.
+    Useful for monitoring quota usage.
+    """
+    return json({
+        "youtube": await youtube_limiter.get_usage(),
+        "gemini": await gemini_limiter.get_usage(),
+        "cohere": await cohere_limiter.get_usage(),
+    })
+
+
+@get("/metrics")
+async def metrics_endpoint():
+    """
+    Prometheus metrics endpoint.
+
+    Exposes metrics for scraping by Prometheus/Grafana.
+    Includes API latency, request counts, external API usage, and more.
+    """
+    from blacksheep import Response, Content
+
+    # Update quota metrics before generating output
+    await update_quota_metrics()
+
+    return Response(
+        status=200,
+        headers=[(b"Content-Type", get_metrics_content_type().encode())],
+        content=Content(get_metrics_content_type().encode(), get_metrics())
+    )
 
 @app.on_stop
 async def on_stop(application: Application):
@@ -64,6 +125,14 @@ async def on_stop(application: Application):
     if supabase_client:
         await supabase_client.close()
         print("✅ SupabaseClient closed")
+
+    # Close Redis client
+    await redis_client.close()
+    print("✅ Redis client closed")
+
+    # Close job queue pool
+    await close_job_pool()
+    print("✅ Job queue pool closed")
 
 # Shopify App landing page
 @get("/")
@@ -734,13 +803,19 @@ async def sync_products_background(shop: str, access_token: str, company_id: str
 
         print(f"✅ [Background] Product sync complete for {shop}")
 
-        # Trigger immediate creator discovery
+        # Trigger immediate creator discovery via job queue
         try:
+            await enqueue_job(
+                discover_creators_job,
+                company_id=company_id,
+                shop_domain=shop
+            )
+            print(f"🚀 [Background] Enqueued creator discovery job for {shop}")
+        except Exception as discovery_error:
+            # Fallback to fire-and-forget
+            print(f"⚠️  [Background] Job queue unavailable, using fallback: {discovery_error}")
             from background_worker import trigger_immediate_discovery
             asyncio.create_task(trigger_immediate_discovery(company_id, shop))
-            print(f"🚀 [Background] Triggered immediate creator discovery for {shop}")
-        except Exception as discovery_error:
-            print(f"⚠️  [Background] Failed to trigger discovery: {discovery_error}")
 
     except Exception as sync_error:
         print(f"❌ [Background] Product sync failed: {sync_error}")
@@ -869,9 +944,20 @@ async def shopify_callback(request: Request):
             print(f"Warning: Failed to create uninstall webhook: {webhook_error}")
             # Don't fail the OAuth flow if webhook creation fails
 
-        # Trigger product sync in background (don't block redirect)
-        print(f"🚀 Starting background product sync for {shop}...")
-        asyncio.create_task(sync_products_background(shop, access_token, company_id))
+        # Trigger product sync via job queue (survives server restarts)
+        print(f"🚀 Enqueueing background product sync for {shop}...")
+        try:
+            await enqueue_job(
+                sync_shopify_products_job,
+                shop=shop,
+                access_token=access_token,
+                company_id=company_id
+            )
+            print(f"✅ Product sync job enqueued for {shop}")
+        except Exception as job_error:
+            # Fallback to fire-and-forget if job queue unavailable
+            print(f"⚠️  Job queue unavailable, using fallback: {job_error}")
+            asyncio.create_task(sync_products_background(shop, access_token, company_id))
 
         # Redirect immediately (don't wait for product sync)
         print(f"[Redirect] Redirecting user to dashboard immediately")
@@ -1231,15 +1317,26 @@ async def trigger_discovery(request: Request):
         if not company_id:
             return json({"error": "company_id is required"}, status=400)
 
-        # Import and trigger discovery in background
-        from background_worker import trigger_immediate_discovery
-
-        # Run discovery in background (don't wait for it to complete)
-        asyncio.create_task(trigger_immediate_discovery(company_id, shop_domain))
+        # Enqueue discovery job (survives server restarts)
+        job_id = None
+        try:
+            job = await enqueue_job(
+                discover_creators_job,
+                company_id=company_id,
+                shop_domain=shop_domain
+            )
+            job_id = job.job_id if job else None
+            print(f"✅ Discovery job enqueued: {job_id}")
+        except Exception as job_error:
+            # Fallback to fire-and-forget if job queue unavailable
+            print(f"⚠️  Job queue unavailable, using fallback: {job_error}")
+            from background_worker import trigger_immediate_discovery
+            asyncio.create_task(trigger_immediate_discovery(company_id, shop_domain))
 
         return json({
             "message": "Discovery triggered successfully",
             "company_id": company_id,
+            "job_id": job_id,
             "status": "processing"
         })
 
