@@ -13,7 +13,7 @@ export function getCurrentUser() {
   return {
     id: 'user-123',
     email: 'user@example.com',
-    companyId: '550e8400-e29b-41d4-a716-446655440000', // Replace with actual company ID from database
+    companyId: process.env.NEXT_PUBLIC_DEMO_COMPANY_ID || 'bbcd5209-93ed-4b50-a25a-fe3d9c67a909',
     name: 'John Doe',
   };
 }

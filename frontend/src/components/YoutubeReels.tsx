@@ -5,6 +5,7 @@ import Image from "next/image";
 import { IconButton, Card, Text, Theme } from "@radix-ui/themes";
 import { sage, lime } from "@radix-ui/colors";
 import { supabase } from "@/lib/supabase";
+import { fetchWithFallback } from "@/lib/api";
 import toast from 'react-hot-toast';
 import { X, Check, ExternalLink, Info, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -182,8 +183,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
             const currentReel = reelsList[index];
 
             // Record dismissal interaction
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            const response = await fetch(`${apiUrl}/reels/interactions`, {
+            const response = await fetchWithFallback('/reels/interactions', '/api/reels/interactions', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -258,8 +258,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
             })) || [];
 
             // Create partnership via API
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            const response = await fetch(`${apiUrl}/partnerships`, {
+            const response = await fetchWithFallback('/partnerships', '/api/partnerships', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -305,7 +304,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
             }
 
             // Record partnered interaction
-            const interactionResponse = await fetch(`${apiUrl}/reels/interactions`, {
+            const interactionResponse = await fetchWithFallback('/reels/interactions', '/api/reels/interactions', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

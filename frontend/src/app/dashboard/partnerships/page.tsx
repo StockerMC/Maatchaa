@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, Flex, Text, Box, Tabs, Badge, Button, Dialog, TextField, TextArea, Avatar, AlertDialog } from "@radix-ui/themes";
 import { getCurrentUser, getApiUrl } from "@/lib/auth";
+import { fetchWithFallback } from "@/lib/api";
 import toast from "react-hot-toast";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -693,8 +694,10 @@ export default function PartnershipsPage() {
 
     // Try to fetch creator's email from API
     try {
-      const contactInfoUrl = getApiUrl(`/partnerships/${partnership.id}/contact-info`);
-      const contactResponse = await fetch(contactInfoUrl);
+      const contactResponse = await fetchWithFallback(
+        `/partnerships/${partnership.id}/contact-info`,
+        `/api/partnerships/${partnership.id}/contact-info`
+      );
       if (contactResponse.ok) {
         const contactData = await contactResponse.json();
         setToEmail(contactData.email || "");

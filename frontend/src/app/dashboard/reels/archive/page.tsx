@@ -112,8 +112,6 @@ export default function ReelsArchivePage() {
     const handleUnarchive = async (videoId: string) => {
         try {
             const user = getCurrentUser();
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
             // Delete the interaction to "unarchive"
             const { error } = await supabase
                 .from("reel_interactions")

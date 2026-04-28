@@ -33,9 +33,12 @@ export default function GetStartedPage() {
       // Generate a proper UUID v4 for temporary company ID
       const tempCompanyId = crypto.randomUUID();
       
-      // Call backend to get redirect URL
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/shopify/install?shop=${encodeURIComponent(cleanShopName)}&company_id=${tempCompanyId}`);
+      // Call backend to get redirect URL (falls back to Next.js API route if backend is down)
+      const { fetchWithFallback } = await import("@/lib/api");
+      const response = await fetchWithFallback(
+        `/shopify/install?shop=${encodeURIComponent(cleanShopName)}&company_id=${tempCompanyId}`,
+        `/api/shopify/install?shop=${encodeURIComponent(cleanShopName)}&company_id=${tempCompanyId}`
+      );
       
       if (!response.ok) {
         const errorData = await response.json();

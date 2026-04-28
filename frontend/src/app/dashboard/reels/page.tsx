@@ -181,30 +181,33 @@ function ReelsPageContent() {
                     return;
                 }
                 
-                // Trigger ingestion
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+                if (!backendUrl) {
+                    console.log("Backend URL not configured, skipping ingestion");
+                    return;
+                }
+
                 setIsIngesting(true);
                 console.log("No shorts found, triggering ingestion for:", shop_name);
-                
-                // Update last_ingest_attempt timestamp
+
                 await supabase
                     .from("companies")
                     .update({ last_ingest_attempt: now.toISOString() })
                     .eq("shop_name", shop_name);
-                
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ingest`, {
+
+                const response = await fetch(`${backendUrl}/ingest`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({ shop_url: shop_name, access_token: company.access_token }),
                 });
-                
+
                 if (response.ok) {
                     console.log("Ingestion triggered successfully");
-                    // Optionally refetch data after a delay to see if new shorts were generated
                     setTimeout(() => {
                         fetchData();
-                    }, 5000); // Wait 5 seconds then refetch
+                    }, 5000);
                 } else {
                     console.error("Failed to trigger ingestion:", response.statusText);
                 }

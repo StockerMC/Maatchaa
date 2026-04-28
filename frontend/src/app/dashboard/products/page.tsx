@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { getCurrentUser, getApiUrl } from "@/lib/auth";
+import { fetchWithFallback } from "@/lib/api";
 
 interface Product {
   id: string;
@@ -79,8 +80,9 @@ function ProductsPageContent() {
       // TODO: Get actual shop_domain from database or session
       const shopDomain = "matchamatcha.ca";
 
-      const response = await fetch(
-        getApiUrl("/products/resync"),
+      const response = await fetchWithFallback(
+        "/products/resync",
+        "/api/products/resync",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
