@@ -2,7 +2,7 @@
 
 AI-powered sponsorship matching for YouTube Shorts. Connects Shopify merchants with YouTube creators automatically.
 
-🏆 **Hack the North 2025 Finalist** · [Live Demo](https://maatchaa.vercel.app)
+🏆 **Hack the North 2025 Finalist** · [Live Demo](https://www.maatchaa.co)
 
 ## The Problem
 
