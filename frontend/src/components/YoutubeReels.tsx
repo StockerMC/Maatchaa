@@ -42,6 +42,23 @@ interface ProductMatchData {
     };
 }
 
+// Handles youtube.com/shorts/ID, youtube.com/watch?v=ID, youtu.be/ID, and /embed/ID.
+function extractYouTubeId(url: string): string {
+    if (!url) return "";
+    const patterns = [
+        /youtube\.com\/shorts\/([^?&/]+)/,
+        /[?&]v=([^?&]+)/,
+        /youtu\.be\/([^?&/]+)/,
+        /youtube(?:-nocookie)?\.com\/embed\/([^?&/]+)/,
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    if (/^[\w-]{11}$/.test(url)) return url; // bare id
+    return "";
+}
+
 export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps) {
     const [reelsList, setReelsList] = useState(reelsData);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -374,8 +391,14 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 `}</style>
 
                 {reelsList.map((reel, index) => {
-                    const videoId = reel.yt_short_url.split("=")[1]?.split("&")[0];
+                    // Robustly extract the YouTube ID. These are Shorts (youtube.com/shorts/ID,
+                    // no `=`), so the old split("=") returned undefined -> embed/undefined -> black.
+                    const videoId = extractYouTubeId(reel.yt_short_url);
                     const isActive = index === currentIndex;
+                    // Only mount the player for the active reel + immediate neighbours. Mounting an
+                    // iframe for every reel loaded ~50 YouTube players at once and starved the first
+                    // (active) video -> slow first load. Non-loaded reels just show the poster.
+                    const shouldLoad = Math.abs(index - currentIndex) <= 1;
 
                     return (
                         <div
@@ -423,13 +446,29 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
 
                             {/* Video - Centered */}
                             <div style={{ position: "relative", marginLeft: "-200px" }}>
-                                <iframe
-                                    style={{ width: "500px", height: "calc(100vh - 80px)" }}
-                                    src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&loop=1&mute=1&playlist=${videoId}&controls=0&modestbranding=1`}
-                                    title="Reel"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
+                                <div style={{ width: "500px", height: "calc(100vh - 80px)", position: "relative", background: "#000", borderRadius: "8px", overflow: "hidden" }}>
+                                    {/* Poster thumbnail = instant paint instead of black while the player loads */}
+                                    {videoId && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+                                            alt=""
+                                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                                        />
+                                    )}
+                                    {shouldLoad && videoId && (
+                                        <iframe
+                                            // Remount when active-state flips so the active video gets a
+                                            // clean autoplay mount + paint (fixes the black-until-reflow bug).
+                                            key={`${reel.id}-${isActive}`}
+                                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                                            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&loop=1&mute=1&playlist=${videoId}&controls=0&modestbranding=1`}
+                                            title="Reel"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    )}
+                                </div>
 
                                 {/* Matched Products - Left of video */}
                                 {isActive && (

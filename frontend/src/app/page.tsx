@@ -152,7 +152,7 @@ export default function HomePage() {
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
                                             <Image
-                                                src="/images/img3.png"
+                                                src="/images/feature-find-creators.png"
                                                 alt="Finding creators"
                                                 width={400}
                                                 height={265}
@@ -170,7 +170,7 @@ export default function HomePage() {
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
                                             <Image
-                                                src="/images/img2.png"
+                                                src="/images/feature-busywork.png"
                                                 alt="Automated busywork"
                                                 width={400}
                                                 height={265}
@@ -188,7 +188,7 @@ export default function HomePage() {
                                         </Text>
                                         <div className="mt-auto overflow-hidden rounded-lg" style={{ height: '250px' }}>
                                             <Image
-                                                src="/images/img2.png"
+                                                src="/images/feature-campaigns.png"
                                                 alt="Campaign automation"
                                                 width={400}
                                                 height={265}
