@@ -137,7 +137,9 @@ export default function HomePage() {
                             </div>
 
                             {/* Right: Rotating Cards */}
-                            <div className="flex items-center justify-center" style={{ height: '480px', position: 'relative', paddingTop: '55px'}}>
+                            {/* CardSwap renders fixed 450px cards (GSAP 3D math), so on small
+                                screens we scale the whole group down instead of resizing props. */}
+                            <div className="flex items-center justify-center relative pt-14 h-[300px] scale-[0.62] sm:h-[400px] sm:scale-[0.8] lg:h-[480px] lg:scale-100 origin-center">
                                 <CardSwap
                                     width={450}
                                     height={450}
@@ -233,7 +235,7 @@ export default function HomePage() {
                         <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How It Works
                         </Text>
-                        <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF', fontFamily: 'var(--font-satoshi), sans-serif' }}>
+                        <Text size={{ initial: "7", sm: "8", md: "9" }} weight="bold" className="block text-balance" style={{ color: '#FFFFFF', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How Maatchaa Automates Sponsorships
                         </Text>
                     </div>

@@ -35,6 +35,8 @@ html {
        position:fixed header visibly slide. overflow-x:hidden on an inner div
        is not enough — it has to be on the document root. */
     overflow-x: hidden;
+    /* Native scrollbar follows the user's OS light/dark theme */
+    color-scheme: light dark;
 }
 
 body {

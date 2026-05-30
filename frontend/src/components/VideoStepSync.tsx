@@ -35,26 +35,18 @@ const steps: Step[] = [
 export default function VideoStepSync() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [progressTime, setProgressTime] = useState(0);
-    const startTimeRef = useRef<number>(Date.now());
-    const pausedAtEndRef = useRef(false);
+    const [videoDuration, setVideoDuration] = useState(20); // fallback until metadata loads
 
     useEffect(() => {
-        // Independent 60fps timer that loops every 10 seconds (9.9s progress + 0.1s pause)
+        // Drive the step progress bars directly off the video's playhead so they
+        // stay in sync with the actual clip regardless of its length.
         let animationFrameId: number;
 
         const updateProgress = () => {
-            const elapsed = (Date.now() - startTimeRef.current) / 1000; // Convert to seconds
-            const loopedTime = elapsed % 10; // Loop every 10 seconds total
-
-            // Hold at 9.9 seconds for 0.1 seconds before resetting
-            if (loopedTime >= 9.9) {
-                setProgressTime(9.9);
-                pausedAtEndRef.current = true;
-            } else {
-                setProgressTime(loopedTime);
-                pausedAtEndRef.current = false;
+            const v = videoRef.current;
+            if (v && v.duration && !Number.isNaN(v.duration)) {
+                setProgressTime(v.currentTime);
             }
-
             animationFrameId = requestAnimationFrame(updateProgress);
         };
 
@@ -65,9 +57,9 @@ export default function VideoStepSync() {
         };
     }, []);
 
-    // Calculate which step is active based on independent progress time
+    // Calculate which step is active based on the video playhead, split evenly across steps
     const getStepProgress = (stepNumber: number) => {
-        const stepDuration = 2.475; // Each step is 2.475 seconds (9.9 / 4)
+        const stepDuration = (videoDuration || 20) / steps.length;
         const stepStart = (stepNumber - 1) * stepDuration;
         const stepEnd = stepNumber * stepDuration;
 
@@ -82,14 +74,15 @@ export default function VideoStepSync() {
         <>
             {/* Video */}
             <div className="mb-12 max-w-4xl mx-auto">
-                <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative' }}>
+                <div className="rounded-2xl overflow-hidden shadow-2xl" style={{ position: 'relative', aspectRatio: '1600 / 802' }}>
                     <video
                         ref={videoRef}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         autoPlay
                         loop
                         muted
                         playsInline
+                        onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
                     >
                         <source src="/images/video.mp4" type="video/mp4" />
                     </video>
