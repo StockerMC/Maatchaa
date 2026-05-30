@@ -62,6 +62,7 @@ function extractYouTubeId(url: string): string {
 export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps) {
     const [reelsList, setReelsList] = useState(reelsData);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [swipeStart, setSwipeStart] = useState<number | null>(null);
     const [swipeOffset, setSwipeOffset] = useState(0);
@@ -72,6 +73,16 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
     useEffect(() => {
         setReelsList(reelsData);
     }, [reelsData]);
+
+    // Track small screens so we can drop the desktop-only pixel offsets that
+    // otherwise push the reel off-screen on mobile.
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 1024px)");
+        const update = () => setIsMobile(mq.matches);
+        update();
+        mq.addEventListener("change", update);
+        return () => mq.removeEventListener("change", update);
+    }, []);
 
     useEffect(() => {
         // Fetch matched products when current reel changes
@@ -372,7 +383,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
 
     return (
         <Theme appearance="dark" accentColor="gray">
-        <div className="w-full h-screen bg-black" style={{ marginLeft: "190px" }}>
+        <div className="w-full h-screen bg-black" style={{ marginLeft: isMobile ? "0" : "190px" }}>
             {/* Scrolling Reels Container */}
             <div
                 ref={containerRef}
@@ -445,8 +456,8 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                             )}
 
                             {/* Video - Centered */}
-                            <div style={{ position: "relative", marginLeft: "-200px" }}>
-                                <div style={{ width: "500px", height: "calc(100vh - 80px)", position: "relative", background: "#000", borderRadius: "8px", overflow: "hidden" }}>
+                            <div style={{ position: "relative", marginLeft: isMobile ? "0" : "-200px" }}>
+                                <div style={{ width: isMobile ? "100vw" : "500px", height: "calc(100vh - 80px)", position: "relative", background: "#000", borderRadius: isMobile ? "0" : "8px", overflow: "hidden" }}>
                                     {/* Poster thumbnail = instant paint instead of black while the player loads */}
                                     {videoId && (
                                         // eslint-disable-next-line @next/next/no-img-element
@@ -470,8 +481,8 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                                     )}
                                 </div>
 
-                                {/* Matched Products - Left of video */}
-                                {isActive && (
+                                {/* Matched Products - Left of video (desktop only; no room on mobile) */}
+                                {isActive && !isMobile && (
                                     <div style={{
                                         position: "absolute",
                                         bottom: "1.5rem",
@@ -602,7 +613,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                             <div style={{
                                 position: "absolute",
                                 top: "50%",
-                                right: "520px",
+                                right: isMobile ? "12px" : "520px",
                                 transform: "translateY(-50%)",
                                 display: isActive ? "flex" : "none",
                                 flexDirection: "column",

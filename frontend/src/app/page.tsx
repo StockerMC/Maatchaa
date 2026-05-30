@@ -120,7 +120,7 @@ export default function HomePage() {
                             />
                         </div>
 
-                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 md:p-12 lg:p-14">
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 px-5 py-8 sm:p-10 md:p-12 lg:p-14">
                             {/* Left: Text Content */}
                             <div className="flex items-center">
                                 <div>

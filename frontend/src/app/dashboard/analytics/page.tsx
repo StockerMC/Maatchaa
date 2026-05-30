@@ -92,7 +92,7 @@ export default function AnalyticsPage() {
     <DashboardLayout>
       <Flex direction="column" gap="6">
         {/* Header */}
-        <Flex align="center" justify="between">
+        <Flex align="center" justify="between" gap="3" wrap="wrap">
           <Box>
             <Text size="8" weight="bold" style={{ color: "sage.sage12" }}>
               Analytics
