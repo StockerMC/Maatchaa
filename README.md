@@ -2,6 +2,7 @@
 
 <img width="1904" height="956" alt="image" src="https://github.com/user-attachments/assets/56a661cd-bcfe-49f5-8214-430c3a636b34" />
 
+
 AI-powered sponsorship matching for YouTube Shorts. Connects Shopify merchants with YouTube creators automatically.
 
 🏆 **Hack the North 2025 Finalist** · [Live Demo](https://www.maatchaa.co)
