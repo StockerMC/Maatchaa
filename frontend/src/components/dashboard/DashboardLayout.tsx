@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Flex, Button } from "@radix-ui/themes";
 import { sage } from "@radix-ui/colors";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,6 +27,21 @@ export default function DashboardLayout({ children, initialSidebarOpen = true, a
       setInternalSidebarOpen(open);
     }
   };
+
+  // Collapse the sidebar to a closed overlay on small screens so it never shoves
+  // the content/header off-screen. Desktop layout is unchanged.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1024px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   return (
     <Box
@@ -78,13 +93,13 @@ export default function DashboardLayout({ children, initialSidebarOpen = true, a
       <Flex
         direction="column"
         style={{
-          marginLeft: sidebarOpen ? "280px" : "0px",
+          marginLeft: !isMobile && sidebarOpen ? "280px" : "0px",
           minHeight: "100vh",
           transition: "margin-left 0.3s ease"
         }}
       >
         {/* Header */}
-        {!hideHeader && <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />}
+        {!hideHeader && <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} leftOffset={!isMobile && sidebarOpen ? "280px" : "0px"} />}
 
         {/* Page Content */}
         <Box style={{ padding: hideHeader ? "0" : "2rem", flex: 1, paddingTop: hideHeader ? "0" : "calc(64px + 2rem)" }}>

@@ -16,9 +16,10 @@ interface Notification {
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
+  leftOffset?: string;
 }
 
-export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
+export default function DashboardHeader({ onMenuClick, leftOffset = "280px" }: DashboardHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,7 +98,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         padding: "0 2rem",
         position: "fixed",
         top: 0,
-        left: "280px",
+        left: leftOffset,
         right: 0,
         zIndex: 100,
       }}

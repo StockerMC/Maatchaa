@@ -4,3 +4,4 @@ logs/
 .env.local
 .env*.local
 **/.DS_Store
+docs/MAATCHAA.md

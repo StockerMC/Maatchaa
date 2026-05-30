@@ -22,7 +22,7 @@ export default function HomePage() {
         <div className="flex flex-col w-full">
             <WaitlistScrollHandler />
             {/* Hero Section */}
-            <section className="flex items-center justify-center w-full min-h-screen relative overflow-hidden">
+            <section className="flex items-start lg:items-center justify-center w-full min-h-screen relative overflow-hidden pt-24 lg:pt-0">
                 {/* Gradient background - contained within hero section */}
                 <div className="absolute inset-0 w-full h-full -z-10">
                     <Iridescence
@@ -31,7 +31,7 @@ export default function HomePage() {
                         speed={0.1}
                     />
                 </div>
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-8 lg:mt-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-0 lg:mt-12">
                     {/* Hero Text */}
                     <div className="text-center lg:text-left w-full lg:w-[60%]">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
@@ -143,7 +143,7 @@ export default function HomePage() {
                                     height={450}
                                     cardDistance={40}
                                     verticalDistance={50}
-                                    delay={2800}
+                                    delay={4000}
                                     pauseOnHover={false}
                                     easing="smooth"
                                 >
@@ -178,7 +178,7 @@ export default function HomePage() {
                                                 alt="Automated busywork"
                                                 width={400}
                                                 height={265}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain"
                                             />
                                         </div>
                                     </Card>
@@ -196,7 +196,7 @@ export default function HomePage() {
                                                 alt="Campaign automation"
                                                 width={400}
                                                 height={265}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain"
                                             />
                                         </div>
                                     </Card>

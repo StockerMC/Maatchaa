@@ -462,7 +462,7 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                                             // clean autoplay mount + paint (fixes the black-until-reflow bug).
                                             key={`${reel.id}-${isActive}`}
                                             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
-                                            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&loop=1&mute=1&playlist=${videoId}&controls=0&modestbranding=1`}
+                                            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&loop=1&mute=1&playlist=${videoId}&controls=1&modestbranding=1`}
                                             title="Reel"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
