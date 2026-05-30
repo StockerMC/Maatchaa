@@ -31,12 +31,19 @@
 html {
     background: #1c1917;
     scroll-behavior: smooth;
+    /* Stop horizontal rubber-band pan on mobile (iOS Safari) that made the
+       position:fixed header visibly slide. overflow-x:hidden on an inner div
+       is not enough — it has to be on the document root. */
+    overflow-x: hidden;
 }
 
 body {
     /*cursor: url('/cursor.png'), auto;*/
     background: #ffffff;
     color: var(--foreground);
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
     font-family: var(--font-satoshi), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

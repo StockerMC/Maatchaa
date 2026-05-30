@@ -31,7 +31,7 @@ export default function HomePage() {
                         speed={0.1}
                     />
                 </div>
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-8 lg:mt-12">
                     {/* Hero Text */}
                     <div className="text-center lg:text-left w-full lg:w-[60%]">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
@@ -51,7 +51,11 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex justify-center items-center w-full lg:w-[40%]">
-                        <PhoneComponent/>
+                        {/* Scale the whole phone (frame + content together) down on small
+                            screens so the fixed 300px mockup never overflows the viewport. */}
+                        <div className="scale-[0.85] sm:scale-100 origin-center">
+                            <PhoneComponent/>
+                        </div>
                     </div>
                 </div>
             </section>
