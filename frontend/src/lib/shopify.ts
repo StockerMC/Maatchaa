@@ -205,3 +205,68 @@ export async function createShopifyDiscount(
     return false;
   }
 }
+
+export interface SimplifiedProduct {
+  title: string;
+  description: string;
+  image: string;
+  price: number;
+}
+
+/**
+ * Fetch a store's product catalog via the Shopify Admin API.
+ *
+ * Ports backend/utils/shopify.py:get_products to TypeScript so product sync can
+ * run on Vercel without the Python backend. Follows Shopify's Link-header
+ * cursor pagination so stores with >250 products are fully synced.
+ */
+export async function getProducts(shop: string, accessToken: string): Promise<SimplifiedProduct[]> {
+  let shopDomain = shop.replace('https://', '').replace('http://', '');
+  if (!shopDomain.endsWith('.myshopify.com')) {
+    shopDomain = `${shopDomain}.myshopify.com`;
+  }
+
+  const products: SimplifiedProduct[] = [];
+  let url: string | null = `https://${shopDomain}/admin/api/2024-01/products.json?limit=250`;
+
+  // Cap pages to avoid an unbounded loop on a misbehaving store.
+  for (let page = 0; url && page < 40; page++) {
+    const response: Response = await fetch(url, {
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 401) {
+      throw new Error('Unauthorized: invalid or expired Shopify access token.');
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch products (status ${response.status}).`);
+    }
+
+    const data = await response.json();
+    for (const product of data.products || []) {
+      const variants = product.variants || [];
+      // Lowest variant price; default 0 if none. (The Python version had an
+      // inverted guard that indexed an empty array — fixed here.)
+      const price = variants.length > 0
+        ? Math.min(...variants.map((v: { price?: string }) => parseFloat(v.price || '0') || 0))
+        : 0;
+      const image = product.images?.[0]?.src || product.image?.src || '';
+      products.push({
+        title: product.title || 'Untitled product',
+        description: product.body_html || '',
+        image,
+        price,
+      });
+    }
+
+    // Shopify returns the next page in the Link header as rel="next".
+    const link = response.headers.get('link') || response.headers.get('Link');
+    const nextMatch = link?.match(/<([^>]+)>;\s*rel="next"/);
+    url = nextMatch ? nextMatch[1] : null;
+  }
+
+  return products;
+}
