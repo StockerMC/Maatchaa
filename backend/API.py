@@ -54,7 +54,7 @@ app = Application()
 # Configure CORS
 app.use_cors(
     allow_methods="GET POST PUT PATCH DELETE OPTIONS",
-    allow_origins="https://maatchaa.vercel.app http://localhost:3000",
+    allow_origins="https://www.maatchaa.co https://maatchaa.co https://maatchaa.vercel.app http://localhost:3000",
     allow_headers="*",
     allow_credentials=True,
     max_age=86400  # Cache preflight for 24 hours
@@ -62,6 +62,18 @@ app.use_cors(
 
 # Global SupabaseClient instance
 supabase_client: SupabaseClient | None = None
+
+
+def _qint(request: Request, key: str, default: int) -> int:
+    """Parse an integer query param, falling back to default on missing/invalid
+    input instead of raising (which would surface as an unhandled 500)."""
+    try:
+        raw = request.query.get(key)
+        if isinstance(raw, list):
+            raw = raw[0] if raw else None
+        return int(raw) if raw is not None else default
+    except (ValueError, TypeError):
+        return default
 
 @app.on_start
 async def on_start(application: Application):
@@ -220,7 +232,7 @@ async def ingest_products(request: Request):
         shop_url = data.get("shop_url")
 
         if not shop_url:
-            return json({"error": "shop_url is required"}, status=200)
+            return json({"error": "shop_url is required"}, status=400)
 
         # Get products from Shopify
         products = shopify.get_products(shop_url)
@@ -228,7 +240,7 @@ async def ingest_products(request: Request):
         products_with_images = [p for p in products if p.get("image")]
 
         if not products_with_images:
-            return json({"error": "No products with images found"}, status=200)
+            return json({"error": "No products with images found"}, status=404)
 
         # Create embeddings and upsert to vector DB
         embeddings = vectordb.embed_products(products_with_images)
@@ -243,7 +255,7 @@ async def ingest_products(request: Request):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return json({"error": str(e)}, status=200)
+        return json({"error": str(e)}, status=500)
 
 # Search for similar products by image URL
 @post("/search/image")
@@ -325,8 +337,8 @@ async def get_products_vector(request: Request):
     """
     try:
         # Get query parameters
-        limit = int(request.query.get("limit", "20"))
-        offset = int(request.query.get("offset", "0"))
+        limit = _qint(request, "limit", 20)
+        offset = _qint(request, "offset", 0)
 
         # Query vector database to get products
         results = vectordb.index.query(
@@ -542,8 +554,8 @@ async def get_shopify_products(request: Request):
         assert supabase_client
 
         store_url = request.query.get("store_url")
-        limit = int(request.query.get("limit", "50"))
-        offset = int(request.query.get("offset", "0"))
+        limit = _qint(request, "limit", 50)
+        offset = _qint(request, "offset", 0)
 
         query = supabase_client.client.table("shopify_products").select("*")
 
@@ -871,6 +883,22 @@ async def shopify_callback(request: Request):
             return json({"error": "Invalid or expired state parameter"}, status=403)
 
         state_record = state_result.data[0]
+
+        # Enforce the state's expiry window (CSRF token is meant to be short-lived).
+        expires_at = state_record.get("expires_at")
+        if expires_at:
+            from datetime import datetime, timezone as _tz
+            try:
+                exp = datetime.fromisoformat(str(expires_at).replace("Z", "+00:00"))
+                if exp.tzinfo is None:
+                    exp = exp.replace(tzinfo=_tz.utc)
+                if datetime.now(_tz.utc) > exp:
+                    # Mark consumed so it can't be retried, then reject.
+                    await supabase_client.client.table("shopify_oauth_states").update({"used": True}).eq("state", state).execute()
+                    return json({"error": "State parameter has expired"}, status=403)
+            except (ValueError, TypeError):
+                pass  # Unparseable timestamp — fall through (used-flag still protects us)
+
         company_id = state_record["company_id"]
 
         # Mark state as used

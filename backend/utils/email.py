@@ -4,6 +4,7 @@ Email utilities for partnerships outreach
 import os
 import smtplib
 import re
+import html
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, List
