@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { getCurrentUser, getApiUrl } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 function ReelsPageContent() {
     const searchParams = useSearchParams();
@@ -46,7 +46,6 @@ function ReelsPageContent() {
     };
 
     const [data, setData] = useState<Reel[] | null>(null);
-    const [isIngesting, setIsIngesting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -147,78 +146,6 @@ function ReelsPageContent() {
             }
         };
 
-        const checkAndTriggerIngestion = async (shop_name: string | null) => {
-            if (!shop_name || isIngesting) return;
-
-            try {
-                console.log("Checking ingestion for shop:", shop_name);
-
-                // Get company data to check last ingestion attempt
-                const { data: company, error: companyError } = await supabase
-                    .from("companies")
-                    .select("last_ingest_attempt, access_token")
-                    .eq("shop_name", shop_name)
-                    .single();
-
-                if (companyError) {
-                    console.error("Error fetching company data:", companyError);
-                    console.log("Company lookup failed - this might mean the shop isn't registered yet");
-                    return;
-                }
-
-                if (!company) {
-                    console.log("No company found with shop_name:", shop_name);
-                    return;
-                }
-                
-                // Check cooldown (2 minutes = 120000 milliseconds)
-                const now = new Date();
-                const lastAttempt = company.last_ingest_attempt ? new Date(company.last_ingest_attempt) : null;
-                const cooldownPeriod = 2 * 60 * 1000; // 2 minutes in milliseconds
-                
-                if (lastAttempt && (now.getTime() - lastAttempt.getTime()) < cooldownPeriod) {
-                    console.log("Ingestion is on cooldown. Last attempt:", lastAttempt);
-                    return;
-                }
-                
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-                if (!backendUrl) {
-                    console.log("Backend URL not configured, skipping ingestion");
-                    return;
-                }
-
-                setIsIngesting(true);
-                console.log("No shorts found, triggering ingestion for:", shop_name);
-
-                await supabase
-                    .from("companies")
-                    .update({ last_ingest_attempt: now.toISOString() })
-                    .eq("shop_name", shop_name);
-
-                const response = await fetch(`${backendUrl}/ingest`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ shop_url: shop_name, access_token: company.access_token }),
-                });
-
-                if (response.ok) {
-                    console.log("Ingestion triggered successfully");
-                    setTimeout(() => {
-                        fetchData();
-                    }, 5000);
-                } else {
-                    console.error("Failed to trigger ingestion:", response.statusText);
-                }
-                
-            } catch (error) {
-                console.error("Error triggering ingestion:", error);
-            } finally {
-                setIsIngesting(false);
-            }
-        };
-
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productId]); // Refetch when product filter changes
@@ -230,12 +157,6 @@ function ReelsPageContent() {
             hideHeader={true}
         >
             <div className="fixed inset-0">
-                {isIngesting && (
-                    <div className="fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-                        Generating new content...
-                    </div>
-                )}
-
                 {/* Archive button */}
                 <a
                     href="/dashboard/reels/archive"
