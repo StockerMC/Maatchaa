@@ -147,7 +147,6 @@ function ReelsPageContent() {
         };
 
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productId]); // Refetch when product filter changes
 
     return (
@@ -157,10 +156,22 @@ function ReelsPageContent() {
             hideHeader={true}
         >
             <div className="fixed inset-0">
+                {/* Back to dashboard — on mobile the sidebar/header are hidden, so this is
+                    the only way out of the full-screen reels view. */}
+                <a
+                    href="/dashboard/overview"
+                    aria-label="Back to dashboard"
+                    className="fixed top-4 left-4 lg:hidden bg-white text-gray-700 p-2 rounded-lg shadow-lg z-50 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </a>
+
                 {/* Archive button */}
                 <a
                     href="/dashboard/reels/archive"
-                    className="fixed top-6 left-[320px] bg-white text-gray-700 px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
+                    className="fixed top-4 right-4 lg:top-6 lg:left-[320px] lg:right-auto bg-white text-gray-700 px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect width="20" height="5" x="2" y="3" rx="1"/>

@@ -251,7 +251,7 @@ export default function CommunicationsPage() {
     <DashboardLayout>
       <Flex direction="column" gap="4" style={{ height: "calc(100vh - 100px)" }}>
         {/* Header */}
-        <Flex align="center" justify="between">
+        <Flex align="center" justify="between" gap="3" wrap="wrap">
           <Box>
             <Text size="8" weight="bold" style={{ color: "sage.sage12" }}>
               Communications

@@ -22,7 +22,7 @@ export default function HomePage() {
         <div className="flex flex-col w-full">
             <WaitlistScrollHandler />
             {/* Hero Section */}
-            <section className="flex items-center justify-center w-full min-h-screen relative overflow-hidden">
+            <section className="flex items-start lg:items-center justify-center w-full min-h-screen relative overflow-hidden pt-24 lg:pt-0">
                 {/* Gradient background - contained within hero section */}
                 <div className="absolute inset-0 w-full h-full -z-10">
                     <Iridescence
@@ -31,7 +31,7 @@ export default function HomePage() {
                         speed={0.1}
                     />
                 </div>
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-8 lg:mt-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 max-w-7xl w-full mx-auto z-10 px-6 mt-0 lg:mt-12">
                     {/* Hero Text */}
                     <div className="text-center lg:text-left w-full lg:w-[60%]">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6 drop-shadow-2xl text-balance leading-tight">
@@ -120,7 +120,7 @@ export default function HomePage() {
                             />
                         </div>
 
-                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 md:p-12 lg:p-14">
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 px-5 py-8 sm:p-10 md:p-12 lg:p-14">
                             {/* Left: Text Content */}
                             <div className="flex items-center">
                                 <div>
@@ -137,13 +137,15 @@ export default function HomePage() {
                             </div>
 
                             {/* Right: Rotating Cards */}
-                            <div className="flex items-center justify-center" style={{ height: '480px', position: 'relative', paddingTop: '55px'}}>
+                            {/* CardSwap renders fixed 450px cards (GSAP 3D math), so on small
+                                screens we scale the whole group down instead of resizing props. */}
+                            <div className="flex items-center justify-center relative pt-14 h-[300px] scale-[0.62] sm:h-[400px] sm:scale-[0.8] lg:h-[480px] lg:scale-100 origin-center">
                                 <CardSwap
                                     width={450}
                                     height={450}
                                     cardDistance={40}
                                     verticalDistance={50}
-                                    delay={2800}
+                                    delay={4000}
                                     pauseOnHover={false}
                                     easing="smooth"
                                 >
@@ -178,7 +180,7 @@ export default function HomePage() {
                                                 alt="Automated busywork"
                                                 width={400}
                                                 height={265}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain"
                                             />
                                         </div>
                                     </Card>
@@ -196,7 +198,7 @@ export default function HomePage() {
                                                 alt="Campaign automation"
                                                 width={400}
                                                 height={265}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain"
                                             />
                                         </div>
                                     </Card>
@@ -233,7 +235,7 @@ export default function HomePage() {
                         <Text size="2" weight="medium" className="block mb-4" style={{ color: '#b1fa8b', letterSpacing: '0.05em', textTransform: 'uppercase', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How It Works
                         </Text>
-                        <Text size="9" weight="bold" className="block" style={{ color: '#FFFFFF', fontFamily: 'var(--font-satoshi), sans-serif' }}>
+                        <Text size={{ initial: "7", sm: "8", md: "9" }} weight="bold" className="block text-balance" style={{ color: '#FFFFFF', fontFamily: 'var(--font-satoshi), sans-serif' }}>
                             How Maatchaa Automates Sponsorships
                         </Text>
                     </div>
