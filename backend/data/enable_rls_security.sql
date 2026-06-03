@@ -15,8 +15,11 @@
 -- anon policy below become server-only by design.
 --
 -- Status: ALREADY APPLIED to the live database (2026-05-30). This file captures
--- it as a reproducible, reviewable migration. Idempotent: safe to re-run
--- (policies are dropped first, then recreated).
+-- it as a reproducible, reviewable migration of the schema as it was on that
+-- date. It is a historical record, not a re-runnable script: the later
+-- drop_dead_tables migration removed public.matches and public.product_pages,
+-- so the two ALTERs referencing them below would now error. To recreate RLS on
+-- the current schema, skip those two lines.
 
 -- 1. Enable RLS on every public table -----------------------------------------
 alter table public.companies               enable row level security;
