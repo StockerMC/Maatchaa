@@ -114,6 +114,20 @@ export async function GET(req: NextRequest) {
       console.error('Error storing shop info:', shopError);
     }
 
+    // Kick off product sync (fire-and-forget). Ported from the Python backend's
+    // post-OAuth job; runs in this Next.js deployment so no separate service is
+    // needed for the catalog to populate. Creator discovery still belongs to the
+    // Python worker. We don't await so the merchant isn't blocked on the redirect.
+    try {
+      void fetch(`${FRONTEND_URL}/api/shopify/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_id: companyId }),
+      }).catch((e) => console.error('Product sync trigger failed:', e));
+    } catch (e) {
+      console.error('Failed to trigger product sync:', e);
+    }
+
     // Redirect to dashboard with success
     return NextResponse.redirect(`${FRONTEND_URL}/dashboard?shopify=connected&company_id=${companyId}`);
   } catch (error) {
