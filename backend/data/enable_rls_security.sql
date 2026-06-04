@@ -1,9 +1,6 @@
 -- Migration: Enable Row Level Security (RLS) + harden functions
 --
--- Context: every table in the `public` schema previously had RLS DISABLED.
--- Because the Supabase anon key ships in the browser bundle, that meant any
--- visitor could read/write every table directly via PostgREST — including the
--- OAuth credential tables (creator_tokens, shopify_oauth_tokens) and companies.
+-- Establishes RLS as the access-control baseline for the public schema.
 --
 -- This migration:
 --   1. Enables RLS on all public tables (default-deny for the anon role).
@@ -12,7 +9,7 @@
 --
 -- Server-side code uses the service-role key (supabaseAdmin / the Python
 -- backend), which bypasses RLS, so API routes are unaffected. Tables with no
--- anon policy below become server-only by design.
+-- anon policy below are server-only by design.
 --
 -- Status: ALREADY APPLIED to the live database (2026-05-30). This file captures
 -- it as a reproducible, reviewable migration of the schema as it was on that
