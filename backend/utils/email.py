@@ -4,6 +4,7 @@ Email utilities for partnerships outreach
 import os
 import smtplib
 import re
+import html
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, List
@@ -149,7 +150,7 @@ def create_partnership_email_template(
     Returns:
         HTML email content
     """
-    product_names = ", ".join([p.get("title", p.get("name", "")) for p in products[:3]])
+    product_names = ", ".join([html.escape(str(p.get("title", p.get("name", "")))) for p in products[:3]])
     if len(products) > 3:
         product_names += f" and {len(products) - 3} more"
 
@@ -159,15 +160,20 @@ We'd like to explore a partnership opportunity with you to feature our {product_
 
 We offer competitive commission rates and would love to discuss how we can work together to create authentic content that resonates with your audience."""
 
-    message_body = custom_message if custom_message else default_message
+    # custom_message is user-controlled and interpolated into HTML below — escape
+    # it to prevent HTML/script injection, then restore intended line breaks.
+    if custom_message:
+        message_body = html.escape(custom_message).replace("\n", "<br>")
+    else:
+        message_body = default_message
 
     html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #2d3748;">Partnership Opportunity with {shop_name}</h2>
+            <h2 style="color: #2d3748;">Partnership Opportunity with {html.escape(shop_name or "")}</h2>
 
-            <p>Hi {creator_name},</p>
+            <p>Hi {html.escape(creator_name or "")},</p>
 
             <p>{message_body}</p>
 
@@ -187,7 +193,7 @@ We offer competitive commission rates and would love to discuss how we can work 
             '''}
 
             <p>Best regards,<br>
-            The {shop_name} Team</p>
+            The {html.escape(shop_name or "")} Team</p>
 
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
 
