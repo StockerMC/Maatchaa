@@ -7,6 +7,8 @@ AI-powered sponsorship matching for YouTube Shorts. Connects Shopify merchants w
 
 🏆 **Hack the North 2025 Finalist** · [Live Demo](https://www.maatchaa.co)
 
+<img width="1904" height="956" alt="image" src="https://github.com/user-attachments/assets/56a661cd-bcfe-49f5-8214-430c3a636b34" />
+
 ## The Problem
 
 Small Shopify brands don't have the budget for influencer marketing agencies, and micro-creators with engaged audiences have no streamlined way to find brand deals. Manually searching through thousands of YouTube Shorts to find creators whose content matches a product's aesthetic doesn't scale. Maatchaa automates that matching using AI embeddings so both sides can find each other in minutes instead of weeks.
