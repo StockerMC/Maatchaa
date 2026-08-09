@@ -34,6 +34,8 @@ Small Shopify brands don't have the budget for influencer marketing agencies, an
 | Vector Search | Pinecone + Cohere Embed v3 | Sub-100ms similarity search across product and video embeddings |
 | Video Analysis | Gemini 1.5 Flash | Multimodal analysis of both visual frames and transcriptions |
 | Auth | Shopify OAuth 2.0 | Direct store verification and product catalog access |
+| Background Jobs | ARQ + Upstash Redis | Async job queue with distributed locks and rate limiting for external API calls |
+| Metrics | Prometheus | /metrics endpoint exposing external API quota gauges |
 | Deployment | Vercel (frontend), Google Cloud Run (backend) | Auto-scaling with zero-config deploys |
 
 ## Getting Started
