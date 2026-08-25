@@ -14,7 +14,15 @@ def _enabled(name: str) -> bool:
 
 
 def rerank_serving_enabled() -> bool:
-    """Serving path: merge vector matches, rerank them, order by relevance score."""
+    """Serving path, ordering only.
+
+    Widens the Pinecone candidate pool and orders the served creator list by
+    Cohere rerank score, written to `rerank_score`. The response keys are the
+    same either way, and an unavailable rerank degrades to the unranked
+    ordering. The frontend route has a second, separate flag
+    (CREATORS_API_EMIT_MATCHES) because its response was missing a key this
+    endpoint has always returned.
+    """
     return _enabled("RETRIEVAL_RERANK_ENABLED")
 
 

@@ -65,6 +65,18 @@ cp .env.example .env.local   # fill in Supabase URL and API base URL
 npm run dev
 ```
 
+### Retrieval feature flags
+
+All default off. With none set, indexing and serving behave exactly as they did before the flags existed.
+
+| Flag | Where | Effect when on |
+| --- | --- | --- |
+| `RETRIEVAL_RERANK_ENABLED` | backend + frontend | Ordering only. Pulls a wider Pinecone candidate pool, scores pre-computed and vector candidates in one Cohere rerank pass, and orders the served list by that score. The Cohere score is written to `rerank_score`; the stored 0-10 `relevance_score` is left alone. If rerank is unavailable the response degrades to the unranked ordering rather than dropping results. |
+| `CREATORS_API_EMIT_MATCHES` | frontend | Response shape only, no reordering. Adds the `matches` array (each entry carrying a nested `creator_videos`) to `/api/products/[id]/creators`. `/dashboard/reels?product_id=...` reads `matches`, so that view renders empty without it. The Python endpoint has always emitted `matches`; this brings the Next.js route into line. |
+| `RETRIEVAL_DOC_INPUT_TYPE_ENABLED` | backend | Indexing only. Embeds corpus content with `input_type=search_document`. Vectors written this way are not comparable with the `search_query` vectors already in the index, so it stays off until the index is fully re-embedded. |
+
+Tuning knobs: `COHERE_RERANK_MODEL`, `RETRIEVAL_CANDIDATE_POOL`, `RETRIEVAL_TOP_N`.
+
 ### Running Tests
 
 ```bash

@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isCreatorVideoMatch, queryByText } from '@/lib/vectordb';
 import { candidatePool, rerankDocuments, rerankTopN } from '@/lib/rerank';
-import { rerankServingEnabled } from '@/lib/featureFlags';
+import { emitCreatorMatchesEnabled, rerankServingEnabled } from '@/lib/featureFlags';
 import {
   CreatorEntry,
   PRE_COMPUTED,
@@ -19,6 +19,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const rerankEnabled = rerankServingEnabled();
+    const emitMatches = emitCreatorMatchesEnabled();
 
     if (!productId) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -115,30 +116,28 @@ export async function GET(
         index === self.findIndex((c) => c.video_id === creator.video_id)
     );
 
-    if (!rerankEnabled) {
-      return NextResponse.json({
-        creators: uniqueCreators.slice(0, limit),
-        count: uniqueCreators.length,
-        pre_computed_count: preMatchedCreators.length,
-        vector_search_count: vectorMatches.length,
-      });
-    }
+    let creators = uniqueCreators.slice(0, limit);
+    let ranking: string | undefined;
 
-    const { creators, ranking } = await rankCreators(
-      rerankQuery,
-      uniqueCreators,
-      limit,
-      rerankTopN(),
-      rerankDocuments
-    );
+    if (rerankEnabled) {
+      ({ creators, ranking } = await rankCreators(
+        rerankQuery,
+        uniqueCreators,
+        limit,
+        rerankTopN(),
+        rerankDocuments
+      ));
+    }
 
     return NextResponse.json({
       creators,
-      matches: toMatchRows(creators),
-      count: creators.length,
+      // `count` has always reported the untruncated total on the unranked path.
+      // Left as-is so the flag-off response is unchanged.
+      count: rerankEnabled ? creators.length : uniqueCreators.length,
       pre_computed_count: preMatchedCreators.length,
       vector_search_count: vectorMatches.length,
-      ranking,
+      ...(ranking ? { ranking } : {}),
+      ...(emitMatches ? { matches: toMatchRows(creators) } : {}),
     });
   } catch (error) {
     console.error('Error fetching product creators:', error);

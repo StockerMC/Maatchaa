@@ -42,7 +42,7 @@ function ReelsPageContent() {
     };
 
     type CreatorMatch = {
-        creator_videos: CreatorVideo;
+        creator_videos: CreatorVideo | null;
     };
 
     const [data, setData] = useState<Reel[] | null>(null);
@@ -113,29 +113,30 @@ function ReelsPageContent() {
                 }
 
                 const result = await response.json();
-                const creators = result.matches || [];
+                // `matches` is only present when CREATORS_API_EMIT_MATCHES is on;
+                // without it this view has always rendered empty.
+                const creators: CreatorMatch[] = result.matches || [];
 
-                // Filter out creators that have been interacted with
-                const filteredCreators = creators.filter((match: CreatorMatch) => {
-                    const video = match.creator_videos;
-                    return !interactedVideoIds.has(video.video_id);
-                });
+                // A match whose creator_videos embed missed has nothing to
+                // render. The API drops those, this is the belt for the braces.
+                const videos = creators
+                    .map((match) => match.creator_videos)
+                    .filter((video): video is CreatorVideo =>
+                        video ? !interactedVideoIds.has(video.video_id) : false
+                    );
 
                 // Transform API response to Reel format
-                const reels: Reel[] = filteredCreators.map((match: CreatorMatch) => {
-                    const video = match.creator_videos;
-                    return {
-                        id: video.id,
-                        company: video.shop_domain || user.companyId,
-                        yt_short_url: video.url,
-                        product_imgs: video.thumbnail ? [video.thumbnail] : [],
-                        product_titles: [video.title],
-                        short_id: video.video_id,
-                        email: video.email || "",
-                        channel_id: video.channel_id,
-                        company_id: user.companyId
-                    };
-                });
+                const reels: Reel[] = videos.map((video) => ({
+                    id: video.id,
+                    company: video.shop_domain || user.companyId,
+                    yt_short_url: video.url,
+                    product_imgs: video.thumbnail ? [video.thumbnail] : [],
+                    product_titles: [video.title],
+                    short_id: video.video_id,
+                    email: video.email || "",
+                    channel_id: video.channel_id,
+                    company_id: user.companyId
+                }));
 
                 console.log(`Loaded ${reels.length} creators for product ${productId} (${creators.length - reels.length} filtered out)`);
                 setData(reels);
