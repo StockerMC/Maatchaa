@@ -25,7 +25,7 @@ function getPinecone() {
 }
 
 // Lazy initialize Cohere client
-function getCohere() {
+export function getCohere() {
   if (!cohereClient) {
     if (!process.env.COHERE_API_KEY) {
       throw new Error('COHERE_API_KEY not configured');
@@ -42,13 +42,21 @@ export function getIndex() {
   return getPinecone().index(INDEX_NAME);
 }
 
+// embed-english-v3.0 is asymmetric: corpus content belongs in 'search_document'
+// and live queries in 'search_query'. The index was built with 'search_query',
+// so corpus writers (the Python indexer) only switch once it is re-embedded.
+export type EmbedInputType = 'search_query' | 'search_document';
+
 // Text to embedding using Cohere
-export async function textToEmbedding(text: string): Promise<number[]> {
+export async function textToEmbedding(
+  text: string,
+  inputType: EmbedInputType = 'search_query'
+): Promise<number[]> {
   const cohere = getCohere();
   const response = await cohere.embed({
     texts: [text],
     model: 'embed-english-v3.0',
-    inputType: 'search_query',
+    inputType,
   });
 
   const embeddings = response.embeddings;
@@ -73,6 +81,15 @@ export async function imageUrlToEmbedding(imageUrl: string): Promise<number[]> {
     return embeddings[0] as number[];
   }
   throw new Error('Failed to generate embedding');
+}
+
+// Identify creator video vectors in an index shared with products.
+// Vectors indexed before the type key existed are identified by video_id.
+export function isCreatorVideoMatch(metadata: Record<string, unknown>): boolean {
+  if (!metadata) return false;
+  const vectorType = metadata.type;
+  if (vectorType) return vectorType === 'creator_video';
+  return Boolean(metadata.video_id);
 }
 
 // Query products by text

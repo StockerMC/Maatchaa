@@ -163,7 +163,7 @@ async def generate_embeddings_job(
         Job result with status and embedding info
     """
     from utils.redis_client import DistributedLock, cohere_limiter
-    from utils.vectordb import text_to_embedding, upsert_embeddings
+    from utils.vectordb import document_to_embedding, upsert_embeddings
 
     print(f"[Job] Generating embedding for video: {video_id}")
 
@@ -177,7 +177,7 @@ async def generate_embeddings_job(
             return {"status": "skipped", "reason": "already_processing"}
 
         try:
-            embedding_response = text_to_embedding(text)
+            embedding_response = document_to_embedding(text)
             embedding_vector = embedding_response.embeddings.float_[0]
 
             upsert_embeddings([{
