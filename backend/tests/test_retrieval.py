@@ -2,6 +2,8 @@
 
 Fully offline: the Cohere and Pinecone clients are mocked.
 """
+import importlib
+
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -14,9 +16,13 @@ def vectordb(monkeypatch):
     monkeypatch.setenv("COHERE_KEY", "test-cohere-key")
     monkeypatch.setenv("PINECONE_KEY", "test-pinecone-key")
     monkeypatch.setenv("INDEX_NAME", "test-index")
+    # patch() only bites on the first import, and utils.vectordb may already be
+    # in sys.modules from another test file. Reload so the module-level clients
+    # are rebuilt against the mocks either way.
     with patch("cohere.ClientV2"), patch("pinecone.Pinecone"):
         import utils.vectordb as module
 
+        importlib.reload(module)
         yield module
 
 
