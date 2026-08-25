@@ -22,7 +22,8 @@ from utils.shopify_oauth import (
 )
 from utils.shopify_api import ShopifyAPIClient
 from utils.feature_flags import rerank_serving_enabled
-from utils.rerank import candidate_pool, rerank_documents, top_n
+from utils.rerank import candidate_pool, top_n
+from utils.creator_ranking import rank_creator_candidates
 
 # Redis caching and rate limiting
 from utils.redis_client import (
@@ -1194,65 +1195,6 @@ async def get_company_products(request: Request):
     except Exception as e:
         return json({"error": str(e)}, status=500)
 
-def _creator_document_text(video: dict) -> str:
-    """Text a creator video is reranked on."""
-    parts = [
-        video.get("title") or "",
-        video.get("channel_title") or video.get("channel") or "",
-        (video.get("description") or "")[:500],
-    ]
-    return " ".join(part for part in parts if part).strip()
-
-
-def rerank_creator_candidates(
-    query: str,
-    match_rows: list,
-    vector_matches: list,
-    keep: int,
-) -> tuple[list, list]:
-    """Score pre-computed and vector candidates in one rerank pass.
-
-    One pass means both sources get scores on the same scale, which the
-    hand-written keyword scores and Pinecone similarities are not.
-    """
-    seen = set()
-    candidates = []
-    for row in match_rows:
-        video_id = row.get("video_id")
-        if video_id in seen:
-            continue
-        seen.add(video_id)
-        video = row.get("creator_videos") or {}
-        candidates.append(("match", row, _creator_document_text(video) or str(video_id or "")))
-    for vector_match in vector_matches:
-        video_id = vector_match.get("video_id")
-        if video_id in seen:
-            continue
-        seen.add(video_id)
-        candidates.append(("vector", vector_match, _creator_document_text(vector_match) or str(video_id or "")))
-
-    ranked = rerank_documents(query, [doc for _, _, doc in candidates], limit=keep) if candidates else None
-
-    if not ranked:
-        ordered = sorted(
-            (c for c in candidates if c[0] == "match"),
-            key=lambda c: c[1].get("match_score") or 0,
-            reverse=True,
-        ) + sorted(
-            (c for c in candidates if c[0] == "vector"),
-            key=lambda c: c[1].get("score") or 0,
-            reverse=True,
-        )
-        ranked_candidates = [(kind, payload) for kind, payload, _ in ordered[:keep]]
-    else:
-        ranked_candidates = [(candidates[i][0], {**candidates[i][1], "relevance_score": score}) for i, score in ranked]
-
-    return (
-        [payload for kind, payload in ranked_candidates if kind == "match"],
-        [payload for kind, payload in ranked_candidates if kind == "vector"],
-    )
-
-
 @get("/products/{product_id}/creators")
 async def get_product_creators(product_id: str, request: Request):
     """
@@ -1288,16 +1230,24 @@ async def get_product_creators(product_id: str, request: Request):
             .execute()
 
         rerank_enabled = rerank_serving_enabled()
-        search_text = ""
+        product_data = product.data or {}
+        # Unchanged: the exact text vector search has always embedded.
+        search_text = f"{product_data.get('title', '')} {product_data.get('description', '')}"[:500]
+        # Built outside the vector-search branch, from the fields that are
+        # actually present. A product that was never indexed still has text to
+        # rerank against, and a missing product yields "" and short-circuits to
+        # the similarity fallback instead of calling rerank with a dead query.
+        rerank_query = " ".join(
+            part for part in (product_data.get("title"), product_data.get("description")) if part
+        )[:500]
 
         vector_matches = []
-        if product.data and product.data.get("pinecone_id"):
+        if product_data.get("pinecone_id"):
             try:
                 from utils.vectordb import query_text, is_creator_video_match
 
-                search_text = f"{product.data['title']} {product.data.get('description', '')}"
                 vector_results = query_text(
-                    search_text[:500],  # Limit text length
+                    search_text,
                     top_k=candidate_pool() if rerank_enabled else 20
                 )
 
@@ -1324,11 +1274,12 @@ async def get_product_creators(product_id: str, request: Request):
         match_rows = matches.data if matches.data else []
 
         if rerank_enabled:
-            match_rows, vector_matches = rerank_creator_candidates(
-                search_text[:500],
+            match_rows, vector_matches = rank_creator_candidates(
+                rerank_query,
                 match_rows,
                 vector_matches,
-                keep=min(limit, top_n())
+                limit=limit,
+                keep=top_n(),
             )
 
         return json({

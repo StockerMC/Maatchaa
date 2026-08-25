@@ -2,61 +2,13 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isCreatorVideoMatch, queryByText } from '@/lib/vectordb';
 import { candidatePool, rerankDocuments, rerankTopN } from '@/lib/rerank';
 import { rerankServingEnabled } from '@/lib/featureFlags';
+import {
+  CreatorEntry,
+  PRE_COMPUTED,
+  rankCreators,
+  toMatchRows,
+} from '@/lib/creatorRanking';
 import { NextRequest, NextResponse } from 'next/server';
-
-type CreatorVideoRow = {
-  video_id?: string;
-  title?: string;
-  channel_title?: string;
-  description?: string;
-  [key: string]: unknown;
-};
-
-type CreatorEntry = {
-  id: string;
-  video_id: string;
-  product_id: string;
-  match_score: number;
-  created_at?: string;
-  video: CreatorVideoRow | null;
-  source: string;
-  relevance_score?: number;
-};
-
-// Text a creator video is reranked on.
-function creatorDocumentText(entry: CreatorEntry): string {
-  const video = entry.video || {};
-  return [video.title || '', video.channel_title || '', (video.description || '').slice(0, 500)]
-    .filter(Boolean)
-    .join(' ')
-    .trim() || entry.video_id;
-}
-
-// Score pre-computed and vector candidates in one rerank pass. One pass means
-// both sources get scores on the same scale, which the hand-written keyword
-// scores and Pinecone similarities are not.
-async function rankCreators(
-  query: string,
-  creators: CreatorEntry[],
-  keep: number
-): Promise<{ creators: CreatorEntry[]; ranking: string }> {
-  const ranked = await rerankDocuments(query, creators.map(creatorDocumentText), keep);
-
-  if (!ranked) {
-    const byScore = (a: CreatorEntry, b: CreatorEntry) => (b.match_score || 0) - (a.match_score || 0);
-    const preComputed = creators.filter((c) => c.source === 'pre_computed').sort(byScore);
-    const vector = creators.filter((c) => c.source !== 'pre_computed').sort(byScore);
-    return { creators: [...preComputed, ...vector].slice(0, keep), ranking: 'similarity' };
-  }
-
-  return {
-    creators: ranked.map(({ index, relevanceScore }) => ({
-      ...creators[index],
-      relevance_score: relevanceScore,
-    })),
-    ranking: 'rerank',
-  };
-}
 
 export async function GET(
   req: NextRequest,
@@ -92,9 +44,11 @@ export async function GET(
       video_id: match.video_id,
       product_id: match.product_id,
       match_score: match.match_score,
+      relevance_score: match.relevance_score,
+      similarity_score: match.similarity_score,
       created_at: match.created_at,
       video: match.creator_videos,
-      source: 'pre_computed',
+      source: PRE_COMPUTED,
     }));
 
     // Also do real-time vector search for fresh matches
@@ -105,12 +59,18 @@ export async function GET(
       .single();
 
     let vectorMatches: CreatorEntry[] = [];
-    let searchText = '';
+    // Built from the fields that are actually present, so a missing product
+    // yields '' and short-circuits to the similarity fallback instead of
+    // calling rerank with a dead query.
+    const rerankQuery = [product?.title, product?.description]
+      .filter(Boolean)
+      .join(' ')
+      .slice(0, 500);
 
     if (product) {
       try {
         // Search using product title + description
-        searchText = `${product.title} ${product.description || ''}`.slice(0, 500);
+        const searchText = `${product.title} ${product.description || ''}`.slice(0, 500);
         const vectorResults = await queryByText(searchText, rerankEnabled ? candidatePool() : 20);
 
         const candidates = rerankEnabled
@@ -165,17 +125,16 @@ export async function GET(
     }
 
     const { creators, ranking } = await rankCreators(
-      searchText,
+      rerankQuery,
       uniqueCreators,
-      Math.min(limit, rerankTopN())
+      limit,
+      rerankTopN(),
+      rerankDocuments
     );
 
     return NextResponse.json({
       creators,
-      // The reels UI reads `matches` with a nested `creator_videos`, the shape
-      // the Python endpoint returns. Emitting it here is what puts the ranked
-      // order in front of the user.
-      matches: creators.map((creator) => ({ ...creator, creator_videos: creator.video })),
+      matches: toMatchRows(creators),
       count: creators.length,
       pre_computed_count: preMatchedCreators.length,
       vector_search_count: vectorMatches.length,
