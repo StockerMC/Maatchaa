@@ -1,6 +1,62 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { queryByText } from '@/lib/vectordb';
+import { isCreatorVideoMatch, queryByText } from '@/lib/vectordb';
+import { candidatePool, rerankDocuments, rerankTopN } from '@/lib/rerank';
+import { rerankServingEnabled } from '@/lib/featureFlags';
 import { NextRequest, NextResponse } from 'next/server';
+
+type CreatorVideoRow = {
+  video_id?: string;
+  title?: string;
+  channel_title?: string;
+  description?: string;
+  [key: string]: unknown;
+};
+
+type CreatorEntry = {
+  id: string;
+  video_id: string;
+  product_id: string;
+  match_score: number;
+  created_at?: string;
+  video: CreatorVideoRow | null;
+  source: string;
+  relevance_score?: number;
+};
+
+// Text a creator video is reranked on.
+function creatorDocumentText(entry: CreatorEntry): string {
+  const video = entry.video || {};
+  return [video.title || '', video.channel_title || '', (video.description || '').slice(0, 500)]
+    .filter(Boolean)
+    .join(' ')
+    .trim() || entry.video_id;
+}
+
+// Score pre-computed and vector candidates in one rerank pass. One pass means
+// both sources get scores on the same scale, which the hand-written keyword
+// scores and Pinecone similarities are not.
+async function rankCreators(
+  query: string,
+  creators: CreatorEntry[],
+  keep: number
+): Promise<{ creators: CreatorEntry[]; ranking: string }> {
+  const ranked = await rerankDocuments(query, creators.map(creatorDocumentText), keep);
+
+  if (!ranked) {
+    const byScore = (a: CreatorEntry, b: CreatorEntry) => (b.match_score || 0) - (a.match_score || 0);
+    const preComputed = creators.filter((c) => c.source === 'pre_computed').sort(byScore);
+    const vector = creators.filter((c) => c.source !== 'pre_computed').sort(byScore);
+    return { creators: [...preComputed, ...vector].slice(0, keep), ranking: 'similarity' };
+  }
+
+  return {
+    creators: ranked.map(({ index, relevanceScore }) => ({
+      ...creators[index],
+      relevance_score: relevanceScore,
+    })),
+    ranking: 'rerank',
+  };
+}
 
 export async function GET(
   req: NextRequest,
@@ -10,6 +66,7 @@ export async function GET(
     const { id: productId } = await params;
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const rerankEnabled = rerankServingEnabled();
 
     if (!productId) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -30,7 +87,7 @@ export async function GET(
       console.error('Error fetching creator matches:', matchError);
     }
 
-    const preMatchedCreators = (preMatches || []).map((match) => ({
+    const preMatchedCreators: CreatorEntry[] = (preMatches || []).map((match) => ({
       id: match.id,
       video_id: match.video_id,
       product_id: match.product_id,
@@ -47,23 +104,21 @@ export async function GET(
       .eq('id', productId)
       .single();
 
-    let vectorMatches: Array<{
-      id: string;
-      video_id: string;
-      product_id: string;
-      match_score: number;
-      video: unknown;
-      source: string;
-    }> = [];
+    let vectorMatches: CreatorEntry[] = [];
+    let searchText = '';
 
     if (product) {
       try {
         // Search using product title + description
-        const searchText = `${product.title} ${product.description || ''}`.slice(0, 500);
-        const vectorResults = await queryByText(searchText, 20);
+        searchText = `${product.title} ${product.description || ''}`.slice(0, 500);
+        const vectorResults = await queryByText(searchText, rerankEnabled ? candidatePool() : 20);
+
+        const candidates = rerankEnabled
+          ? vectorResults.matches.filter((m) => isCreatorVideoMatch(m.metadata))
+          : vectorResults.matches;
 
         // Get video details for vector matches
-        const videoIds = vectorResults.matches.map((m) => m.metadata.video_id).filter(Boolean);
+        const videoIds = candidates.map((m) => m.metadata.video_id).filter(Boolean);
 
         if (videoIds.length > 0) {
           const { data: videos } = await supabaseAdmin
@@ -71,7 +126,7 @@ export async function GET(
             .select('*')
             .in('video_id', videoIds);
 
-          vectorMatches = vectorResults.matches
+          vectorMatches = candidates
             .map((match) => {
               const video = videos?.find((v) => v.video_id === match.metadata.video_id);
               return video
@@ -85,7 +140,7 @@ export async function GET(
                   }
                 : null;
             })
-            .filter((m) => m !== null) as typeof vectorMatches;
+            .filter((m) => m !== null) as CreatorEntry[];
         }
       } catch (vectorError) {
         console.error('Vector search failed:', vectorError);
@@ -100,11 +155,31 @@ export async function GET(
         index === self.findIndex((c) => c.video_id === creator.video_id)
     );
 
+    if (!rerankEnabled) {
+      return NextResponse.json({
+        creators: uniqueCreators.slice(0, limit),
+        count: uniqueCreators.length,
+        pre_computed_count: preMatchedCreators.length,
+        vector_search_count: vectorMatches.length,
+      });
+    }
+
+    const { creators, ranking } = await rankCreators(
+      searchText,
+      uniqueCreators,
+      Math.min(limit, rerankTopN())
+    );
+
     return NextResponse.json({
-      creators: uniqueCreators.slice(0, limit),
-      count: uniqueCreators.length,
+      creators,
+      // The reels UI reads `matches` with a nested `creator_videos`, the shape
+      // the Python endpoint returns. Emitting it here is what puts the ranked
+      // order in front of the user.
+      matches: creators.map((creator) => ({ ...creator, creator_videos: creator.video })),
+      count: creators.length,
       pre_computed_count: preMatchedCreators.length,
       vector_search_count: vectorMatches.length,
+      ranking,
     });
   } catch (error) {
     console.error('Error fetching product creators:', error);
