@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from utils.creator_ranking import creator_document_text
 from utils.rerank import candidate_pool, rerank_documents, rerank_model, top_n
 from utils.supabase import SupabaseClient
 from utils.vectordb import is_creator_video_match, query_text
@@ -33,16 +34,6 @@ COLUMN_WIDTH = 46
 def truncate(text: str, width: int) -> str:
     text = " ".join((text or "").split())
     return text if len(text) <= width else text[: width - 1] + "…"
-
-
-def document_text(video: dict) -> str:
-    """Same document text the serving path reranks on."""
-    parts = [
-        video.get("title") or "",
-        video.get("channel_title") or video.get("channel") or "",
-        (video.get("description") or "")[:500],
-    ]
-    return " ".join(part for part in parts if part).strip()
 
 
 def label(video: dict) -> str:
@@ -119,7 +110,7 @@ async def main() -> int:
         video.setdefault("video_id", video_id)
         enriched.append((video, match.score))
 
-    ranked = rerank_documents(query, [document_text(v) for v, _ in enriched], limit=args.top_n)
+    ranked = rerank_documents(query, [creator_document_text(v) for v, _ in enriched], limit=args.top_n)
     if ranked is None:
         print("Rerank unavailable — the serving path would keep similarity order.")
         return 1
