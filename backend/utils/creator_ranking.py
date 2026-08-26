@@ -68,25 +68,29 @@ def rank_creator_candidates(
     candidates: List[Tuple[str, dict, str]] = []
 
     if query:
-        seen = set()
-        for row in match_rows:
-            video_id = row.get("video_id")
-            if video_id in seen:
-                continue
-            seen.add(video_id)
-            video = row.get("creator_videos") or {}
-            candidates.append(("match", row, creator_document_text(video) or str(video_id or "")))
-        for vector_match in vector_matches:
-            video_id = vector_match.get("video_id")
-            if video_id in seen:
-                continue
-            seen.add(video_id)
-            candidates.append(
-                ("vector", vector_match, creator_document_text(vector_match) or str(video_id or ""))
-            )
+        try:
+            seen = set()
+            for row in match_rows:
+                video_id = row.get("video_id")
+                if video_id in seen:
+                    continue
+                seen.add(video_id)
+                video = row.get("creator_videos") or {}
+                candidates.append(("match", row, creator_document_text(video) or str(video_id or "")))
+            for vector_match in vector_matches:
+                video_id = vector_match.get("video_id")
+                if video_id in seen:
+                    continue
+                seen.add(video_id)
+                candidates.append(
+                    ("vector", vector_match, creator_document_text(vector_match) or str(video_id or ""))
+                )
 
-        if candidates:
-            ranked = rerank(query, [doc for _, _, doc in candidates], limit=min(limit, keep))
+            if candidates:
+                ranked = rerank(query, [doc for _, _, doc in candidates], limit=min(limit, keep))
+        except Exception as e:
+            print(f"⚠️  Rerank stage failed, keeping similarity order: {e}")
+            ranked = None
 
     if not ranked:
         return (

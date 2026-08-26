@@ -81,7 +81,10 @@ Tuning knobs: `COHERE_RERANK_MODEL`, `RETRIEVAL_CANDIDATE_POOL`, `RETRIEVAL_TOP_
 
 ```bash
 cd backend
-python -m pytest tests/ -v
+python -m pytest tests/ -v            # note: test_real_search.py and test_youtube.py call the live YouTube API
+
+cd ../frontend
+npm test                              # offline, node --test
 ```
 
 ### Docker
