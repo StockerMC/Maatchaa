@@ -1,0 +1,19 @@
+name: Supabase keep-alive
+
+# Free-tier projects pause after ~7 idle days; one read a day keeps the demo up.
+on:
+  schedule:
+    - cron: "17 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/waitlist?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "status $code"
+          [ "$code" = "200" ]
