@@ -31,9 +31,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     }
 
+    const products = data || [];
+    const matchCounts = new Map<string, number>();
+
+    if (products.length > 0) {
+      const { data: matches, error: matchesError } = await supabaseAdmin
+        .from('product_creator_matches')
+        .select('product_id')
+        .in('product_id', products.map((p) => p.id));
+
+      if (matchesError) {
+        console.error('Error fetching product match counts:', matchesError);
+      } else {
+        for (const m of matches || []) {
+          matchCounts.set(m.product_id, (matchCounts.get(m.product_id) || 0) + 1);
+        }
+      }
+    }
+
     return NextResponse.json({
-      products: data || [],
-      count: data?.length || 0,
+      products: products.map((p) => ({ ...p, match_count: matchCounts.get(p.id) || 0 })),
+      count: products.length,
     });
   } catch (error) {
     console.error('Error in products endpoint:', error);
