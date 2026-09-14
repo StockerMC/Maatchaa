@@ -294,8 +294,8 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 body: JSON.stringify({
                     company_id: reel.company_id,
                     video_id: videoData.video_id,
-                    creator_name: videoData.channel_name || "Creator",
-                    creator_handle: videoData.channel_name ? `@${videoData.channel_name}` : undefined,
+                    creator_name: videoData.channel_title || "Creator",
+                    creator_handle: videoData.channel_title ? `@${videoData.channel_title}` : undefined,
                     creator_email: reel.email,
                     creator_channel_id: reel.channel_id,
                     creator_channel_url: `https://youtube.com/channel/${reel.channel_id}`,
