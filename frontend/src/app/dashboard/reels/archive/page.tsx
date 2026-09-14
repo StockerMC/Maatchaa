@@ -18,7 +18,7 @@ interface ArchivedReel {
         title: string;
         thumbnail: string;
         url: string;
-        channel_name: string;
+        channel_title: string;
         views: number;
     };
 }
@@ -87,7 +87,7 @@ export default function ReelsArchivePage() {
                             title: video.title,
                             thumbnail: video.thumbnail,
                             url: video.url,
-                            channel_name: video.channel_name,
+                            channel_title: video.channel_title,
                             views: video.views || 0
                         } : null
                     };
@@ -194,9 +194,9 @@ export default function ReelsArchivePage() {
                                         {reel.video?.title || "Unknown Video"}
                                     </Text>
 
-                                    {reel.video?.channel_name && (
+                                    {reel.video?.channel_title && (
                                         <Text size="2" className="text-gray-500 mb-2">
-                                            {reel.video.channel_name}
+                                            {reel.video.channel_title}
                                         </Text>
                                     )}
 
