@@ -33,15 +33,6 @@ interface MatchedProduct {
     price: number;
 }
 
-interface ProductMatchData {
-    company_products: {
-        id: string;
-        title: string;
-        image: string;
-        price: number;
-    };
-}
-
 // Handles youtube.com/shorts/ID, youtube.com/watch?v=ID, youtu.be/ID, and /embed/ID.
 function extractYouTubeId(url: string): string {
     if (!url) return "";
@@ -161,34 +152,16 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 return;
             }
 
-            // Get matched products for this video
-            const { data: matchData, error: matchError } = await supabase
-                .from("product_creator_matches")
-                .select(`
-                    *,
-                    company_products (
-                        id,
-                        title,
-                        image,
-                        price
-                    )
-                `)
-                .eq("video_id", videoData.video_id)
-                .limit(10);
+            // company_products is blocked for the publishable key, so the join runs server-side
+            const matchRes = await fetch(`/api/videos/${videoData.video_id}/matches?limit=10`);
 
-            if (matchError) {
-                console.error("Error fetching matched products:", matchError);
+            if (!matchRes.ok) {
+                console.error("Error fetching matched products:", matchRes.status);
                 setMatchedProducts([]);
                 return;
             }
 
-            const products = matchData?.map((match: ProductMatchData) => ({
-                id: match.company_products?.id || '',
-                title: match.company_products?.title || 'Unknown Product',
-                image: match.company_products?.image || '',
-                price: match.company_products?.price || 0,
-            })) || [];
-
+            const { products = [] } = await matchRes.json();
             setMatchedProducts(products);
         } catch (error) {
             console.error("Error fetching matched products:", error);
@@ -262,28 +235,11 @@ export default function YouTubeReels({ reelsData, className }: YouTubeReelsProps
                 return;
             }
 
-            // Get matched products for this video
-            const { data: matchData, error: matchError } = await supabase
-                .from("product_creator_matches")
-                .select(`
-                    *,
-                    company_products (
-                        id,
-                        title,
-                        image,
-                        price
-                    )
-                `)
-                .eq("video_id", videoData.video_id)
-                .limit(5);
-
-            const matchedProducts = matchData?.map((match: ProductMatchData) => ({
-                id: match.company_products?.id,
-                title: match.company_products?.title,
-                name: match.company_products?.title,
-                image: match.company_products?.image,
-                price: match.company_products?.price,
-            })) || [];
+            // company_products is blocked for the publishable key, so the join runs server-side
+            const matchRes = await fetch(`/api/videos/${videoData.video_id}/matches?limit=5`);
+            const { products: matchedProducts = [] } = matchRes.ok
+                ? await matchRes.json()
+                : { products: [] };
 
             // Create partnership via API
             const response = await fetchWithFallback('/partnerships', '/api/partnerships', {
