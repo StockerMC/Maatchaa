@@ -6,6 +6,7 @@ import os
 import time
 from typing import List, Dict, Any, TypedDict, Optional
 
+from utils.feature_flags import document_input_type_enabled
 from utils.shopify import Product
 
 class ImageUrlContent(TypedDict):
@@ -66,15 +67,40 @@ def imageurl_to_embedding(image_url: str) -> Any:
       inputs=imageurl_to_input(image_url)
   )
 
-def text_to_embedding(text: str) -> Any:
+def corpus_input_type() -> str:
+    """Input type for corpus content.
+
+    embed-english-v3.0 is asymmetric: corpus text belongs in search_document and
+    live queries in search_query. The index was built with search_query, so
+    switching requires a full re-embed and stays behind a flag until then.
+    """
+    return "search_document" if document_input_type_enabled() else "search_query"
+
+def text_to_embedding(text: str, input_type: str = "search_query") -> Any:
     return co.embed(
         model="embed-english-v3.0",
-        input_type="search_query",
+        input_type=input_type,
         embedding_types=["float"],
         inputs=[{"content": [
             {"type": "text", "text": text},
         ]}]
     )
+
+def document_to_embedding(text: str) -> Any:
+    """Embed corpus content (products, creator videos)."""
+    return text_to_embedding(text, input_type=corpus_input_type())
+
+def is_creator_video_match(metadata: Optional[Dict[str, Any]]) -> bool:
+    """Identify creator video vectors in an index shared with products.
+
+    Vectors indexed before the type key existed are identified by video_id.
+    """
+    if not metadata:
+        return False
+    vector_type = metadata.get("type")
+    if vector_type:
+        return vector_type == "creator_video"
+    return bool(metadata.get("video_id"))
 
 def embed_products(products: List[Product]) -> List[EmbeddingItem]:
     items: List[EmbeddingItem] = []
@@ -94,13 +120,14 @@ def embed_products(products: List[Product]) -> List[EmbeddingItem]:
                 print(f"🖼️  Using image embedding for '{product['name']}'")
                 embedding = imageurl_to_embedding(image_url).embeddings.float_[0]
             else:
-                embedding = text_to_embedding(text).embeddings.float_[0]
+                embedding = document_to_embedding(text).embeddings.float_[0]
         except Exception as e:
             print(f"⚠️  Failed to create embedding for '{product['name']}': {e}")
             continue
 
         # Build metadata, filtering out None/null values (Pinecone doesn't accept them)
         metadata = {
+            "type": "product",
             "title": product["name"],
             "price": product.get("price", 0)
         }

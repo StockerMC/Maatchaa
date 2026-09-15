@@ -1,7 +1,10 @@
 blacksheep
 uvicorn
-cohere
-pinecone
+# Majors pinned: ClientV2.rerank resolves to V2Client.rerank through the
+# ClientV2(V2Client, Client) MRO, and the v1 signature is incompatible
+# (Sequence[RerankRequestDocumentsItem], max_chunks_per_doc).
+cohere>=5.18,<6
+pinecone>=8,<9
 python-dotenv
 supabase
 google-api-python-client

@@ -21,6 +21,9 @@ from utils.shopify_oauth import (
     APP_URL
 )
 from utils.shopify_api import ShopifyAPIClient
+from utils.feature_flags import rerank_serving_enabled
+from utils.rerank import candidate_pool, top_n
+from utils.creator_ranking import rank_creator_candidates
 
 # Redis caching and rate limiting
 from utils.redis_client import (
@@ -1226,28 +1229,63 @@ async def get_product_creators(product_id: str, request: Request):
             .single()\
             .execute()
 
-        vector_matches = []
-        if product.data and product.data.get("pinecone_id"):
-            try:
-                from utils.vectordb import query_text
+        rerank_enabled = rerank_serving_enabled()
+        product_data = product.data or {}
+        # Unchanged: the exact text vector search has always embedded.
+        search_text = f"{product_data.get('title', '')} {product_data.get('description', '')}"[:500]
+        # Built outside the vector-search branch, from the fields that are
+        # actually present. A product that was never indexed still has text to
+        # rerank against, and a missing product yields "" and short-circuits to
+        # the similarity fallback instead of calling rerank with a dead query.
+        rerank_query = " ".join(
+            part for part in (product_data.get("title"), product_data.get("description")) if part
+        )[:500]
 
-                search_text = f"{product.data['title']} {product.data.get('description', '')}"
-                vector_results = query_text(search_text[:500], top_k=20)  # Limit text length
+        vector_matches = []
+        if product_data.get("pinecone_id"):
+            try:
+                from utils.vectordb import query_text, is_creator_video_match
+
+                vector_results = query_text(
+                    search_text,
+                    top_k=candidate_pool() if rerank_enabled else 20
+                )
 
                 # Convert Pinecone results to our format
                 for match in vector_results.matches:
-                    if match.metadata.get("type") == "creator_video":
+                    metadata = match.metadata or {}
+                    if rerank_enabled:
+                        if not is_creator_video_match(metadata):
+                            continue
                         vector_matches.append({
-                            "video_id": match.metadata.get("video_id"),
+                            "video_id": metadata.get("video_id"),
+                            "score": match.score,
+                            "title": metadata.get("title", ""),
+                            "channel": metadata.get("channel", "")
+                        })
+                    elif metadata.get("type") == "creator_video":
+                        vector_matches.append({
+                            "video_id": metadata.get("video_id"),
                             "score": match.score
                         })
             except Exception as vector_error:
                 print(f"Vector search error: {vector_error}")
 
+        match_rows = matches.data if matches.data else []
+
+        if rerank_enabled:
+            match_rows, vector_matches = rank_creator_candidates(
+                rerank_query,
+                match_rows,
+                vector_matches,
+                limit=limit,
+                keep=top_n(),
+            )
+
         return json({
-            "matches": matches.data if matches.data else [],
+            "matches": match_rows,
             "vector_matches": vector_matches,
-            "count": len(matches.data) if matches.data else 0
+            "count": len(match_rows)
         })
 
     except Exception as e:

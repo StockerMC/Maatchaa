@@ -1,5 +1,13 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { queryByText } from '@/lib/vectordb';
+import { isCreatorVideoMatch, queryByText } from '@/lib/vectordb';
+import { candidatePool, rerankDocuments, rerankTopN } from '@/lib/rerank';
+import { emitCreatorMatchesEnabled, rerankServingEnabled } from '@/lib/featureFlags';
+import {
+  CreatorEntry,
+  PRE_COMPUTED,
+  rankCreators,
+  toMatchRows,
+} from '@/lib/creatorRanking';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -10,6 +18,8 @@ export async function GET(
     const { id: productId } = await params;
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const rerankEnabled = rerankServingEnabled();
+    const emitMatches = emitCreatorMatchesEnabled();
 
     if (!productId) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -30,14 +40,16 @@ export async function GET(
       console.error('Error fetching creator matches:', matchError);
     }
 
-    const preMatchedCreators = (preMatches || []).map((match) => ({
+    const preMatchedCreators: CreatorEntry[] = (preMatches || []).map((match) => ({
       id: match.id,
       video_id: match.video_id,
       product_id: match.product_id,
       match_score: match.match_score,
+      relevance_score: match.relevance_score,
+      similarity_score: match.similarity_score,
       created_at: match.created_at,
       video: match.creator_videos,
-      source: 'pre_computed',
+      source: PRE_COMPUTED,
     }));
 
     // Also do real-time vector search for fresh matches
@@ -47,23 +59,27 @@ export async function GET(
       .eq('id', productId)
       .single();
 
-    let vectorMatches: Array<{
-      id: string;
-      video_id: string;
-      product_id: string;
-      match_score: number;
-      video: unknown;
-      source: string;
-    }> = [];
+    let vectorMatches: CreatorEntry[] = [];
+    // Built from the fields that are actually present, so a missing product
+    // yields '' and short-circuits to the similarity fallback instead of
+    // calling rerank with a dead query.
+    const rerankQuery = [product?.title, product?.description]
+      .filter(Boolean)
+      .join(' ')
+      .slice(0, 500);
 
     if (product) {
       try {
         // Search using product title + description
         const searchText = `${product.title} ${product.description || ''}`.slice(0, 500);
-        const vectorResults = await queryByText(searchText, 20);
+        const vectorResults = await queryByText(searchText, rerankEnabled ? candidatePool() : 20);
+
+        const candidates = rerankEnabled
+          ? vectorResults.matches.filter((m) => isCreatorVideoMatch(m.metadata))
+          : vectorResults.matches;
 
         // Get video details for vector matches
-        const videoIds = vectorResults.matches.map((m) => m.metadata.video_id).filter(Boolean);
+        const videoIds = candidates.map((m) => m.metadata.video_id).filter(Boolean);
 
         if (videoIds.length > 0) {
           const { data: videos } = await supabaseAdmin
@@ -71,7 +87,7 @@ export async function GET(
             .select('*')
             .in('video_id', videoIds);
 
-          vectorMatches = vectorResults.matches
+          vectorMatches = candidates
             .map((match) => {
               const video = videos?.find((v) => v.video_id === match.metadata.video_id);
               return video
@@ -85,7 +101,7 @@ export async function GET(
                   }
                 : null;
             })
-            .filter((m) => m !== null) as typeof vectorMatches;
+            .filter((m) => m !== null) as CreatorEntry[];
         }
       } catch (vectorError) {
         console.error('Vector search failed:', vectorError);
@@ -100,11 +116,28 @@ export async function GET(
         index === self.findIndex((c) => c.video_id === creator.video_id)
     );
 
+    let creators = uniqueCreators.slice(0, limit);
+    let ranking: string | undefined;
+
+    if (rerankEnabled) {
+      ({ creators, ranking } = await rankCreators(
+        rerankQuery,
+        uniqueCreators,
+        limit,
+        rerankTopN(),
+        rerankDocuments
+      ));
+    }
+
     return NextResponse.json({
-      creators: uniqueCreators.slice(0, limit),
-      count: uniqueCreators.length,
+      creators,
+      // `count` has always reported the untruncated total on the unranked path.
+      // Left as-is so the flag-off response is unchanged.
+      count: rerankEnabled ? creators.length : uniqueCreators.length,
       pre_computed_count: preMatchedCreators.length,
       vector_search_count: vectorMatches.length,
+      ...(ranking ? { ranking } : {}),
+      ...(emitMatches ? { matches: toMatchRows(creators) } : {}),
     });
   } catch (error) {
     console.error('Error fetching product creators:', error);

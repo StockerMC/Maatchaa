@@ -12,7 +12,7 @@ import os
 from dotenv import load_dotenv
 from utils.yt_search import fetch_top_shorts
 from utils.video import parse_video
-from utils.vectordb import text_to_embedding, upsert_embeddings
+from utils.vectordb import document_to_embedding, upsert_embeddings
 from utils.supabase import SupabaseClient
 
 # Load environment variables
@@ -412,7 +412,7 @@ async def process_creator_video(video: dict, product: dict, source_keyword: str,
 
         # 2. Create embedding
         embedding_text = f"{video['title']} {video['description']} {analysis_data.get('aesthetic', '')} {analysis_data.get('tone_vibe', '')}"
-        embedding_response = text_to_embedding(embedding_text)
+        embedding_response = document_to_embedding(embedding_text)
         embedding_vector = embedding_response.embeddings.float_[0]
 
         # 3. Store in Pinecone
@@ -429,6 +429,7 @@ async def process_creator_video(video: dict, product: dict, source_keyword: str,
             "id": video_pinecone_id,
             "values": embedding_vector,
             "metadata": {
+                "type": "creator_video",
                 "video_id": video_id,
                 "title": video["title"][:200],  # Truncate for metadata limits
                 "channel": video["channelTitle"][:100],
