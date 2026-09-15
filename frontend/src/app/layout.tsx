@@ -69,7 +69,7 @@ export default function RootLayout({
             {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
                 <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
             )}
-            <SpeedInsights />
+            {process.env.NEXT_PUBLIC_VERCEL_ENV ? <SpeedInsights /> : null}
         </body>
         </html>
     )
